@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Crisis Monitor & Family Emergency Supply Calculator | Crisis Pulse</title>
+<meta name="description" content="Analyze global conflict situations and generate personalized family emergency supply lists based on your location and family parameters.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#1a1a1a;background:#0a0a0f;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* ====== LANGUAGE SWITCHER ====== */
+.lang-switcher{position:fixed;top:12px;right:16px;z-index:200;display:flex;gap:2px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:3px;backdrop-filter:blur(8px)}
+.lang-btn{padding:5px 10px;border:none;border-radius:8px;font-size:12px;cursor:pointer;background:transparent;color:#888;transition:all .2s;font-weight:500;white-space:nowrap}
+.lang-btn.active{background:rgba(255,255,255,.15);color:#fff;font-weight:600}
+.lang-btn:hover:not(.active){color:#ccc}
+/* Calculator page lang switcher override */
+.calc-page-mode.lang-switcher{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.1)}
+.calc-page-mode.lang-btn{color:#999}
+.calc-page-mode.lang-btn.active{background:rgba(0,0,0,.08);color:#333}
+.calc-page-mode.lang-btn:hover:not(.active){color:#666}
+
+/* ====== PAGE: MAP ====== */
+.map-page{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#0a0a0f 0%,#0d1117 50%,#0a0a0f 100%)}
+.map-header{text-align:center;padding:24px 16px 8px}
+.map-header h1{font-size:22px;font-weight:700;color:#e6e6e6;letter-spacing:1px}
+.map-header .subtitle{font-size:12px;color:#666;margin-top:4px}
+.map-header .live-tag{display:inline-block;font-size:10px;color:#ef4444;background:rgba(239,68,68,.12);padding:2px 10px;border-radius:10px;margin-top:8px;animation:pulse-tag 2s infinite}
+@keyframes pulse-tag{0%,100%{opacity:1}50%{opacity:.5}}
+
+.map-container{flex:1;display:flex;align-items:center;justify-content:center;padding:0 8px;position:relative;min-height:380px}
+#worldMap{width:100%;max-width:960px}
+#worldMap svg{width:100%;height:auto}
+
+.map-legend{display:flex;justify-content:center;gap:16px;padding:8px 16px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#888}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+
+.risk-panel{max-width:600px;margin:0 auto;padding:16px}
+.risk-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;text-align:center}
+.risk-label{font-size:12px;color:#888;margin-bottom:4px}
+.risk-score{font-size:48px;font-weight:800;margin:4px 0}
+.risk-desc{font-size:13px;color:#aaa;margin-bottom:16px;line-height:1.6}
+.risk-factors{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:16px}
+.risk-factor{font-size:11px;padding:3px 10px;border-radius:8px;background:rgba(255,255,255,.06);color:#ccc}
+.gps-status{font-size:11px;color:#555;margin-bottom:12px}
+.gps-status .pin{color:#22c55e}
+.btn-enter{display:block;width:100%;max-width:360px;margin:0 auto;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;color:#fff}
+.btn-enter:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+
+/* Conflict tooltip */
+.conflict-tooltip{position:fixed;pointer-events:none;background:rgba(15,15,20,.92);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;font-size:12px;color:#ddd;max-width:240px;z-index:100;opacity:0;transition:opacity .15s}
+.conflict-tooltip .ct-name{font-weight:700;font-size:13px;margin-bottom:3px}
+.conflict-tooltip .ct-level{font-size:11px;margin-bottom:2px}
+.conflict-tooltip .ct-desc{font-size:11px;color:#999}
+
+/* Hotspot marker */
+.hotspot-marker{cursor:pointer}
+.hotspot-ring{animation:ring-pulse 2.5s infinite}
+@keyframes ring-pulse{0%{opacity:.7;r:6}50%{opacity:.2;r:14}100%{opacity:.7;r:6}}
+
+/* User location marker */
+.user-marker{filter:drop-shadow(0 0 6px rgba(34,197,94,.6))}
+
+/* ====== PAGE: CALCULATOR ====== */
+.calc-page{display:none;background:#f8f8f6;min-height:100vh}
+.app{max-width:680px;margin:0 auto;padding:16px}
+h1{font-size:20px;font-weight:700;margin-bottom:4px}
+h2{font-size:16px;font-weight:600;margin:0 0 8px}
+.subtitle{font-size:12px;color:#888;margin-bottom:20px}
+.section{background:#fff;border-radius:12px;border:1px solid #e8e8e4;margin-bottom:16px;overflow:hidden}
+.section-header{padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f0f0ec}
+.section-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.s-red .section-num{background:#fde8e8;color:#c53030}
+.s-amber .section-num{background:#fef3c7;color:#b45309}
+.s-blue .section-num{background:#dbeafe;color:#1d4ed8}
+.s-green .section-num{background:#dcfce7;color:#15803d}
+.section-body{padding:14px 16px}
+.field-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.field-row label{font-size:12px;color:#666;min-width:50px}
+input[type=text],input[type=number],select{padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;background:#fff;color:#1a1a1a;outline:none;transition:border .2s}
+input:focus,select:focus{border-color:#3b82f6}
+input[type=number]{width:64px;text-align:center}
+select{cursor:pointer}
+.member-grid{display:grid;grid-template-columns:1fr 60px 64px 70px 90px 30px;gap:5px;align-items:center;margin-bottom:6px;font-size:13px}
+.member-labels{font-size:11px;color:#999;padding-bottom:4px}
+.btn{padding:8px 16px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:13px;cursor:pointer;transition:all .15s}
+.btn:hover{background:#f5f5f3;border-color:#ccc}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:#1d4ed8;color:#fff;border:none;font-weight:600;width:100%;padding:12px;font-size:15px;border-radius:10px}
+.btn-primary:hover{background:#1e40af}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-danger{color:#dc2626;border-color:#fca5a5}
+.btn-danger:hover{background:#fef2f2}
+.radio-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:500px){.radio-grid{grid-template-columns:1fr}.member-grid{grid-template-columns:1fr 50px 54px 60px 80px 26px;gap:3px}}
+.radio-card{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e8e4;background:#fff;cursor:pointer;transition:border .2s}
+.radio-card.active{border-color:#3b82f6;background:#eff6ff}
+.radio-card input{margin-top:3px}
+.radio-card .rc-title{font-size:13px;font-weight:600}
+.radio-card .rc-desc{font-size:11px;color:#888}
+.inline-fields{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.inline-field{display:flex;align-items:center;gap:6px;font-size:13px}
+.inline-field label{color:#666;white-space:nowrap}
+
+/* Risk banner in calculator */
+.risk-banner{background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;color:#fff}
+.risk-banner .rb-score{font-size:28px;font-weight:800;min-width:50px;text-align:center}
+.risk-banner .rb-text{font-size:12px;color:#aaa;line-height:1.5}
+.risk-banner .rb-text strong{color:#e6e6e6;font-size:13px}
+.risk-banner .rb-back{margin-left:auto;font-size:11px;color:#666;cursor:pointer;white-space:nowrap;padding:6px 12px;border:1px solid #333;border-radius:8px;background:transparent;transition:all .2s}
+.risk-banner .rb-back:hover{border-color:#555;color:#aaa}
+
+/* Results */
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+@media(max-width:500px){.summary-grid{grid-template-columns:repeat(2,1fr)}}
+.summary-card{background:#f8f8f6;border-radius:10px;padding:10px 12px}
+.summary-card .sc-label{font-size:11px;color:#888}
+.summary-card .sc-value{font-size:20px;font-weight:700;margin:2px 0}
+.summary-card .sc-sub{font-size:11px;color:#aaa}
+.member-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.member-tag{font-size:12px;padding:3px 10px;border-radius:8px;background:#f0f0ec}
+.member-tag.pet{background:#fef3c7}
+.tier-section{margin-bottom:16px}
+.tier-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.tier-tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px}
+.tier-tag.red{background:#fde8e8;color:#c53030}
+.tier-tag.amber{background:#fef3c7;color:#b45309}
+.tier-tag.blue{background:#dbeafe;color:#1d4ed8}
+.tier-total{font-size:14px;font-weight:700}
+.item-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e8e8e4;border-radius:10px;overflow:hidden}
+.item-table thead{background:#f8f8f6}
+.item-table th{padding:7px 10px;text-align:left;font-weight:500;font-size:11px;color:#888}
+.item-table th:nth-child(2){text-align:center;width:80px}
+.item-table th:nth-child(3){text-align:right;width:60px}
+.item-table td{padding:6px 10px;border-top:1px solid #f0f0ec}
+.item-table td:nth-child(2){text-align:center;color:#888}
+.item-table td:nth-child(3){text-align:right;font-weight:600}
+.item-table td:nth-child(4){color:#aaa;font-size:11px}
+.grand-total{background:#fff;border-radius:12px;border:1px solid #e8e8e4;padding:14px 16px;margin-top:12px}
+.gt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:13px}
+.gt-label{color:#888;font-size:11px}
+.gt-value{font-weight:700}
+.gt-highlight{font-size:18px;color:#c53030}
+.notes{margin-top:12px;padding:12px 14px;border-radius:10px;background:#fff;border:1px solid #e8e8e4;font-size:12px;color:#888;line-height:1.8}
+.back-btn{width:100%;padding:10px;font-size:14px;margin-top:12px}
+.footer{text-align:center;padding:20px 0 10px;font-size:11px;color:#bbb}
+.footer a{color:#999;text-decoration:none}
+
+/* Page transition */
+.fade-out{animation:fadeOut .4s forwards}
+.fade-in{animation:fadeIn .4s forwards}
+@keyframes fadeOut{to{opacity:0;transform:translateY(-10px)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Data source footer */
+.data-source{text-align:center;padding:8px 16px 20px;font-size:10px;color:#444}
+.data-source a{color:#555;text-decoration:none}
+
+/* Humanistic message */
+.humanistic-message{margin-bottom:12px;padding:12px 14px;background:rgba(255,255,255,.05);border-left:3px solid rgba(255,255,255,.2);border-radius:6px;font-size:13px;color:#aaa;line-height:1.6;font-style:italic}
+</style>
+</head>
+<body>
+
+<!-- ====== LANGUAGE SWITCHER ====== -->
+<div class="lang-switcher" id="langSwitcher">
+  <button class="lang-btn active" data-lang="en">EN</button>
+  <button class="lang-btn" data-lang="zh-CN">简中</button>
+  <button class="lang-btn" data-lang="zh-TW">繁中</button>
+  <button class="lang-btn" data-lang="ja">日本語</button>
+</div>
+
+<!-- ====== MAP PAGE ====== -->
+<div class="map-page" id="mapPage">
+  <div class="map-header">
+    <h1 id="mapTitle"></h1>
+    <div class="subtitle" id="mapSubtitle"></div>
+    <div class="live-tag" id="liveTag"></div>
+  </div>
+
+  <div class="map-container">
+    <div id="worldMap"></div>
+    <div class="conflict-tooltip" id="tooltip"></div>
+  </div>
+
+  <div class="map-legend" id="mapLegend"></div>
+
+  <div class="risk-panel">
+    <div class="risk-card">
+      <div class="humanistic-message" id="humanMsg"></div>
+      <div class="risk-label" id="riskLabel"></div>
+      <div class="risk-score" id="riskScore" style="color:#fbbf24">—</div>
+      <div class="risk-desc" id="riskDesc"></div>
+      <div class="gps-status" id="gpsStatus"></div>
+      <div class="risk-factors" id="riskFactors"></div>
+      <button class="btn-enter" id="enterCalcBtn" style="background:linear-gradient(135deg,#dc2626,#991b1b);display:none" onclick="enterCalculator()"></button>
+    </div>
+  </div>
+
+  <div class="data-source" id="dataSource"></div>
+</div>
+
+<!-- ====== CALCULATOR PAGE ====== -->
+<div class="calc-page" id="calcPage">
+  <div class="app" id="app"></div>
+</div>
+
+<script>
+// ====== i18n SYSTEM ======
+let currentLang = localStorage.getItem('crisis-pulse-lang') || (navigator.language.startsWith('ja') ? 'ja' : navigator.language.startsWith('zh') ? (navigator.language.includes('TW') || navigator.language.includes('HK') ? 'zh-TW' : 'zh-CN') : 'en');
+
+const I18N = {
+  // ---- MAP PAGE ----
+  mapTitle: {
+    en: "Global Crisis Monitor",
+    "zh-CN": "全球危机态势监控",
+    "zh-TW": "全球危機態勢監控",
+    ja: "世界危機モニター"
+  },
+  mapSubtitle: {
+    en: "Crisis Pulse — Know the world. Protect your family.",
+    "zh-CN": "Crisis Pulse — 了解世界，守护家人。",
+    "zh-TW": "Crisis Pulse — 了解世界，守護家人。",
+    ja: "Crisis Pulse — 世界を知り、家族を守る。"
+  },
+  liveTag: {
+    en: "● March 2026 Situation Data",
+    "zh-CN": "● 2026年3月 态势数据",
+    "zh-TW": "● 2026年3月 態勢數據",
+    ja: "● 2026年3月 情勢データ"
+  },
+  legendYou: { en: "Your Location", "zh-CN": "你的位置", "zh-TW": "你的位置", ja: "あなたの位置" },
+  legendNoConflict: { en: "No Conflict Zone", "zh-CN": "无冲突地区", "zh-TW": "無衝突地區", ja: "非紛争地域" },
+  legendLow: { en: "Low Risk", "zh-CN": "低风险", "zh-TW": "低風險", ja: "低リスク" },
+  legendMedium: { en: "Medium Conflict", "zh-CN": "中等冲突", "zh-TW": "中等衝突", ja: "中程度紛争" },
+  legendHigh: { en: "High Intensity", "zh-CN": "高强度", "zh-TW": "高強度", ja: "高強度" },
+  legendWar: { en: "Full-Scale War", "zh-CN": "全面战争", "zh-TW": "全面戰爭", ja: "全面戦争" },
+  humanMsg: {
+    en: "In an uncertain world, understanding risk is the first step to protecting those you love.",
+    "zh-CN": "在不确定的世界里，了解风险是守护所爱之人的第一步。",
+    "zh-TW": "在不確定的世界裡，了解風險是守護所愛之人的第一步。",
+    ja: "不確実な世界で、リスクを理解することは大切な人を守る第一歩です。"
+  },
+  riskLabel: {
+    en: "Risk Index for Your Location",
+    "zh-CN": "你所在位置的风险指数",
+    "zh-TW": "你所在位置的風險指數",
+    ja: "あなたの位置のリスク指数"
+  },
+  riskLoading: {
+    en: "Locating and computing risk index...",
+    "zh-CN": "正在定位并计算风险指数...",
+    "zh-TW": "正在定位並計算風險指數...",
+    ja: "位置情報を取得しリスク指数を計算中..."
+  },
+  gpsLoading: {
+    en: "📡 Getting GPS location...",
+    "zh-CN": "📡 正在获取GPS位置...",
+    "zh-TW": "📡 正在獲取GPS位置...",
+    ja: "📡 GPS位置情報を取得中..."
+  },
+  gpsNoSupport: {
+    en: "⚠️ Browser does not support location, using global average risk",
+    "zh-CN": "⚠️ 浏览器不支持定位，使用全球平均风险",
+    "zh-TW": "⚠️ 瀏覽器不支持定位，使用全球平均風險",
+    ja: "⚠️ ブラウザが位置情報に非対応、世界平均リスクを使用"
+  },
+  gpsError: {
+    en: "⚠️ Unable to get location, using global average risk",
+    "zh-CN": "⚠️ 无法获取位置，使用全球平均风险",
+    "zh-TW": "⚠️ 無法獲取位置，使用全球平均風險",
+    ja: "⚠️ 位置情報を取得できません、世界平均リスクを使用"
+  },
+  gpsLocated: {
+    en: (lat,lon) => `<span class="pin">📍</span> Located: ${lat}°N, ${lon}°E`,
+    "zh-CN": (lat,lon) => `<span class="pin">📍</span> 已定位: ${lat}°N, ${lon}°E`,
+    "zh-TW": (lat,lon) => `<span class="pin">📍</span> 已定位: ${lat}°N, ${lon}°E`,
+    ja: (lat,lon) => `<span class="pin">📍</span> 測位完了: ${lat}°N, ${lon}°E`
+  },
+  enterCalc: {
+    en: "Enter Family Emergency Supply Calculator →",
+    "zh-CN": "进入应急储备计算器 →",
+    "zh-TW": "進入應急儲備計算器 →",
+    ja: "備蓄計算機へ →"
+  },
+  dataSource: {
+    en: "Data source: ACLED, CFR Conflict Tracker, International Crisis Group · Updated March 2026<br>Crisis Pulse · Open source · No login · No data collected · Preparedness starts with awareness",
+    "zh-CN": "数据来源：ACLED、CFR全球冲突追踪、国际危机组织 · 2026年3月更新<br>Crisis Pulse · 开源 · 无需登录 · 不收集数据 · 防患于未然",
+    "zh-TW": "數據來源：ACLED、CFR全球衝突追蹤、國際危機組織 · 2026年3月更新<br>Crisis Pulse · 開源 · 無需登入 · 不收集數據 · 防患於未然",
+    ja: "データ出典：ACLED、CFR世界紛争トラッカー、国際危機グループ · 2026年3月更新<br>Crisis Pulse · オープンソース · ログイン不要 · データ収集なし · 備えあれば憂いなし"
+  },
+  // Global factors
+  factorGlobalHigh: {
+    en: "Global conflict count at historic high",
+    "zh-CN": "全球冲突数量处于历史高位",
+    "zh-TW": "全球衝突數量處於歷史高位",
+    ja: "世界の紛争数が史上最多"
+  },
+  factorSupplyChain: {
+    en: "Supply chain disruption risks rising",
+    "zh-CN": "供应链中断风险上升",
+    "zh-TW": "供應鏈中斷風險上升",
+    ja: "サプライチェーン途絶リスク上昇"
+  },
+  factorGeopolitical: {
+    en: "Geopolitical tensions increasing",
+    "zh-CN": "地缘政治紧张加剧",
+    "zh-TW": "地緣政治緊張加劇",
+    ja: "地政学的緊張の高まり"
+  },
+  factorPressure: {
+    en: "Global supply chain pressure index elevated",
+    "zh-CN": "全球供应链压力指数偏高",
+    "zh-TW": "全球供應鏈壓力指數偏高",
+    ja: "グローバルサプライチェーン圧力指数上昇"
+  },
+  factorIncrease: {
+    en: "Recommend increasing supply reserve period",
+    "zh-CN": "建议增加储备周期",
+    "zh-TW": "建議增加儲備週期",
+    ja: "備蓄期間の延長を推奨"
+  },
+  // Risk descriptions
+  riskExtreme: {
+    en: "Extreme Risk Zone — Strongly recommend preparing 6+ months supply",
+    "zh-CN": "极高风险区域 — 强烈建议准备6个月以上储备",
+    "zh-TW": "極高風險區域 — 強烈建議準備6個月以上儲備",
+    ja: "極度リスクゾーン — 6ヶ月以上の備蓄を強く推奨"
+  },
+  riskHigh: {
+    en: "High Risk — Recommend 3-6 months supply, prioritize water and stable grains",
+    "zh-CN": "高风险 — 建议3-6个月储备，优先确保饮用水和主粮",
+    "zh-TW": "高風險 — 建議3-6個月儲備，優先確保飲用水和主糧",
+    ja: "高リスク — 3〜6ヶ月の備蓄を推奨、水と主食を優先"
+  },
+  riskMedium: {
+    en: "Medium Risk — Recommend 1-3 months basic supply as safety buffer",
+    "zh-CN": "中等风险 — 建议1-3个月基本储备作为安全缓冲",
+    "zh-TW": "中等風險 — 建議1-3個月基本儲備作為安全緩衝",
+    ja: "中リスク — 安全バッファとして1〜3ヶ月の基本備蓄を推奨"
+  },
+  riskLow: {
+    en: "Relatively Safe — Still recommend maintaining 2-4 weeks essentials",
+    "zh-CN": "相对安全 — 仍建议维持2-4周基本物资",
+    "zh-TW": "相對安全 — 仍建議維持2-4週基本物資",
+    ja: "比較的安全 — 2〜4週間の基本物資の維持を推奨"
+  },
+  mapLoadError: {
+    en: "Loading map... Please ensure your internet connection is stable",
+    "zh-CN": "正在加载地图...请确保网络连接稳定",
+    "zh-TW": "正在載入地圖...請確保網路連線穩定",
+    ja: "地図を読み込み中...インターネット接続をご確認ください"
+  },
+
+  // ---- CONFLICT DATA ----
+  typeWar: { en:"Full-Scale War", "zh-CN":"全面战争", "zh-TW":"全面戰爭", ja:"全面戦争" },
+  typeHigh: { en:"High Intensity", "zh-CN":"高强度冲突", "zh-TW":"高強度衝突", ja:"高強度紛争" },
+  typeMedium: { en:"Medium Conflict", "zh-CN":"中等冲突", "zh-TW":"中等衝突", ja:"中程度紛争" },
+  typeLow: { en:"Low Risk", "zh-CN":"低风险", "zh-TW":"低風險", ja:"低リスク" },
+  typeTension: { en:"Geopolitical Tension", "zh-CN":"地缘政治紧张", "zh-TW":"地緣政治緊張", ja:"地政学的緊張" },
+  intensity: { en:"Intensity", "zh-CN":"强度", "zh-TW":"強度", ja:"強度" },
+
+  // ---- CALCULATOR PAGE ----
+  backToGlobal: { en:"← Crisis Monitor", "zh-CN":"← 危机监控", "zh-TW":"← 危機監控", ja:"← 危機モニター" },
+  currentRisk: { en:"Current Risk Index", "zh-CN":"当前风险指数", "zh-TW":"當前風險指數", ja:"現在のリスク指数" },
+  recommendSupply: {
+    en: (m) => `Recommend ≥${m} months`,
+    "zh-CN": (m) => `建议≥${m}个月`,
+    "zh-TW": (m) => `建議≥${m}個月`,
+    ja: (m) => `${m}ヶ月以上推奨`
+  },
+  basedGPS: { en:"Based on GPS location", "zh-CN":"基于GPS定位", "zh-TW":"基於GPS定位", ja:"GPS測位に基づく" },
+  globalAvg: { en:"Global average", "zh-CN":"全球平均", "zh-TW":"全球平均", ja:"世界平均" },
+  calcTitle: { en:"Family Emergency Supply Calculator", "zh-CN":"家庭应急储备计算器", "zh-TW":"家庭應急儲備計算器", ja:"家庭防災備蓄計算機" },
+  calcSubtitle: {
+    en:"Enter your family parameters, auto-generate personalized supply list · Crisis Pulse",
+    "zh-CN":"输入家庭参数，自动生成个性化储备清单 · Crisis Pulse",
+    "zh-TW":"輸入家庭參數，自動生成個性化儲備清單 · Crisis Pulse",
+    ja:"家族情報を入力し、パーソナライズされた備蓄リストを自動生成 · Crisis Pulse"
+  },
+  secMembers: { en:"Family Members", "zh-CN":"家庭成员", "zh-TW":"家庭成員", ja:"家族構成" },
+  secPets: { en:"Pets", "zh-CN":"宠物", "zh-TW":"寵物", ja:"ペット" },
+  secRegion: { en:"Region & Housing", "zh-CN":"地区与住房", "zh-TW":"地區與住房", ja:"地域と住居" },
+  colName: { en:"Name", "zh-CN":"姓名", "zh-TW":"姓名", ja:"名前" },
+  colAge: { en:"Age", "zh-CN":"年龄", "zh-TW":"年齡", ja:"年齢" },
+  colWeight: { en:"Weight kg", "zh-CN":"体重kg", "zh-TW":"體重kg", ja:"体重kg" },
+  colGender: { en:"Gender", "zh-CN":"性别", "zh-TW":"性別", ja:"性別" },
+  colSpecial: { en:"Special Status", "zh-CN":"特殊状态", "zh-TW":"特殊狀態", ja:"特記事項" },
+  genderM: { en:"Male", "zh-CN":"男", "zh-TW":"男", ja:"男性" },
+  genderF: { en:"Female", "zh-CN":"女", "zh-TW":"女", ja:"女性" },
+  specialNone: { en:"None", "zh-CN":"无", "zh-TW":"無", ja:"なし" },
+  specialGrowing: { en:"Growing", "zh-CN":"发育期", "zh-TW":"發育期", ja:"成長期" },
+  specialPregnant: { en:"Pregnant", "zh-CN":"孕期", "zh-TW":"孕期", ja:"妊娠中" },
+  specialElderly: { en:"Elderly 65+", "zh-CN":"65岁以上", "zh-TW":"65歲以上", ja:"65歳以上" },
+  specialChronic: { en:"Chronic", "zh-CN":"慢性病", "zh-TW":"慢性病", ja:"慢性疾患" },
+  addMember: { en:"+ Add Member", "zh-CN":"+ 添加成员", "zh-TW":"+ 新增成員", ja:"+ 追加" },
+  regionType: { en:"Region Type", "zh-CN":"地区类型", "zh-TW":"地區類型", ja:"地域タイプ" },
+  labelHousing: { en:"Housing", "zh-CN":"住房", "zh-TW":"住房", ja:"住居" },
+  labelVehicles: { en:"Vehicles", "zh-CN":"车辆", "zh-TW":"車輛", ja:"車両" },
+  labelPeriod: { en:"Period", "zh-CN":"周期", "zh-TW":"週期", ja:"期間" },
+  generateBtn: { en:"Generate Emergency Supply List", "zh-CN":"生成应急储备清单", "zh-TW":"生成應急儲備清單", ja:"防災備蓄リストを生成" },
+  calcFooter: {
+    en:"Based on Crisis Pulse family emergency preparedness framework · Profile → Environment → Calculate → Execute",
+    "zh-CN":"基于Crisis Pulse 家庭应急储备框架 · 画像 → 环境 → 计算 → 执行",
+    "zh-TW":"基於Crisis Pulse 家庭應急儲備框架 · 畫像 → 環境 → 計算 → 執行",
+    ja:"Crisis Pulse 家庭防災備蓄フレームワーク · プロフィール → 環境 → 計算 → 実行"
+  },
+  editParams: { en:"Edit Parameters", "zh-CN":"编辑参数", "zh-TW":"編輯參數", ja:"パラメータ編集" },
+  people: { en:"people", "zh-CN":"人", "zh-TW":"人", ja:"人" },
+  pet: { en:"+1 pet", "zh-CN":"+1宠物", "zh-TW":"+1寵物", ja:"+1ペット" },
+  monthPlan: { en:"-month plan", "zh-CN":"个月计划", "zh-TW":"個月計劃", ja:"ヶ月プラン" },
+  dailyCal: { en:"Daily Total Calories", "zh-CN":"每日总热量", "zh-TW":"每日總熱量", ja:"1日総カロリー" },
+  grainReq: { en:"Grain Requirement", "zh-CN":"谷物需求", "zh-TW":"穀物需求", ja:"穀物必要量" },
+  grainSub: { en:"Rice/noodles/oats", "zh-CN":"米/面/燕麦", "zh-TW":"米/麵/燕麥", ja:"米/麺/オートミール" },
+  emMonWater: { en:"Emergency Water", "zh-CN":"应急饮水", "zh-TW":"應急飲水", ja:"緊急用水" },
+  totalBudget: { en:"Total Budget", "zh-CN":"总预算", "zh-TW":"總預算", ja:"総予算" },
+  inclCash: { en:"Includes cash reserves", "zh-CN":"含现金储备", "zh-TW":"含現金儲備", ja:"現金準備金含む" },
+  months: { en:"months", "zh-CN":"个月", "zh-TW":"個月", ja:"ヶ月" },
+  tierUrgent: { en:"Urgent · Complete This Week", "zh-CN":"紧急 · 本周完成", "zh-TW":"緊急 · 本週完成", ja:"緊急 · 今週中に" },
+  tierImportant: { en:"Important · Complete Within Two Weeks", "zh-CN":"重要 · 两周内完成", "zh-TW":"重要 · 兩週內完成", ja:"重要 · 2週間以内に" },
+  tierGeneral: { en:"General · Complete Within One Month", "zh-CN":"一般 · 一个月内完成", "zh-TW":"一般 · 一個月內完成", ja:"一般 · 1ヶ月以内に" },
+  colItem: { en:"Item", "zh-CN":"物品", "zh-TW":"物品", ja:"品目" },
+  colQty: { en:"Quantity", "zh-CN":"数量", "zh-TW":"數量", ja:"数量" },
+  colCost: { en:"Cost", "zh-CN":"费用", "zh-TW":"費用", ja:"費用" },
+  colRationale: { en:"Rationale", "zh-CN":"说明", "zh-TW":"說明", ja:"理由" },
+  labelUrgent: { en:"Urgent", "zh-CN":"紧急", "zh-TW":"緊急", ja:"緊急" },
+  labelImportant: { en:"Important", "zh-CN":"重要", "zh-TW":"重要", ja:"重要" },
+  labelGeneral: { en:"General", "zh-CN":"一般", "zh-TW":"一般", ja:"一般" },
+  labelTotal: { en:"Total", "zh-CN":"总计", "zh-TW":"總計", ja:"合計" },
+  instructions: {
+    en:"<strong>Instructions:</strong> This list computes grain/protein/oil needs based on daily calories × reserve days, adjusted by regional risk coefficients. Quantities are estimates—adjust by actual dietary preferences. Purchase in batches, rotate first-in-first-out, avoid over-stockpiling.",
+    "zh-CN":"<strong>说明：</strong>本清单根据每日热量×储备天数计算谷物/蛋白质/油脂需求，并按地区风险系数调整。数量为估算值——请根据实际饮食偏好调整。分批购买，先进先出轮换，避免过度囤积。",
+    "zh-TW":"<strong>說明：</strong>本清單根據每日熱量×儲備天數計算穀物/蛋白質/油脂需求，並按地區風險係數調整。數量為估算值——請根據實際飲食偏好調整。分批購買，先進先出輪換，避免過度囤積。",
+    ja:"<strong>説明：</strong>このリストは1日のカロリー×備蓄日数に基づき穀物/タンパク質/油脂の必要量を算出し、地域リスク係数で調整しています。数量は推定値です——実際の食事嗜好に合わせて調整してください。分割購入し、先入れ先出しでローテーションし、過剰備蓄を避けてください。"
+  },
+  returnEdit: { en:"← Return to Edit Parameters", "zh-CN":"← 返回编辑参数", "zh-TW":"← 返回編輯參數", ja:"← パラメータ編集に戻る" },
+  footerFull: {
+    en:"Crisis Pulse · Open source · No login · No data collected · Preparedness starts with awareness",
+    "zh-CN":"Crisis Pulse · 开源 · 无需登录 · 不收集数据 · 防患于未然",
+    "zh-TW":"Crisis Pulse · 開源 · 無需登入 · 不收集數據 · 防患於未然",
+    ja:"Crisis Pulse · オープンソース · ログイン不要 · データ収集なし · 備えあれば憂いなし"
+  },
+  noPets: { en:"No Pets", "zh-CN":"没有宠物", "zh-TW":"沒有寵物", ja:"ペットなし" },
+  weight: { en:"Weight", "zh-CN":"体重", "zh-TW":"體重", ja:"体重" },
+
+  // Region labels
+  regionIsland: { en:"Island/Import-Dependent", "zh-CN":"岛屿/依赖进口型", "zh-TW":"島嶼/依賴進口型", ja:"島嶼/輸入依存型" },
+  regionIslandDesc: { en:"e.g., New Zealand, Japan, Singapore, Taiwan", "zh-CN":"如新西兰、日本、新加坡、台湾", "zh-TW":"如紐西蘭、日本、新加坡、台灣", ja:"例：ニュージーランド、日本、シンガポール、台湾" },
+  regionCoastal: { en:"Coastal/Mixed Economy", "zh-CN":"沿海/混合经济型", "zh-TW":"沿海/混合經濟型", ja:"沿岸/混合経済型" },
+  regionCoastalDesc: { en:"e.g., China Coast, South Korea, Europe", "zh-CN":"如中国沿海、韩国、欧洲", "zh-TW":"如中國沿海、韓國、歐洲", ja:"例：中国沿岸、韓国、ヨーロッパ" },
+  regionInland: { en:"Inland/Self-Sufficient", "zh-CN":"内陆/自给型", "zh-TW":"內陸/自給型", ja:"内陸/自給自足型" },
+  regionInlandDesc: { en:"e.g., US Midwest, China Interior", "zh-CN":"如美国中西部、中国内地", "zh-TW":"如美國中西部、中國內地", ja:"例：米国中西部、中国内陸" },
+  regionTropical: { en:"Tropical/Developing", "zh-CN":"热带/发展中型", "zh-TW":"熱帶/發展中型", ja:"熱帯/発展途上型" },
+  regionTropicalDesc: { en:"e.g., Southeast Asia, South America", "zh-CN":"如东南亚、南美洲", "zh-TW":"如東南亞、南美洲", ja:"例：東南アジア、南米" },
+
+  // Housing
+  housingHouse: { en:"House/Townhouse", "zh-CN":"独栋/联排别墅", "zh-TW":"獨棟/聯排別墅", ja:"一戸建て/タウンハウス" },
+  housingAptBig: { en:"Large Apartment (3+ rooms)", "zh-CN":"大户型公寓(3室+)", "zh-TW":"大戶型公寓(3室+)", ja:"大型マンション(3LDK+)" },
+  housingAptSmall: { en:"Small Apartment (1-2 rooms)", "zh-CN":"小户型公寓(1-2室)", "zh-TW":"小戶型公寓(1-2室)", ja:"小型マンション(1-2LDK)" },
+
+  // Pets
+  petDogLarge: { en:"Large Dog (25kg+)", "zh-CN":"大型犬(25kg+)", "zh-TW":"大型犬(25kg+)", ja:"大型犬(25kg+)" },
+  petDogMedium: { en:"Medium Dog (10-25kg)", "zh-CN":"中型犬(10-25kg)", "zh-TW":"中型犬(10-25kg)", ja:"中型犬(10-25kg)" },
+  petDogSmall: { en:"Small Dog (<10kg)", "zh-CN":"小型犬(<10kg)", "zh-TW":"小型犬(<10kg)", ja:"小型犬(<10kg)" },
+  petCat: { en:"Cat", "zh-CN":"猫", "zh-TW":"貓", ja:"猫" },
+  vehicles0: { en:"0 vehicles", "zh-CN":"0辆车", "zh-TW":"0輛車", ja:"車0台" },
+  vehicles1: { en:"1 vehicle", "zh-CN":"1辆车", "zh-TW":"1輛車", ja:"車1台" },
+  vehicles2: { en:"2 vehicles", "zh-CN":"2辆车", "zh-TW":"2輛車", ja:"車2台" },
+  vehicles3: { en:"3 vehicles", "zh-CN":"3辆车", "zh-TW":"3輛車", ja:"車3台" },
+
+  // Supply items
+  itemWater: { en:"Drinking Water 10L", "zh-CN":"饮用水 10L", "zh-TW":"飲用水 10L", ja:"飲料水 10L" },
+  itemPurify: { en:"Water Purification Tablets (50 pack)", "zh-CN":"净水片(50片装)", "zh-TW":"淨水片(50片裝)", ja:"浄水タブレット(50錠)" },
+  itemRice: { en:"Rice 10kg bag", "zh-CN":"大米 10kg装", "zh-TW":"白米 10kg裝", ja:"米 10kg袋" },
+  itemNoodle: { en:"Pasta/Noodles 500g", "zh-CN":"面条/意面 500g", "zh-TW":"麵條/義大利麵 500g", ja:"パスタ/麺 500g" },
+  itemFlour: { en:"Flour 1.5kg", "zh-CN":"面粉 1.5kg", "zh-TW":"麵粉 1.5kg", ja:"小麦粉 1.5kg" },
+  itemOat: { en:"Oatmeal 1kg", "zh-CN":"燕麦片 1kg", "zh-TW":"燕麥片 1kg", ja:"オートミール 1kg" },
+  itemOil: { en:"Cooking Oil 2L", "zh-CN":"食用油 2L", "zh-TW":"食用油 2L", ja:"食用油 2L" },
+  itemTuna: { en:"Canned Tuna 95g", "zh-CN":"金枪鱼罐头 95g", "zh-TW":"鮪魚罐頭 95g", ja:"ツナ缶 95g" },
+  itemBeans: { en:"Canned Beans 400g", "zh-CN":"豆类罐头 400g", "zh-TW":"豆類罐頭 400g", ja:"豆缶 400g" },
+  itemTomato: { en:"Canned Tomatoes 400g", "zh-CN":"番茄罐头 400g", "zh-TW":"番茄罐頭 400g", ja:"トマト缶 400g" },
+  itemMeat: { en:"Canned Meat/Spam", "zh-CN":"午餐肉罐头", "zh-TW":"午餐肉罐頭", ja:"肉缶/スパム" },
+  itemChicken: { en:"Frozen Chicken 1kg", "zh-CN":"冷冻鸡肉 1kg", "zh-TW":"冷凍雞肉 1kg", ja:"冷凍鶏肉 1kg" },
+  itemBeef: { en:"Frozen Ground Beef 500g", "zh-CN":"冷冻牛肉碎 500g", "zh-TW":"冷凍牛絞肉 500g", ja:"冷凍牛ひき肉 500g" },
+  itemEggs: { en:"Eggs (30 pack)", "zh-CN":"鸡蛋(30枚装)", "zh-TW":"雞蛋(30枚裝)", ja:"卵(30個入)" },
+  itemMilk: { en:"UHT Milk 1L", "zh-CN":"常温牛奶 1L", "zh-TW":"常溫牛奶 1L", ja:"ロングライフ牛乳 1L" },
+  itemFirstAid: { en:"First Aid Kit", "zh-CN":"急救包", "zh-TW":"急救包", ja:"救急キット" },
+  itemRx: { en:"Prescription Medications (1 month extra)", "zh-CN":"处方药(多备1个月)", "zh-TW":"處方藥(多備1個月)", ja:"処方薬(1ヶ月分追加)" },
+  itemPetFood: { en:(t) => t + " food", "zh-CN":(t) => t, "zh-TW":(t) => t, ja:(t) => t + "フード" },
+  itemPetWet: { en:(a) => a + " wet food", "zh-CN":(a) => a + "湿粮", "zh-TW":(a) => a + "濕糧", ja:(a) => a + "ウェットフード" },
+  itemCash: { en:"Small Denomination Cash", "zh-CN":"小面额现金", "zh-TW":"小面額現金", ja:"小額紙幣" },
+  itemSeasoning: { en:"Seasoning Kit (salt/sugar/soy/vinegar/spices)", "zh-CN":"调味品套装(盐/糖/酱油/醋/香料)", "zh-TW":"調味品套裝(鹽/糖/醬油/醋/香料)", ja:"調味料セット(塩/砂糖/醤油/酢/スパイス)" },
+  itemHoney: { en:"Honey 500g", "zh-CN":"蜂蜜 500g", "zh-TW":"蜂蜜 500g", ja:"はちみつ 500g" },
+  itemPowderedMilk: { en:"Powdered Milk 1kg (full-fat)", "zh-CN":"全脂奶粉 1kg", "zh-TW":"全脂奶粉 1kg", ja:"全脂粉ミルク 1kg" },
+  itemDriedBeans: { en:"Dried Beans 1kg", "zh-CN":"干豆 1kg", "zh-TW":"乾豆 1kg", ja:"乾燥豆 1kg" },
+  itemDriedGoods: { en:"Dried Goods (seaweed/kelp/mushrooms)", "zh-CN":"干货(海苔/海带/干菇)", "zh-TW":"乾貨(海苔/海帶/乾菇)", ja:"乾物(海苔/昆布/干し椎茸)" },
+  itemNuts: { en:"Nuts 1kg", "zh-CN":"坚果 1kg", "zh-TW":"堅果 1kg", ja:"ナッツ 1kg" },
+  itemFrzVeg: { en:"Frozen Vegetables 1kg", "zh-CN":"冷冻蔬菜 1kg", "zh-TW":"冷凍蔬菜 1kg", ja:"冷凍野菜 1kg" },
+  itemFrzBroc: { en:"Frozen Edamame/Broccoli", "zh-CN":"冷冻毛豆/西兰花", "zh-TW":"冷凍毛豆/花椰菜", ja:"冷凍枝豆/ブロッコリー" },
+  itemFuel: { en:"Spare Fuel Canister 20L", "zh-CN":"备用油桶 20L", "zh-TW":"備用油桶 20L", ja:"予備燃料缶 20L" },
+  itemTP: { en:"Toilet Paper (12-roll pack)", "zh-CN":"卫生纸(12卷装)", "zh-TW":"衛生紙(12捲裝)", ja:"トイレットペーパー(12ロール)" },
+  itemClean: { en:"Cleaning Supplies Kit", "zh-CN":"清洁用品套装", "zh-TW":"清潔用品套裝", ja:"清掃用品セット" },
+  itemPersonal: { en:"Personal Care Kit", "zh-CN":"个人护理套装", "zh-TW":"個人護理套裝", ja:"パーソナルケアキット" },
+  itemFeminine: { en:"Feminine Hygiene Products", "zh-CN":"女性卫生用品", "zh-TW":"女性衛生用品", ja:"生理用品" },
+  itemPetMed: { en:"Pet Preventive Medicine + Treats", "zh-CN":"宠物预防药+零食", "zh-TW":"寵物預防藥+零食", ja:"ペット予防薬+おやつ" },
+  itemStove: { en:"Portable Gas Burner + Canisters", "zh-CN":"便携燃气炉+气罐", "zh-TW":"攜帶式瓦斯爐+氣罐", ja:"カセットコンロ+ボンベ" },
+  itemPowerBank: { en:"Power Bank 20000mAh", "zh-CN":"充电宝 20000mAh", "zh-TW":"行動電源 20000mAh", ja:"モバイルバッテリー 20000mAh" },
+  itemBattery: { en:"Batteries + Flashlights", "zh-CN":"电池+手电筒", "zh-TW":"電池+手電筒", ja:"電池+懐中電灯" },
+  itemVitamin: { en:"Multivitamins", "zh-CN":"复合维生素", "zh-TW":"綜合維生素", ja:"マルチビタミン" },
+  itemCalcium: { en:"Calcium + Vitamin D", "zh-CN":"钙片+维生素D", "zh-TW":"鈣片+維生素D", ja:"カルシウム+ビタミンD" },
+  itemSnack: { en:"Coffee/Tea + Snacks", "zh-CN":"咖啡/茶+零食", "zh-TW":"咖啡/茶+零食", ja:"コーヒー/紅茶+お菓子" },
+  itemGarden: { en:"Vegetable Growing Kit", "zh-CN":"蔬菜种植套装", "zh-TW":"蔬菜種植套裝", ja:"家庭菜園キット" },
+  itemRadio: { en:"Battery/Hand Crank Radio", "zh-CN":"电池/手摇收音机", "zh-TW":"電池/手搖收音機", ja:"電池/手回しラジオ" },
+  itemDocPouch: { en:"Waterproof Document Pouch", "zh-CN":"防水证件袋", "zh-TW":"防水證件袋", ja:"防水書類ケース" },
+  itemPetEmKit: { en:"Pet Emergency Kit", "zh-CN":"宠物应急包", "zh-TW":"寵物應急包", ja:"ペット非常用キット" },
+  itemInsurance: { en:"Insurance Review + Emergency Plan", "zh-CN":"保险检查+应急预案", "zh-TW":"保險檢查+應急預案", ja:"保険確認+緊急計画" },
+
+  // Rationale strings
+  rBackupWater: { en:"Backup option, 5-year shelf life", "zh-CN":"备用方案，5年保质期", "zh-TW":"備用方案，5年保質期", ja:"予備、有効期限5年" },
+  rStaple: { en:(kg,m) => kg+"kg ≈ "+m+" months staple", "zh-CN":(kg,m) => kg+"kg ≈ "+m+"个月主粮", "zh-TW":(kg,m) => kg+"kg ≈ "+m+"個月主糧", ja:(kg,m) => kg+"kg ≈ "+m+"ヶ月の主食" },
+  rBackupStaple: { en:(kg) => kg+"kg backup staple", "zh-CN":(kg) => kg+"kg 备用主粮", "zh-TW":(kg) => kg+"kg 備用主糧", ja:(kg) => kg+"kg 予備主食" },
+  rBread: { en:"For bread/biscuits/noodles", "zh-CN":"可做面包/饼干/面条", "zh-TW":"可做麵包/餅乾/麵條", ja:"パン/ビスケット/麺用" },
+  rBreakfast: { en:"Breakfast staple", "zh-CN":"早餐主食", "zh-TW":"早餐主食", ja:"朝食の主食" },
+  rMonthlyOil: { en:(n,l) => n+" people monthly use ~"+l+"L", "zh-CN":(n,l) => n+"人每月用约"+l+"L", "zh-TW":(n,l) => n+"人每月用約"+l+"L", ja:(n,l) => n+"人の月間使用量 約"+l+"L" },
+  rLongProtein: { en:"Long shelf-life protein", "zh-CN":"长保质期蛋白质", "zh-TW":"長保質期蛋白質", ja:"長期保存タンパク質" },
+  rPlantProtein: { en:"Plant protein + fiber", "zh-CN":"植物蛋白+膳食纤维", "zh-TW":"植物蛋白+膳食纖維", ja:"植物性タンパク質+食物繊維" },
+  rSauceBase: { en:"Versatile sauce/soup base", "zh-CN":"万用酱汁/汤底", "zh-TW":"萬用醬汁/湯底", ja:"万能ソース/スープベース" },
+  rHighCal: { en:"High-calorie protein", "zh-CN":"高热量蛋白质", "zh-TW":"高熱量蛋白質", ja:"高カロリータンパク質" },
+  rStockLow: { en:"Stock at lower prices", "zh-CN":"趁低价囤货", "zh-TW":"趁低價囤貨", ja:"安い時にまとめ買い" },
+  rVersatile: { en:"Versatile protein", "zh-CN":"百搭蛋白质", "zh-TW":"百搭蛋白質", ja:"万能タンパク質" },
+  rGrowingEggs: { en:"Growing children protein needs", "zh-CN":"发育期儿童蛋白需求", "zh-TW":"發育期兒童蛋白需求", ja:"成長期の子供のタンパク質需要" },
+  rMilkDaily: { en:"Long shelf-life, 1-2 boxes daily", "zh-CN":"长保质期，每天1-2盒", "zh-TW":"長保質期，每天1-2盒", ja:"長期保存、毎日1-2本" },
+  rFirstAid: { en:"Fever/pain/diarrhea/wound care", "zh-CN":"发烧/疼痛/腹泻/伤口护理", "zh-TW":"發燒/疼痛/腹瀉/傷口護理", ja:"発熱/痛み/下痢/創傷ケア" },
+  rConsultDoc: { en:"Consult doctor in advance", "zh-CN":"提前咨询医生", "zh-TW":"提前諮詢醫生", ja:"事前に医師に相談" },
+  rPetDaily: { en:(d,m,kg) => d+"g/day × "+m+" months ≈ "+kg+"kg", "zh-CN":(d,m,kg) => d+"g/天 × "+m+"个月 ≈ "+kg+"kg", "zh-TW":(d,m,kg) => d+"g/天 × "+m+"個月 ≈ "+kg+"kg", ja:(d,m,kg) => d+"g/日 × "+m+"ヶ月 ≈ "+kg+"kg" },
+  rPetMix: { en:"Rotate/mix with dry", "zh-CN":"与干粮轮换/混合", "zh-TW":"與乾糧輪換/混合", ja:"ドライフードとローテーション" },
+  rAdjustDiet: { en:"Adjust by diet", "zh-CN":"按饮食习惯调整", "zh-TW":"按飲食習慣調整", ja:"食事習慣に合わせて調整" },
+  rNeverExpires: { en:"Never expires", "zh-CN":"永不过期", "zh-TW":"永不過期", ja:"賞味期限なし" },
+  rLongCalcium: { en:"Long shelf-life calcium + protein", "zh-CN":"长保质期钙+蛋白质", "zh-TW":"長保質期鈣+蛋白質", ja:"長期保存カルシウム+タンパク質" },
+  rSprout: { en:"Sprout for fresh greens + protein", "zh-CN":"可发芽获取新鲜蔬菜+蛋白质", "zh-TW":"可發芽獲取新鮮蔬菜+蛋白質", ja:"発芽させて新鮮野菜+タンパク質" },
+  rMinerals: { en:"Minerals + flavor", "zh-CN":"矿物质+提鲜", "zh-TW":"礦物質+提鮮", ja:"ミネラル+風味" },
+  rQualityFats: { en:"Quality fats", "zh-CN":"优质脂肪", "zh-TW":"優質脂肪", ja:"良質な脂質" },
+  rWeeklyVeg: { en:(n) => n+" people × ~1kg/week", "zh-CN":(n) => n+"人 × 约1kg/周", "zh-TW":(n) => n+"人 × 約1kg/週", ja:(n) => n+"人 × 約1kg/週" },
+  rHighVitamin: { en:"High vitamin density", "zh-CN":"高维生素密度", "zh-TW":"高維生素密度", ja:"高ビタミン密度" },
+  rInclFuel: { en:"Includes fuel", "zh-CN":"含燃油", "zh-TW":"含燃油", ja:"燃料含む" },
+  rTP: { en:(n) => n+" people × 3 months", "zh-CN":(n) => n+"人 × 3个月", "zh-TW":(n) => n+"人 × 3個月", ja:(n) => n+"人 × 3ヶ月" },
+  r3moSupply: { en:"3-month supply", "zh-CN":"3个月用量", "zh-TW":"3個月用量", ja:"3ヶ月分" },
+  rStockAll: { en:"Stock all at once", "zh-CN":"一次性备齐", "zh-TW":"一次性備齊", ja:"一括購入" },
+  rPetPrev: { en:"Flea/tick prevention", "zh-CN":"跳蚤/蜱虫预防", "zh-TW":"跳蚤/蜱蟲預防", ja:"ノミ/ダニ予防" },
+  rBackupPower: { en:"Backup for power outages", "zh-CN":"停电备用", "zh-TW":"停電備用", ja:"停電時のバックアップ" },
+  rPhoneCharging: { en:"Phone charging", "zh-CN":"手机充电", "zh-TW":"手機充電", ja:"スマホ充電" },
+  rBatteries: { en:"20+ AA/AAA each", "zh-CN":"各20+节AA/AAA", "zh-TW":"各20+顆AA/AAA", ja:"各20本以上のAA/AAA" },
+  rVegShortage: { en:"Supplement veggie shortage", "zh-CN":"补充蔬菜不足", "zh-TW":"補充蔬菜不足", ja:"野菜不足を補う" },
+  rSeniorBone: { en:"Senior bone health", "zh-CN":"老年骨骼健康", "zh-TW":"老年骨骼健康", ja:"高齢者の骨の健康" },
+  rMorale: { en:"Morale item", "zh-CN":"士气物资", "zh-TW":"士氣物資", ja:"モラルアイテム" },
+  rGarden: { en:"Scallions/chives/lettuce", "zh-CN":"葱/韭菜/生菜", "zh-TW":"蔥/韭菜/萵苣", ja:"ネギ/ニラ/レタス" },
+  rEmInfo: { en:"Emergency info channel", "zh-CN":"应急信息渠道", "zh-TW":"應急資訊管道", ja:"緊急情報チャンネル" },
+  rDocStorage: { en:"Passport/insurance storage", "zh-CN":"护照/保险单存放", "zh-TW":"護照/保險單存放", ja:"パスポート/保険証保管" },
+  rPetEmergency: { en:"Exam + leash + water bowl", "zh-CN":"检查+牵引绳+水碗", "zh-TW":"檢查+牽引繩+水碗", ja:"診察+リード+水碗" },
+  rChecklist: { en:"Checklist item", "zh-CN":"待办清单项", "zh-TW":"待辦清單項", ja:"チェックリスト項目" },
+  bottles: { en:"bottles", "zh-CN":"瓶", "zh-TW":"瓶", ja:"本" },
+  boxes: { en:"boxes", "zh-CN":"盒", "zh-TW":"盒", ja:"箱" },
+  bags: { en:"bags", "zh-CN":"袋", "zh-TW":"袋", ja:"袋" },
+  packs: { en:"packs", "zh-CN":"包", "zh-TW":"包", ja:"パック" },
+  cans: { en:"cans", "zh-CN":"罐", "zh-TW":"罐", ja:"缶" },
+  packages: { en:"packages", "zh-CN":"包", "zh-TW":"包", ja:"パック" },
+  trays: { en:"trays", "zh-CN":"板", "zh-TW":"板", ja:"パック" },
+  kits: { en:"kits", "zh-CN":"套", "zh-TW":"套", ja:"セット" },
+  jars: { en:"jars", "zh-CN":"瓶", "zh-TW":"瓶", ja:"瓶" },
+  units: { en:"units", "zh-CN":"个", "zh-TW":"個", ja:"台" },
+  pieces: { en:"pieces", "zh-CN":"个", "zh-TW":"個", ja:"枚" },
+  set1: { en:"1 set", "zh-CN":"1套", "zh-TW":"1套", ja:"1セット" },
+  unit1: { en:"1 unit", "zh-CN":"1台", "zh-TW":"1台", ja:"1台" },
+  servings: { en:(n) => n+" servings", "zh-CN":(n) => n+"人份", "zh-TW":(n) => n+"人份", ja:(n) => n+"人分" },
+  asNeeded: { en:"As needed", "zh-CN":"按需", "zh-TW":"按需", ja:"必要に応じて" },
+  canister: { en:(n) => n+" canister", "zh-CN":(n) => n+"桶", "zh-TW":(n) => n+"桶", ja:(n) => n+"缶" },
+  monthsSupply: { en:(m) => m+" months", "zh-CN":(m) => m+"个月", "zh-TW":(m) => m+"個月", ja:(m) => m+"ヶ月" },
+  moSupply: { en:"2-3 month supply", "zh-CN":"2-3个月用量", "zh-TW":"2-3個月用量", ja:"2-3ヶ月分" },
+  dashMark: { en:"—", "zh-CN":"—", "zh-TW":"—", ja:"—" },
+
+  // Conflict names
+  cRussiaUkraine: { en:"Russia-Ukraine War", "zh-CN":"俄乌战争", "zh-TW":"俄烏戰爭", ja:"ロシア・ウクライナ戦争" },
+  cIsraelPalestine: { en:"Israel-Palestine", "zh-CN":"以巴冲突", "zh-TW":"以巴衝突", ja:"イスラエル・パレスチナ" },
+  cUSIsraelIran: { en:"US-Israel-Iran Conflict", "zh-CN":"美以伊冲突", "zh-TW":"美以伊衝突", ja:"米・イスラエル・イラン紛争" },
+  cYemen: { en:"Yemen Civil War", "zh-CN":"也门内战", "zh-TW":"葉門內戰", ja:"イエメン内戦" },
+  cSudan: { en:"Sudan Civil War", "zh-CN":"苏丹内战", "zh-TW":"蘇丹內戰", ja:"スーダン内戦" },
+  cMyanmar: { en:"Myanmar Civil War", "zh-CN":"缅甸内战", "zh-TW":"緬甸內戰", ja:"ミャンマー内戦" },
+  cSyria: { en:"Syria Conflict", "zh-CN":"叙利亚冲突", "zh-TW":"敘利亞衝突", ja:"シリア紛争" },
+  cLebanon: { en:"Lebanon Crisis", "zh-CN":"黎巴嫩危机", "zh-TW":"黎巴嫩危機", ja:"レバノン危機" },
+  cDRC: { en:"Eastern DRC Conflict", "zh-CN":"刚果(金)东部冲突", "zh-TW":"剛果(金)東部衝突", ja:"コンゴ東部紛争" },
+  cSahel: { en:"Sahel Region Crisis", "zh-CN":"萨赫勒地区危机", "zh-TW":"薩赫勒地區危機", ja:"サヘル地域危機" },
+  cSomalia: { en:"Somalia", "zh-CN":"索马里", "zh-TW":"索馬利亞", ja:"ソマリア" },
+  cNigeria: { en:"Northern Nigeria", "zh-CN":"尼日利亚北部", "zh-TW":"奈及利亞北部", ja:"ナイジェリア北部" },
+  cEthiopia: { en:"Ethiopia", "zh-CN":"埃塞俄比亚", "zh-TW":"衣索比亞", ja:"エチオピア" },
+  cAfghan: { en:"Afghanistan", "zh-CN":"阿富汗", "zh-TW":"阿富汗", ja:"アフガニスタン" },
+  cPakistan: { en:"Northwest Pakistan", "zh-CN":"巴基斯坦西北部", "zh-TW":"巴基斯坦西北部", ja:"パキスタン北西部" },
+  cHaiti: { en:"Haiti", "zh-CN":"海地", "zh-TW":"海地", ja:"ハイチ" },
+  cColombia: { en:"Colombia", "zh-CN":"哥伦比亚", "zh-TW":"哥倫比亞", ja:"コロンビア" },
+  cMexico: { en:"Mexico", "zh-CN":"墨西哥", "zh-TW":"墨西哥", ja:"メキシコ" },
+  cIraq: { en:"Iraq", "zh-CN":"伊拉克", "zh-TW":"伊拉克", ja:"イラク" },
+  cLibya: { en:"Libya", "zh-CN":"利比亚", "zh-TW":"利比亞", ja:"リビア" },
+  cPhilippines: { en:"Southern Philippines", "zh-CN":"菲律宾南部", "zh-TW":"菲律賓南部", ja:"フィリピン南部" },
+  cKashmir: { en:"Kashmir India-Pakistan", "zh-CN":"克什米尔印巴争端", "zh-TW":"喀什米爾印巴爭端", ja:"カシミール印パ紛争" },
+  cTaiwan: { en:"Taiwan Strait", "zh-CN":"台湾海峡", "zh-TW":"台灣海峽", ja:"台湾海峡" },
+  cKorea: { en:"Korean Peninsula", "zh-CN":"朝鲜半岛", "zh-TW":"朝鮮半島", ja:"朝鮮半島" },
+  cSCS: { en:"South China Sea", "zh-CN":"南海", "zh-TW":"南海", ja:"南シナ海" },
+
+  // Conflict descriptions
+  dRussiaUkraine: { en:"Largest conventional war in Europe, ongoing fifth year", "zh-CN":"欧洲最大常规战争，持续第五年", "zh-TW":"歐洲最大常規戰爭，持續第五年", ja:"ヨーロッパ最大の通常戦争、5年目に突入" },
+  dIsraelPalestine: { en:"Gaza humanitarian crisis continuing", "zh-CN":"加沙人道主义危机持续", "zh-TW":"加薩人道主義危機持續", ja:"ガザ人道危機が継続" },
+  dUSIsraelIran: { en:"Regional escalation after February 2026 strikes", "zh-CN":"2026年2月空袭后地区局势升级", "zh-TW":"2026年2月空襲後地區局勢升級", ja:"2026年2月の空爆後の地域的エスカレーション" },
+  dYemen: { en:"Houthi attacks on Red Sea shipping", "zh-CN":"胡塞武装袭击红海航运", "zh-TW":"胡塞武裝襲擊紅海航運", ja:"フーシ派による紅海船舶攻撃" },
+  dSudan: { en:"SAF vs RSF conflict, over 10 million displaced", "zh-CN":"SAF对RSF冲突，超1000万人流离失所", "zh-TW":"SAF對RSF衝突，超1000萬人流離失所", ja:"SAF対RSF紛争、1000万人以上が避難" },
+  dMyanmar: { en:"Military junta vs multiple resistance forces", "zh-CN":"军政府对抗多支抵抗力量", "zh-TW":"軍政府對抗多支抵抗力量", ja:"軍事政権対複数の抵抗勢力" },
+  dSyria: { en:"Multiple factions ongoing", "zh-CN":"多方势力持续对抗", "zh-TW":"多方勢力持續對抗", ja:"複数派閥による継続的紛争" },
+  dLebanon: { en:"Israel-Hezbollah conflict spillover", "zh-CN":"以色列-真主党冲突外溢", "zh-TW":"以色列-真主黨衝突外溢", ja:"イスラエル・ヒズボラ紛争の波及" },
+  dDRC: { en:"M23 militants vs government forces", "zh-CN":"M23武装与政府军冲突", "zh-TW":"M23武裝與政府軍衝突", ja:"M23武装勢力対政府軍" },
+  dSahel: { en:"Mali/Burkina Faso/Niger armed conflicts", "zh-CN":"马里/布基纳法索/尼日尔武装冲突", "zh-TW":"馬利/布基納法索/尼日武裝衝突", ja:"マリ/ブルキナファソ/ニジェール武力紛争" },
+  dSomalia: { en:"Al-Shabaab militant activity", "zh-CN":"青年党武装活动", "zh-TW":"青年黨武裝活動", ja:"アル・シャバーブの武装活動" },
+  dNigeria: { en:"Boko Haram remnants and herder clashes", "zh-CN":"博科圣地残余与牧民冲突", "zh-TW":"博科聖地殘餘與牧民衝突", ja:"ボコ・ハラム残党と遊牧民の衝突" },
+  dEthiopia: { en:"Fragile Tigray peace, scattered conflicts", "zh-CN":"提格雷脆弱和平，零星冲突", "zh-TW":"提格雷脆弱和平，零星衝突", ja:"ティグライの脆弱な和平、散発的紛争" },
+  dAfghan: { en:"Unstable security under Taliban", "zh-CN":"塔利班治下安全局势不稳", "zh-TW":"塔利班治下安全局勢不穩", ja:"タリバン政権下の不安定な治安" },
+  dPakistan: { en:"TTP militant attacks", "zh-CN":"TTP武装袭击", "zh-TW":"TTP武裝襲擊", ja:"TTP武装攻撃" },
+  dHaiti: { en:"Gang violence and state collapse", "zh-CN":"帮派暴力与国家崩溃", "zh-TW":"幫派暴力與國家崩潰", ja:"ギャング暴力と国家崩壊" },
+  dColombia: { en:"Fragile peace, armed groups in some regions", "zh-CN":"脆弱和平，部分地区武装团体活动", "zh-TW":"脆弱和平，部分地區武裝團體活動", ja:"脆弱な和平、一部地域で武装勢力活動" },
+  dMexico: { en:"Drug cartel violence", "zh-CN":"毒品卡特尔暴力", "zh-TW":"毒品卡特爾暴力", ja:"麻薬カルテルの暴力" },
+  dIraq: { en:"ISIS remnants and militia clashes", "zh-CN":"ISIS残余与民兵冲突", "zh-TW":"ISIS殘餘與民兵衝突", ja:"ISIS残党と民兵の衝突" },
+  dLibya: { en:"Divided government and militia standoff", "zh-CN":"分裂政府与民兵对峙", "zh-TW":"分裂政府與民兵對峙", ja:"分裂政府と民兵の対立" },
+  dPhilippines: { en:"Mindanao armed remnants", "zh-CN":"棉兰老岛武装残余", "zh-TW":"棉蘭老島武裝殘餘", ja:"ミンダナオ武装残党" },
+  dKashmir: { en:"Ongoing border tensions", "zh-CN":"持续的边境紧张", "zh-TW":"持續的邊境緊張", ja:"継続する国境緊張" },
+  dTaiwan: { en:"Military exercises, sustained tension", "zh-CN":"军事演习，持续紧张", "zh-TW":"軍事演習，持續緊張", ja:"軍事演習、持続的緊張" },
+  dKorea: { en:"Missile tests and military standoff", "zh-CN":"导弹试射与军事对峙", "zh-TW":"導彈試射與軍事對峙", ja:"ミサイル実験と軍事的対立" },
+  dSCS: { en:"Multiple territorial disputes", "zh-CN":"多方领土争端", "zh-TW":"多方領土爭端", ja:"複数の領土紛争" },
+
+  // Dog/Cat labels
+  catLabel: { en:"Cat", "zh-CN":"猫", "zh-TW":"貓", ja:"猫" },
+  dogLabel: { en:"Dog", "zh-CN":"狗", "zh-TW":"狗", ja:"犬" },
+  catFood: { en:"Cat food", "zh-CN":"猫粮", "zh-TW":"貓糧", ja:"キャットフード" },
+  dogFood: { en:"Dog food", "zh-CN":"狗粮", "zh-TW":"狗糧", ja:"ドッグフード" },
+};
+
+function t(key) {
+  const entry = I18N[key];
+  if (!entry) return key;
+  return entry[currentLang] || entry.en || key;
+}
+
+function tf(key, ...args) {
+  const entry = I18N[key];
+  if (!entry) return key;
+  const fn = entry[currentLang] || entry.en;
+  if (typeof fn === 'function') return fn(...args);
+  return fn || key;
+}
+
+// ====== LANGUAGE SWITCHER ======
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('crisis-pulse-lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+
+  const titles = { en:"Global Crisis Monitor & Family Emergency Supply Calculator | Crisis Pulse", "zh-CN":"全球危机态势 & 家庭应急储备计算器 | Crisis Pulse", "zh-TW":"全球危機態勢 & 家庭應急儲備計算器 | Crisis Pulse", ja:"世界危機モニター & 家庭防災備蓄計算機 | Crisis Pulse" };
+  document.title = titles[lang] || titles.en;
+  document.documentElement.lang = lang === 'zh-CN' ? 'zh-Hans' : lang === 'zh-TW' ? 'zh-Hant' : lang;
+
+  document.getElementById('mapTitle').textContent = t('mapTitle');
+  document.getElementById('mapSubtitle').textContent = t('mapSubtitle');
+  document.getElementById('liveTag').innerHTML = '● ' + t('liveTag').replace('● ','');
+  document.getElementById('humanMsg').textContent = t('humanMsg');
+  document.getElementById('riskLabel').textContent = t('riskLabel');
+  document.getElementById('enterCalcBtn').textContent = t('enterCalc');
+  document.getElementById('dataSource').innerHTML = t('dataSource');
+
+  updateLegend();
+
+  if (window._riskComputed) {
+    displayRisk(riskIndex, window._riskFactorsRaw);
+  } else {
+    document.getElementById('riskDesc').textContent = t('riskLoading');
+    document.getElementById('gpsStatus').textContent = t('gpsLoading');
+  }
+
+  if (document.getElementById('calcPage').style.display === 'block') {
+    renderCalc();
+  }
+
+  updateConflictTooltips();
+}
+
+function updateLegend() {
+  document.getElementById('mapLegend').innerHTML = `
+    <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>${t('legendYou')}</div>
+    <div class="legend-item"><div class="legend-dot" style="background:transparent;border:1.5px solid rgba(34,197,94,0.6)"></div>${t('legendNoConflict')}</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>${t('legendLow')}</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>${t('legendMedium')}</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>${t('legendHigh')}</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#991b1b"></div>${t('legendWar')}</div>`;
+}
+
+function updateConflictTooltips() {}
+
+document.getElementById('langSwitcher').addEventListener('click', e => {
+  const btn = e.target.closest('.lang-btn');
+  if (btn) setLang(btn.dataset.lang);
+});
+
+// ====== CONFLICT DATA (2026.03) ======
+const CONFLICTS = [
+  {nameKey:"cRussiaUkraine",descKey:"dRussiaUkraine",lat:48.5,lon:35.5,intensity:9,typeKey:"typeWar"},
+  {nameKey:"cIsraelPalestine",descKey:"dIsraelPalestine",lat:31.5,lon:34.5,intensity:9,typeKey:"typeWar"},
+  {nameKey:"cUSIsraelIran",descKey:"dUSIsraelIran",lat:32.5,lon:53,intensity:8,typeKey:"typeHigh"},
+  {nameKey:"cYemen",descKey:"dYemen",lat:15.5,lon:44,intensity:7,typeKey:"typeHigh"},
+  {nameKey:"cSudan",descKey:"dSudan",lat:15.5,lon:32.5,intensity:9,typeKey:"typeWar"},
+  {nameKey:"cMyanmar",descKey:"dMyanmar",lat:19.8,lon:96.2,intensity:8,typeKey:"typeHigh"},
+  {nameKey:"cSyria",descKey:"dSyria",lat:35,lon:38,intensity:7,typeKey:"typeHigh"},
+  {nameKey:"cLebanon",descKey:"dLebanon",lat:33.9,lon:35.5,intensity:7,typeKey:"typeHigh"},
+  {nameKey:"cDRC",descKey:"dDRC",lat:-1.5,lon:29,intensity:7,typeKey:"typeHigh"},
+  {nameKey:"cSahel",descKey:"dSahel",lat:14,lon:-1,intensity:7,typeKey:"typeHigh"},
+  {nameKey:"cSomalia",descKey:"dSomalia",lat:5,lon:46,intensity:6,typeKey:"typeMedium"},
+  {nameKey:"cNigeria",descKey:"dNigeria",lat:10,lon:8,intensity:6,typeKey:"typeMedium"},
+  {nameKey:"cEthiopia",descKey:"dEthiopia",lat:8,lon:39,intensity:5,typeKey:"typeMedium"},
+  {nameKey:"cAfghan",descKey:"dAfghan",lat:34,lon:67,intensity:6,typeKey:"typeMedium"},
+  {nameKey:"cPakistan",descKey:"dPakistan",lat:33,lon:70,intensity:5,typeKey:"typeMedium"},
+  {nameKey:"cHaiti",descKey:"dHaiti",lat:19,lon:-72.3,intensity:6,typeKey:"typeMedium"},
+  {nameKey:"cColombia",descKey:"dColombia",lat:4,lon:-74,intensity:4,typeKey:"typeLow"},
+  {nameKey:"cMexico",descKey:"dMexico",lat:23,lon:-102,intensity:5,typeKey:"typeMedium"},
+  {nameKey:"cIraq",descKey:"dIraq",lat:33.3,lon:44.4,intensity:5,typeKey:"typeMedium"},
+  {nameKey:"cLibya",descKey:"dLibya",lat:32.9,lon:13.2,intensity:5,typeKey:"typeMedium"},
+  {nameKey:"cPhilippines",descKey:"dPhilippines",lat:7,lon:124,intensity:4,typeKey:"typeLow"},
+  {nameKey:"cKashmir",descKey:"dKashmir",lat:34,lon:76,intensity:4,typeKey:"typeLow"},
+  {nameKey:"cTaiwan",descKey:"dTaiwan",lat:24,lon:121,intensity:3,typeKey:"typeTension"},
+  {nameKey:"cKorea",descKey:"dKorea",lat:38,lon:127,intensity:3,typeKey:"typeTension"},
+  {nameKey:"cSCS",descKey:"dSCS",lat:12,lon:114,intensity:3,typeKey:"typeTension"}
+];
+
+const COUNTRY_RISK = {
+  "Ukraine":9,"Russia":6,"Israel":8,"Palestine":9,"Iran":8,"Yemen":7,
+  "Sudan":9,"South Sudan":6,"Myanmar":8,"Syria":7,"Lebanon":7,
+  "Dem. Rep. Congo":7,"Mali":7,"Burkina Faso":7,"Niger":6,
+  "Somalia":6,"Nigeria":6,"Ethiopia":5,"Afghanistan":6,"Pakistan":5,
+  "Haiti":6,"Colombia":4,"Mexico":5,"Iraq":5,"Libya":5,
+  "Philippines":3,"India":3,"China":2,"North Korea":4,
+  "Chad":4,"Egypt":2,"Saudi Arabia":3,"Turkey":3
+};
+
+function intensityColor(i) {
+  if (i >= 9) return "#991b1b";
+  if (i >= 7) return "#ef4444";
+  if (i >= 5) return "#f97316";
+  if (i >= 3) return "#fbbf24";
+  return "#4ade80";
+}
+
+function countryFillColor(name) {
+  const risk = COUNTRY_RISK[name];
+  if (!risk) return "rgba(34,197,94,0.04)";
+  const alpha = Math.min(risk / 10, 1);
+  if (risk >= 8) return `rgba(153,27,27,${alpha * 0.7})`;
+  if (risk >= 6) return `rgba(239,68,68,${alpha * 0.5})`;
+  if (risk >= 4) return `rgba(249,115,22,${alpha * 0.35})`;
+  if (risk >= 2) return `rgba(251,191,36,${alpha * 0.2})`;
+  return "rgba(34,197,94,0.04)";
+}
+
+function countryStrokeColor(name) {
+  const risk = COUNTRY_RISK[name];
+  if (!risk) return "rgba(34,197,94,0.35)";
+  if (risk >= 7) return "rgba(239,68,68,0.25)";
+  if (risk >= 4) return "rgba(249,115,22,0.18)";
+  return "rgba(251,191,36,0.12)";
+}
+
+function countryStrokeWidth(name) {
+  return COUNTRY_RISK[name] ? 0.5 : 0.8;
+}
+
+// ====== MAP RENDERING ======
+const mapW = 960, mapH = 500;
+
+function initMap() {
+  setLang(currentLang);
+
+  const svg = d3.select("#worldMap").append("svg")
+    .attr("viewBox", `0 0 ${mapW} ${mapH}`)
+    .attr("preserveAspectRatio", "xMidYMid meet");
+
+  svg.append("rect").attr("width", mapW).attr("height", mapH).attr("fill", "#0a0a0f");
+
+  const projection = d3.geoNaturalEarth1().scale(155).translate([mapW / 2, mapH / 2]);
+  const path = d3.geoPath().projection(projection);
+
+  svg.append("path").datum(d3.geoGraticule10()).attr("d", path).attr("fill", "none").attr("stroke", "rgba(255,255,255,.04)").attr("stroke-width", 0.5);
+
+  const worldUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+
+  d3.json(worldUrl).then(world => {
+    const countries = topojson.feature(world, world.objects.countries);
+
+    svg.selectAll("path.country").data(countries.features).enter().append("path")
+      .attr("class", "country").attr("d", path)
+      .attr("fill", d => countryFillColor(d.properties.name))
+      .attr("stroke", d => countryStrokeColor(d.properties.name))
+      .attr("stroke-width", d => countryStrokeWidth(d.properties.name));
+
+    const tooltip = document.getElementById("tooltip");
+
+    CONFLICTS.forEach(c => {
+      const [x, y] = projection([c.lon, c.lat]);
+      if (!x || !y) return;
+
+      const g = svg.append("g").attr("class", "hotspot-marker");
+      g.append("circle").attr("class", "hotspot-ring").attr("cx", x).attr("cy", y).attr("r", 6).attr("fill", "none").attr("stroke", intensityColor(c.intensity)).attr("stroke-width", 1.5).attr("opacity", 0.5);
+      g.append("circle").attr("cx", x).attr("cy", y).attr("r", Math.max(2, c.intensity * 0.5)).attr("fill", intensityColor(c.intensity)).attr("opacity", 0.9);
+
+      g.on("mouseenter", (e) => {
+        tooltip.innerHTML = `<div class="ct-name">${t(c.nameKey)}</div><div class="ct-level" style="color:${intensityColor(c.intensity)}">● ${t(c.typeKey)} · ${t('intensity')} ${c.intensity}/10</div><div class="ct-desc">${t(c.descKey)}</div>`;
+        tooltip.style.opacity = 1;
+        tooltip.style.left = (e.clientX + 12) + "px";
+        tooltip.style.top = (e.clientY - 10) + "px";
+      }).on("mouseleave", () => { tooltip.style.opacity = 0; });
+    });
+
+    window._projection = projection;
+    window._svg = svg;
+    requestGPS();
+  }).catch(err => {
+    console.error("Map load error:", err);
+    document.getElementById("worldMap").innerHTML = '<div style="text-align:center;color:#555;padding:40px">' + t('mapLoadError') + '</div>';
+    requestGPS();
+  });
+}
+
+// ====== GPS & RISK CALCULATION ======
+let userLocation = null;
+let riskIndex = 5;
+
+function requestGPS() {
+  const statusEl = document.getElementById("gpsStatus");
+
+  if (!navigator.geolocation) {
+    statusEl.textContent = t('gpsNoSupport');
+    computeRisk(null);
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      statusEl.innerHTML = tf('gpsLocated', userLocation.lat.toFixed(2), userLocation.lon.toFixed(2));
+
+      if (window._projection && window._svg) {
+        const [ux, uy] = window._projection([userLocation.lon, userLocation.lat]);
+        if (ux && uy) {
+          const g = window._svg.append("g").attr("class", "user-marker");
+          g.append("circle").attr("cx", ux).attr("cy", uy).attr("r", 8).attr("fill", "rgba(34,197,94,.2)");
+          g.append("circle").attr("cx", ux).attr("cy", uy).attr("r", 4).attr("fill", "#22c55e");
+          g.append("circle").attr("cx", ux).attr("cy", uy).attr("r", 2).attr("fill", "#fff");
+        }
+      }
+      computeRisk(userLocation);
+    },
+    err => {
+      console.warn("GPS error:", err);
+      statusEl.textContent = t('gpsError');
+      computeRisk(null);
+    },
+    { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 }
+  );
+}
+
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function computeRisk(loc) {
+  let factorsRaw = [];
+  let score = 0;
+
+  if (!loc) {
+    score = 5.2;
+    factorsRaw = [{type:'global',key:'factorGlobalHigh'},{type:'global',key:'factorSupplyChain'},{type:'global',key:'factorGeopolitical'}];
+  } else {
+    let proximityScore = 0;
+    let nearConflicts = [];
+
+    CONFLICTS.forEach(c => {
+      const dist = haversine(loc.lat, loc.lon, c.lat, c.lon);
+      let weight = 0;
+      if (dist < 500) weight = c.intensity * 1.0;
+      else if (dist < 1500) weight = c.intensity * 0.6;
+      else if (dist < 3000) weight = c.intensity * 0.3;
+      else if (dist < 6000) weight = c.intensity * 0.1;
+      else weight = c.intensity * 0.03;
+      proximityScore += weight;
+      if (dist < 3000) nearConflicts.push({ ...c, dist: Math.round(dist) });
+    });
+
+    score = Math.min(10, Math.max(1, proximityScore / 8));
+    score = Math.round(score * 10) / 10;
+
+    nearConflicts.sort((a, b) => a.dist - b.dist);
+    nearConflicts.slice(0, 3).forEach(c => {
+      factorsRaw.push({type:'conflict',nameKey:c.nameKey,dist:c.dist});
+    });
+    factorsRaw.push({type:'global',key:'factorPressure'});
+    if (score >= 6) factorsRaw.push({type:'global',key:'factorIncrease'});
+  }
+
+  riskIndex = score;
+  window._riskFactorsRaw = factorsRaw;
+  window._riskComputed = true;
+  displayRisk(score, factorsRaw);
+}
+
+function displayRisk(score, factorsRaw) {
+  const scoreEl = document.getElementById("riskScore");
+  const descEl = document.getElementById("riskDesc");
+  const factorsEl = document.getElementById("riskFactors");
+  const btnEl = document.getElementById("enterCalcBtn");
+
+  let color, descKey, btnBg;
+  if (score >= 8) { color = "#991b1b"; descKey = 'riskExtreme'; btnBg = "linear-gradient(135deg,#991b1b,#7f1d1d)"; }
+  else if (score >= 6) { color = "#ef4444"; descKey = 'riskHigh'; btnBg = "linear-gradient(135deg,#dc2626,#991b1b)"; }
+  else if (score >= 4) { color = "#f97316"; descKey = 'riskMedium'; btnBg = "linear-gradient(135deg,#ea580c,#c2410c)"; }
+  else { color = "#fbbf24"; descKey = 'riskLow'; btnBg = "linear-gradient(135deg,#d97706,#b45309)"; }
+
+  scoreEl.textContent = score.toFixed(1);
+  scoreEl.style.color = color;
+  descEl.textContent = t(descKey);
+
+  const factorTexts = factorsRaw.map(f => {
+    if (f.type === 'conflict') return `${t(f.nameKey)} (${f.dist}km)`;
+    return t(f.key);
+  });
+  factorsEl.innerHTML = factorTexts.map(f => `<span class="risk-factor">${f}</span>`).join("");
+  btnEl.textContent = t('enterCalc');
+  btnEl.style.background = btnBg;
+  btnEl.style.display = "block";
+}
+
+// ====== PAGE TRANSITION ======
+function enterCalculator() {
+  const mapPage = document.getElementById("mapPage");
+  const calcPage = document.getElementById("calcPage");
+  mapPage.classList.add("fade-out");
+  setTimeout(() => {
+    mapPage.style.display = "none";
+    calcPage.style.display = "block";
+    calcPage.classList.add("fade-in");
+    window.scrollTo(0, 0);
+    renderCalc();
+  }, 400);
+}
+
+function backToMap() {
+  const mapPage = document.getElementById("mapPage");
+  const calcPage = document.getElementById("calcPage");
+  calcPage.classList.remove("fade-in");
+  calcPage.classList.add("fade-out");
+  setTimeout(() => {
+    calcPage.style.display = "none";
+    calcPage.classList.remove("fade-out");
+    mapPage.style.display = "flex";
+    mapPage.classList.remove("fade-out");
+    mapPage.classList.add("fade-in");
+    window.scrollTo(0, 0);
+  }, 400);
+}
+
+// ====== CALCULATOR ======
+const REGIONS=[
+  {id:"island_import",labelKey:"regionIsland",descKey:"regionIslandDesc",fuelRisk:3,foodRisk:2},
+  {id:"coastal_mixed",labelKey:"regionCoastal",descKey:"regionCoastalDesc",fuelRisk:2,foodRisk:1},
+  {id:"inland_self",labelKey:"regionInland",descKey:"regionInlandDesc",fuelRisk:1,foodRisk:1},
+  {id:"tropical",labelKey:"regionTropical",descKey:"regionTropicalDesc",fuelRisk:2,foodRisk:2}
+];
+const HOUSINGS=[
+  {id:"house",labelKey:"housingHouse",gardenOk:true},
+  {id:"apt_big",labelKey:"housingAptBig",gardenOk:true},
+  {id:"apt_small",labelKey:"housingAptSmall",gardenOk:false}
+];
+const PETS=[
+  {id:"none",labelKey:"noPets"},
+  {id:"dog_large",labelKey:"petDogLarge"},
+  {id:"dog_medium",labelKey:"petDogMedium"},
+  {id:"dog_small",labelKey:"petDogSmall"},
+  {id:"cat",labelKey:"petCat"}
+];
+
+let calcState={step:1,members:[{id:1,label:"Member 1",age:40,weight:70,gender:"m",special:""}],nextId:2,region:"island_import",housing:"house",petType:"none",petWeight:30,vehicles:1,months:6};
+
+function calcCalories(age,weight,gender,special){
+  if(age>=10&&age<=17)return Math.round(weight*42);
+  if(special==="pregnant")return Math.round(weight*(gender==="f"?25:30)*1.3+300);
+  if(gender==="m")return Math.round(weight*30*1.3);
+  return Math.round(weight*25*1.3);
+}
+
+function calcPet(type,weight){
+  if(type==="none")return{daily:0,monthly:0,cost6mo:0,label:"",bagSize:0};
+  if(type==="cat")return{daily:60,monthly:1.8,cost6mo:120,label:t('catFood'),bagSize:4};
+  const d=Math.round(weight*0.025*1000*0.35+weight*3);
+  const m=Math.round(d*30/1000*10)/10;
+  const cpk=type==="dog_large"?4.5:type==="dog_medium"?5:6;
+  const bs=type==="dog_large"?15:10;
+  return{daily:d,monthly:m,cost6mo:Math.round(m*6*cpk),label:t('dogFood'),bagSize:bs};
+}
+
+function getResult(){
+  const s=calcState,n=s.members.length,reg=REGIONS.find(r=>r.id===s.region),hou=HOUSINGS.find(h=>h.id===s.housing),pet=calcPet(s.petType,s.petWeight);
+  const md=s.members.map(m=>({...m,cal:calcCalories(m.age,m.weight,m.gender,m.special),isGrowing:m.age>=10&&m.age<=17}));
+  const totalCal=md.reduce((a,m)=>a+m.cal,0);
+  const waterL=n*3*7;
+  const gkt=Math.round(totalCal*0.55/3500*10)/10;
+  const grainKg=Math.round(gkt*Math.min(s.months,3)*30);
+  const riceKg=Math.round(grainKg*0.65),riceBags=Math.ceil(riceKg/10);
+  const noodleKg=Math.round(grainKg*0.2),noodlePacks=Math.ceil(noodleKg/0.5);
+  const flourBags=Math.max(Math.ceil(Math.round(grainKg*0.1)/1.5),1);
+  const oatBags=Math.max(Math.ceil(Math.round(grainKg*0.05)/1),2);
+  const protCans=Math.round(n*2*Math.min(s.months,2)*4.3);
+  const tunaCans=Math.round(protCans*0.4),beanCans=Math.round(protCans*0.35),tomCans=Math.round(protCans*0.25);
+  const meatCans=Math.max(Math.round(n*1.5*Math.min(s.months,2)),6);
+  const chickenP=Math.ceil(Math.round(n*0.5*Math.min(s.months,2)*4.3));
+  const beefP=Math.ceil(Math.round(n*0.3*Math.min(s.months,2)*4.3)/0.5);
+  const oilB=Math.max(Math.ceil(n*0.5*Math.min(s.months,3)),3);
+  const frzVeg=Math.round(n*1*Math.min(s.months,2)*4.3/4);
+  const cashBase=n*300;
+  const hasGrowing=md.some(m=>m.isGrowing),hasElderly=md.some(m=>m.special==="elderly"||m.age>=65);
+  const femaleCount=md.filter(m=>m.gender==="f"&&m.age>=12).length;
+  const fuelExtra=reg.fuelRisk>=2&&s.vehicles>0;
+
+  const urgent=[],important=[],general=[];
+  urgent.push({n:t('itemWater'),q:Math.ceil(waterL/10)+" "+t('bottles'),c:Math.ceil(waterL/10)*8,r:n+" "+t('people')+" × 3L × 7 days = "+waterL+"L"});
+  urgent.push({n:t('itemPurify'),q:"2 "+t('boxes'),c:50,r:t('rBackupWater')});
+  urgent.push({n:t('itemRice'),q:riceBags+" "+t('bags'),c:riceBags*18,r:tf('rStaple',riceKg,Math.min(s.months,3))});
+  urgent.push({n:t('itemNoodle'),q:noodlePacks+" "+t('packs'),c:Math.round(noodlePacks*2.5),r:tf('rBackupStaple',noodleKg)});
+  urgent.push({n:t('itemFlour'),q:flourBags+" "+t('bags'),c:flourBags*3,r:t('rBread')});
+  urgent.push({n:t('itemOat'),q:oatBags+" "+t('bags'),c:oatBags*5,r:t('rBreakfast')});
+  urgent.push({n:t('itemOil'),q:oilB+" "+t('bottles'),c:oilB*9,r:tf('rMonthlyOil',n,Math.round(n*0.5))});
+  urgent.push({n:t('itemTuna'),q:tunaCans+" "+t('cans'),c:tunaCans*2,r:t('rLongProtein')});
+  urgent.push({n:t('itemBeans'),q:beanCans+" "+t('cans'),c:beanCans*2,r:t('rPlantProtein')});
+  urgent.push({n:t('itemTomato'),q:tomCans+" "+t('cans'),c:Math.round(tomCans*1.5),r:t('rSauceBase')});
+  urgent.push({n:t('itemMeat'),q:meatCans+" "+t('cans'),c:meatCans*5,r:t('rHighCal')});
+  urgent.push({n:t('itemChicken'),q:chickenP+" "+t('packages'),c:chickenP*12,r:t('rStockLow')});
+  urgent.push({n:t('itemBeef'),q:beefP+" "+t('packages'),c:beefP*9,r:t('rVersatile')});
+  if(hasGrowing){
+    const gt=md.filter(m=>m.isGrowing).length;
+    urgent.push({n:t('itemEggs'),q:Math.max(gt*2,2)+" "+t('trays'),c:Math.max(gt*2,2)*14,r:t('rGrowingEggs')});
+    urgent.push({n:t('itemMilk'),q:Math.max(gt*12,12)+" "+t('boxes'),c:Math.round(Math.max(gt*12,12)*2.5),r:t('rMilkDaily')});
+  }
+  const medK=Math.max(Math.ceil(n/2),2);
+  urgent.push({n:t('itemFirstAid'),q:medK+" "+t('kits'),c:medK*35,r:t('rFirstAid')});
+  const chronic=md.filter(m=>m.special==="chronic").length;
+  if(chronic>0)urgent.push({n:t('itemRx'),q:t('asNeeded'),c:chronic*50,r:t('rConsultDoc')});
+  if(pet.daily>0){
+    const petKg6=Math.round(pet.monthly*s.months);
+    const bags=Math.ceil(petKg6/pet.bagSize);
+    urgent.push({n:pet.label+" "+pet.bagSize+"kg",q:bags+" "+t('bags'),c:pet.cost6mo,r:tf('rPetDaily',pet.daily,s.months,petKg6)});
+    const animalLabel = s.petType==="cat" ? t('catLabel') : t('dogLabel');
+    urgent.push({n:animalLabel+" "+({en:"wet food","zh-CN":"湿粮","zh-TW":"濕糧",ja:"ウェットフード"}[currentLang]||"wet food"),q:Math.round(s.months*4)+" "+t('cans'),c:Math.round(s.months*4*3.5),r:t('rPetMix')});
+  }
+  urgent.push({n:t('itemCash'),q:"$"+cashBase.toLocaleString(),c:cashBase,r:n+" "+t('people')+" × $300"});
+
+  important.push({n:t('itemSeasoning'),q:tf('servings',n),c:Math.round(25+n*8),r:t('rAdjustDiet')});
+  important.push({n:t('itemHoney'),q:Math.max(Math.ceil(n/2),2)+" "+t('jars'),c:Math.max(Math.ceil(n/2),2)*12,r:t('rNeverExpires')});
+  important.push({n:t('itemPowderedMilk'),q:Math.max(Math.ceil(n/2),2)+" "+t('cans'),c:Math.max(Math.ceil(n/2),2)*16,r:t('rLongCalcium')});
+  important.push({n:t('itemDriedBeans'),q:Math.max(n,3)+" "+t('bags'),c:Math.max(n,3)*5,r:t('rSprout')});
+  important.push({n:t('itemDriedGoods'),q:"3-5 "+t('packs'),c:Math.round(n*6),r:t('rMinerals')});
+  important.push({n:t('itemNuts'),q:Math.ceil(n/2)+" "+t('bags'),c:Math.ceil(n/2)*15,r:t('rQualityFats')});
+  important.push({n:t('itemFrzVeg'),q:frzVeg+" "+t('bags'),c:frzVeg*5,r:tf('rWeeklyVeg',n)});
+  important.push({n:t('itemFrzBroc'),q:Math.round(n*1.5)+" "+t('bags'),c:Math.round(n*1.5)*4,r:t('rHighVitamin')});
+  if(fuelExtra)important.push({n:t('itemFuel'),q:tf('canister',s.vehicles),c:s.vehicles*80,r:t('rInclFuel')});
+  important.push({n:t('itemTP'),q:Math.max(Math.ceil(n*0.8*Math.min(s.months,3)/3),3)+" "+t('packs'),c:Math.max(Math.ceil(n*0.8*Math.min(s.months,3)/3),3)*12,r:tf('rTP',n)});
+  important.push({n:t('itemClean'),q:t('r3moSupply'),c:Math.round(15+n*5),r:""});
+  important.push({n:t('itemPersonal'),q:n+" "+t('people')+" × 3 "+t('months'),c:Math.round(n*12),r:t('rStockAll')});
+  if(femaleCount>0)important.push({n:t('itemFeminine'),q:femaleCount+" "+t('people')+" × 3 "+t('months'),c:femaleCount*25,r:""});
+  if(pet.daily>0)important.push({n:t('itemPetMed'),q:tf('monthsSupply',s.months),c:Math.round(s.months*15),r:t('rPetPrev')});
+  important.push({n:t('itemStove'),q:t('set1'),c:Math.round(50+n*5),r:t('rBackupPower')});
+  important.push({n:t('itemPowerBank'),q:Math.max(Math.ceil(n/3),1)+" "+t('units'),c:Math.max(Math.ceil(n/3),1)*50,r:t('rPhoneCharging')});
+  important.push({n:t('itemBattery'),q:t('set1'),c:35,r:t('rBatteries')});
+
+  general.push({n:t('itemVitamin'),q:Math.ceil(n*0.7)+" "+t('bottles'),c:Math.ceil(n*0.7)*15,r:t('rVegShortage')});
+  if(hasElderly){
+    const ec=md.filter(m=>m.special==="elderly"||m.age>=55).length;
+    general.push({n:t('itemCalcium'),q:ec+" "+t('bottles'),c:ec*12,r:t('rSeniorBone')});
+  }
+  general.push({n:t('itemSnack'),q:t('moSupply'),c:Math.round(30+n*12),r:t('rMorale')});
+  if(hou.gardenOk)general.push({n:t('itemGarden'),q:t('set1'),c:30,r:t('rGarden')});
+  general.push({n:t('itemRadio'),q:t('unit1'),c:40,r:t('rEmInfo')});
+  general.push({n:t('itemDocPouch'),q:Math.ceil(n/3)+" "+t('pieces'),c:Math.ceil(n/3)*10,r:t('rDocStorage')});
+  if(pet.daily>0)general.push({n:t('itemPetEmKit'),q:t('set1'),c:80,r:t('rPetEmergency')});
+  general.push({n:t('itemInsurance'),q:t('dashMark'),c:0,r:t('rChecklist')});
+
+  const ut=urgent.reduce((a,i)=>a+i.c,0),it=important.reduce((a,i)=>a+i.c,0),gt2=general.reduce((a,i)=>a+i.c,0);
+  return{md,totalCal,waterL,grainKg,pet,urgent,important,general,ut,it,gt:gt2,total:ut+it+gt2};
+}
+
+function renderCalc(){
+  const el=document.getElementById("app");
+  if(calcState.step===1){el.innerHTML=renderInput();}
+  else{el.innerHTML=renderResult();}
+  bindEvents();
+}
+
+function renderInput(){
+  let membersHTML=calcState.members.map(m=>`
+  <div class="member-grid" data-mid="${m.id}">
+  <input type="text" value="${m.label}" data-field="label" placeholder="${t('colName')}">
+  <input type="number" value="${m.age}" data-field="age" min="0" max="120">
+  <input type="number" value="${m.weight}" data-field="weight" min="1" max="300">
+  <select data-field="gender"><option value="m"${m.gender==="m"?" selected":""}>${t('genderM')}</option><option value="f"${m.gender==="f"?" selected":""}>${t('genderF')}</option></select>
+  <select data-field="special"><option value=""${m.special===""?" selected":""}>${t('specialNone')}</option><option value="growing"${m.special==="growing"?" selected":""}>${t('specialGrowing')}</option><option value="pregnant"${m.special==="pregnant"?" selected":""}>${t('specialPregnant')}</option><option value="elderly"${m.special==="elderly"?" selected":""}>${t('specialElderly')}</option><option value="chronic"${m.special==="chronic"?" selected":""}>${t('specialChronic')}</option></select>
+  ${calcState.members.length>1?`<button class="btn btn-sm btn-danger" data-remove="${m.id}">×</button>`:`<div></div>`}
+  </div>`).join("");
+
+  let regionsHTML=REGIONS.map(r=>`
+  <label class="radio-card${calcState.region===r.id?" active":""}" data-region="${r.id}">
+  <input type="radio" name="region" value="${r.id}"${calcState.region===r.id?" checked":""}>
+  <div><div class="rc-title">${t(r.labelKey)}</div><div class="rc-desc">${t(r.descKey)}</div></div>
+  </label>`).join("");
+
+  let housingOpts=HOUSINGS.map(h=>`<option value="${h.id}"${calcState.housing===h.id?" selected":""}>${t(h.labelKey)}</option>`).join("");
+  let petOpts=PETS.map(p=>`<option value="${p.id}"${calcState.petType===p.id?" selected":""}>${t(p.labelKey)}</option>`).join("");
+  let vehOpts=[0,1,2,3].map(v=>`<option value="${v}"${calcState.vehicles===v?" selected":""}>${t('vehicles'+v)}</option>`).join("");
+  let moOpts=[3,6,9,12].map(m=>`<option value="${m}"${calcState.months===m?" selected":""}>${m} ${t('months')}</option>`).join("");
+
+  let sugMo = riskIndex >= 7 ? 6 : riskIndex >= 5 ? 3 : 1;
+
+  return`
+  <div class="risk-banner">
+    <div class="rb-score" style="color:${riskIndex>=7?'#ef4444':riskIndex>=4?'#f97316':'#fbbf24'}">${riskIndex.toFixed(1)}</div>
+    <div class="rb-text"><strong>${t('currentRisk')}</strong><br>${tf('recommendSupply',sugMo)} · ${userLocation ? t('basedGPS') : t('globalAvg')}</div>
+    <button class="rb-back" onclick="backToMap()">${t('backToGlobal')}</button>
+  </div>
+
+  <h1>${t('calcTitle')}</h1>
+  <div class="subtitle">${t('calcSubtitle')}</div>
+
+  <div class="section s-red"><div class="section-header"><div class="section-num">1</div><h2>${t('secMembers')}</h2></div><div class="section-body">
+  <div class="member-grid member-labels"><span>${t('colName')}</span><span style="text-align:center">${t('colAge')}</span><span style="text-align:center">${t('colWeight')}</span><span>${t('colGender')}</span><span>${t('colSpecial')}</span><span></span></div>
+  ${membersHTML}
+  <button class="btn btn-sm" id="addMember" style="margin-top:4px">${t('addMember')}</button>
+  </div></div>
+
+  <div class="section s-amber"><div class="section-header"><div class="section-num">2</div><h2>${t('secPets')}</h2></div><div class="section-body">
+  <div class="field-row">
+  <select id="petType">${petOpts}</select>
+  ${calcState.petType!=="none"&&calcState.petType!=="cat"?`<label style="display:flex;align-items:center;gap:6px;font-size:13px">${t('weight')} <input type="number" id="petWeight" value="${calcState.petWeight}" min="1" max="80" style="width:56px"> kg</label>`:""}
+  </div>
+  </div></div>
+
+  <div class="section s-blue"><div class="section-header"><div class="section-num">3</div><h2>${t('secRegion')}</h2></div><div class="section-body">
+  <div style="font-size:12px;color:#888;margin-bottom:6px">${t('regionType')}</div>
+  <div class="radio-grid" id="regionGrid">${regionsHTML}</div>
+  <div class="inline-fields" style="margin-top:12px">
+  <div class="inline-field"><label>${t('labelHousing')}</label><select id="housing">${housingOpts}</select></div>
+  <div class="inline-field"><label>${t('labelVehicles')}</label><select id="vehicles">${vehOpts}</select></div>
+  <div class="inline-field"><label>${t('labelPeriod')}</label><select id="months">${moOpts}</select></div>
+  </div>
+  </div></div>
+
+  <button class="btn btn-primary" id="generateBtn">${t('generateBtn')}</button>
+  <div class="footer">${t('calcFooter')}</div>`;
+}
+
+function renderResult(){
+  const r=getResult();
+  const memberTags=r.md.map(m=>`<span class="member-tag">${m.label} ${m.age}y/${m.weight}kg → ${m.cal.toLocaleString()}kcal/${{en:"day","zh-CN":"天","zh-TW":"天",ja:"日"}[currentLang]||"day"}</span>`).join("");
+  const petTag=r.pet.daily>0?`<span class="member-tag pet">${{en:"Pet","zh-CN":"宠物","zh-TW":"寵物",ja:"ペット"}[currentLang]} → ${r.pet.daily}g/${{en:"day","zh-CN":"天","zh-TW":"天",ja:"日"}[currentLang]||"day"}</span>`:"";
+
+  function tierHTML(items,title,tag){
+    const total=items.reduce((a,i)=>a+i.c,0);
+    const rows=items.map(i=>`<tr><td>${i.n}</td><td>${i.q}</td><td>$${i.c.toLocaleString()}</td><td>${i.r}</td></tr>`).join("");
+    return`<div class="tier-section">
+    <div class="tier-header"><span class="tier-tag ${tag}">${title}</span><span class="tier-total">$${total.toLocaleString()}</span></div>
+    <table class="item-table"><thead><tr><th>${t('colItem')}</th><th>${t('colQty')}</th><th>${t('colCost')}</th><th>${t('colRationale')}</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>`;
+  }
+
+  return`
+  <div class="risk-banner">
+    <div class="rb-score" style="color:${riskIndex>=7?'#ef4444':riskIndex>=4?'#f97316':'#fbbf24'}">${riskIndex.toFixed(1)}</div>
+    <div class="rb-text"><strong>${t('currentRisk')}</strong><br>${userLocation ? t('basedGPS') : t('globalAvg')}</div>
+    <button class="rb-back" onclick="backToMap()">${t('backToGlobal')}</button>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+  <h2 style="font-size:17px">${calcState.members.length} ${t('people')}${calcState.petType!=="none"?t('pet'):""}·${calcState.months}${t('monthPlan')}</h2>
+  <button class="btn btn-sm" id="backBtn">${t('editParams')}</button>
+  </div>
+  <div class="member-tags">${memberTags}${petTag}</div>
+  <div class="summary-grid">
+  <div class="summary-card"><div class="sc-label">${t('dailyCal')}</div><div class="sc-value">${r.totalCal.toLocaleString()}</div><div class="sc-sub">kcal · ${calcState.members.length} ${t('people')}</div></div>
+  <div class="summary-card"><div class="sc-label">${t('grainReq')}</div><div class="sc-value">${r.grainKg}kg</div><div class="sc-sub">${t('grainSub')} · ${Math.min(calcState.months,3)} ${t('months')}</div></div>
+  <div class="summary-card"><div class="sc-label">${t('emMonWater')}</div><div class="sc-value">${r.waterL}L</div><div class="sc-sub">${calcState.members.length} ${t('people')} × 3L × 7d</div></div>
+  <div class="summary-card"><div class="sc-label">${t('totalBudget')}</div><div class="sc-value" style="color:#c53030">$${r.total.toLocaleString()}</div><div class="sc-sub">${t('inclCash')}</div></div>
+  </div>
+  ${tierHTML(r.urgent,t('tierUrgent'),"red")}
+  ${tierHTML(r.important,t('tierImportant'),"amber")}
+  ${tierHTML(r.general,t('tierGeneral'),"blue")}
+  <div class="grand-total"><div class="gt-grid">
+  <div><div class="gt-label">${t('labelUrgent')}</div><div class="gt-value">$${r.ut.toLocaleString()}</div></div>
+  <div><div class="gt-label">${t('labelImportant')}</div><div class="gt-value">$${r.it.toLocaleString()}</div></div>
+  <div><div class="gt-label">${t('labelGeneral')}</div><div class="gt-value">$${r.gt.toLocaleString()}</div></div>
+  <div><div class="gt-label" style="color:#c53030;font-weight:600">${t('labelTotal')}</div><div class="gt-value gt-highlight">$${r.total.toLocaleString()}</div></div>
+  </div></div>
+  <div class="notes">${t('instructions')}</div>
+  <button class="btn back-btn" id="backBtn2">${t('returnEdit')}</button>
+  <div class="footer">${t('footerFull')}</div>`;
+}
+
+function bindEvents(){
+  const s=calcState;
+  document.querySelectorAll(".member-grid[data-mid]").forEach(row=>{
+    const mid=+row.dataset.mid;
+    row.querySelectorAll("input,select").forEach(el=>{
+      const f=el.dataset.field;if(!f)return;
+      el.addEventListener("change",()=>{
+        const m=s.members.find(x=>x.id===mid);
+        if(m){m[f]=el.type==="number"?+el.value:el.value;renderCalc();}
+      });
+    });
+  });
+  document.querySelectorAll("[data-remove]").forEach(b=>{
+    b.addEventListener("click",()=>{s.members=s.members.filter(m=>m.id!==+b.dataset.remove);renderCalc();});
+  });
+  const addBtn=document.getElementById("addMember");
+  if(addBtn)addBtn.addEventListener("click",()=>{
+    s.members.push({id:s.nextId++,label:({en:"Member","zh-CN":"成员","zh-TW":"成員",ja:"メンバー"}[currentLang]||"Member")+(s.members.length+1),age:30,weight:60,gender:"m",special:""});renderCalc();
+  });
+  const petSel=document.getElementById("petType");
+  if(petSel)petSel.addEventListener("change",()=>{s.petType=petSel.value;renderCalc();});
+  const pwEl=document.getElementById("petWeight");
+  if(pwEl)pwEl.addEventListener("change",()=>{s.petWeight=+pwEl.value;renderCalc();});
+  document.querySelectorAll("[data-region]").forEach(card=>{
+    card.addEventListener("click",()=>{s.region=card.dataset.region;renderCalc();});
+  });
+  ["housing","vehicles","months"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener("change",()=>{s[id]=id==="housing"?el.value:+el.value;renderCalc();});
+  });
+  const genBtn=document.getElementById("generateBtn");
+  if(genBtn)genBtn.addEventListener("click",()=>{s.step=2;renderCalc();window.scrollTo(0,0);});
+  [document.getElementById("backBtn"),document.getElementById("backBtn2")].forEach(b=>{
+    if(b)b.addEventListener("click",()=>{s.step=1;renderCalc();window.scrollTo(0,0);});
+  });
+}
+
+// ====== INIT ======
+document.addEventListener("DOMContentLoaded", initMap);
+</script>
+</body>
+</html>
