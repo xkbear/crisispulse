@@ -140,6 +140,15 @@ select{cursor:pointer}
 @keyframes fadeOut{to{opacity:0;transform:translateY(-10px)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .data-source{text-align:center;padding:8px 16px 20px;font-size:10px;color:#444}
+.visitor-panel{position:fixed;left:12px;top:50%;transform:translateY(-50%);z-index:150;background:rgba(10,10,15,0.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;min-width:160px;max-height:55vh;overflow-y:auto;color:#e6e6e6;font-size:12px;opacity:0;transition:opacity 0.6s ease}
+.visitor-panel.loaded{opacity:1}
+.visitor-panel .vp-title{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
+.visitor-panel .vp-total{font-size:22px;font-weight:800;color:#60a5fa;margin-bottom:10px}
+.visitor-panel .vp-country{display:flex;align-items:center;gap:7px;padding:3px 0;border-top:1px solid rgba(255,255,255,0.04)}
+.visitor-panel .vp-flag{font-size:14px}
+.visitor-panel .vp-name{flex:1;color:#aaa;font-size:11px}
+.visitor-panel .vp-count{color:#666;font-size:11px;font-variant-numeric:tabular-nums}
+@media(max-width:768px){.visitor-panel{display:none}}
 .source-panel{position:fixed;top:0;right:-380px;width:360px;height:100vh;background:rgba(10,10,15,0.92);backdrop-filter:blur(16px);border-left:1px solid rgba(255,255,255,0.08);z-index:300;transition:right 0.3s ease;padding:24px 20px;overflow-y:auto;color:#e6e6e6}
 .source-panel.open{right:0}
 .source-panel .sp-close{position:absolute;top:12px;right:16px;background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:4px 8px}
@@ -163,6 +172,7 @@ select{cursor:pointer}
 
 <!-- ====== MAP PAGE ====== -->
 <div class="map-page" id="mapPage">
+  <div class="visitor-panel" id="visitorPanel"><div class="vp-title" id="vpTitle">Visitors</div><div class="vp-total" id="vpTotal">—</div><div id="vpCountries"></div></div>
   <div class="map-header">
     <h1 id="mapTitle"></h1>
     <div class="subtitle" id="mapSubtitle"></div>
@@ -208,6 +218,7 @@ const T = {
     gpsLocating:"📍 Locating...",
     gpsNoSupport:"⚠️ Browser does not support location, using global average",
     gpsError:"⚠️ Unable to get location, using global average",
+    vpTitle:"Visitors",
     riskExtreme:"Extreme Risk Zone — Strongly recommend preparing 6+ months supply",
     riskHigh:"High Risk — Recommend 3-6 months supply, prioritize water and staple grains",
     riskMedium:"Medium Risk — Recommend 1-3 months basic supply as safety buffer",
@@ -295,6 +306,7 @@ const T = {
     gpsLocating:"📍 定位中...",
     gpsNoSupport:"⚠️ 浏览器不支持定位，使用默认风险评估",
     gpsError:"⚠️ 无法获取位置，使用全球平均风险评估",
+    vpTitle:"访客",
     riskExtreme:"极高风险区域 — 强烈建议立即准备至少6个月应急储备",
     riskHigh:"高风险 — 建议准备3-6个月应急储备，优先确保水和主粮",
     riskMedium:"中等风险 — 建议准备1-3个月基础储备作为安全缓冲",
@@ -660,10 +672,36 @@ function requestGPS(){
         }
       }
       calculateRisk(userLocation);
+      initVisitorCounter();
     },
-    err=>{console.warn("GPS:",err);document.getElementById("gpsStatus").textContent=t('gpsError');calculateRisk(null);},
+    err=>{console.warn("GPS:",err);document.getElementById("gpsStatus").textContent=t('gpsError');calculateRisk(null);initVisitorCounter();},
     {enableHighAccuracy:false,timeout:8000,maximumAge:600000}
   );
+}
+
+// ====== VISITOR COUNTER ======
+const COUNTRY_FLAGS={"United States":"🇺🇸","China":"🇨🇳","Japan":"🇯🇵","Germany":"🇩🇪","United Kingdom":"🇬🇧","France":"🇫🇷","India":"🇮🇳","Brazil":"🇧🇷","Canada":"🇨🇦","Australia":"🇦🇺","South Korea":"🇰🇷","Russia":"🇷🇺","Mexico":"🇲🇽","Italy":"🇮🇹","Spain":"🇪🇸","Turkey":"🇹🇷","Indonesia":"🇮🇩","Netherlands":"🇳🇱","Taiwan":"🇹🇼","Thailand":"🇹🇭","Vietnam":"🇻🇳","Philippines":"🇵🇭","Poland":"🇵🇱","Sweden":"🇸🇪","Singapore":"🇸🇬","Malaysia":"🇲🇾","Israel":"🇮🇱","Ukraine":"🇺🇦","New Zealand":"🇳🇿","Argentina":"🇦🇷","Colombia":"🇨🇴","Egypt":"🇪🇬","Nigeria":"🇳🇬","South Africa":"🇿🇦","Saudi Arabia":"🇸🇦","Iran":"🇮🇷","Pakistan":"🇵🇰","Bangladesh":"🇧🇩","Chile":"🇨🇱","Peru":"🇵🇪","Portugal":"🇵🇹","Ireland":"🇮🇪","Norway":"🇳🇴","Denmark":"🇩🇰","Finland":"🇫🇮","Switzerland":"🇨🇭","Austria":"🇦🇹","Belgium":"🇧🇪","Czech Republic":"🇨🇿","Romania":"🇷🇴","Unknown":"🌐"};
+let _visitorCounted=false;
+async function initVisitorCounter(){
+  if(_visitorCounted)return;_visitorCounted=true;
+  const country=window._userCountry||"Unknown";
+  try{
+    const r=await fetch("/api/visitor",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({country})});
+    if(r.ok)renderVisitorPanel(await r.json());
+  }catch(e){
+    console.warn("Visitor counter:",e);
+    try{const r=await fetch("/api/visitor");if(r.ok)renderVisitorPanel(await r.json());}catch(_){}
+  }
+}
+function renderVisitorPanel(data){
+  const p=document.getElementById("visitorPanel");if(!p)return;
+  document.getElementById("vpTitle").textContent=t("vpTitle");
+  document.getElementById("vpTotal").textContent=(data.total||0).toLocaleString();
+  const sorted=Object.entries(data.countries||{}).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  document.getElementById("vpCountries").innerHTML=sorted.map(([name,count])=>
+    `<div class="vp-country"><span class="vp-flag">${COUNTRY_FLAGS[name]||"🌍"}</span><span class="vp-name">${name}</span><span class="vp-count">${count.toLocaleString()}</span></div>`
+  ).join("");
+  p.classList.add("loaded");
 }
 
 function haversine(lat1,lon1,lat2,lon2){
