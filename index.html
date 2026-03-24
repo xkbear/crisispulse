@@ -684,10 +684,10 @@ const COUNTRY_FLAGS={"United States":"🇺🇸","China":"🇨🇳","Japan":"🇯
 let _visitorCounted=false;
 async function initVisitorCounter(){
   if(_visitorCounted)return;_visitorCounted=true;
-  const country=window._userCountry||"Unknown";
+  const country=window._userCountry||"";
   try{
     const r=await fetch("/api/visitor",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({country})});
-    if(r.ok)renderVisitorPanel(await r.json());
+    if(r.ok){const d=await r.json();if(!window._userCountry&&d.detectedCountry)window._userCountry=d.detectedCountry;renderVisitorPanel(d);}
   }catch(e){
     console.warn("Visitor counter:",e);
     try{const r=await fetch("/api/visitor");if(r.ok)renderVisitorPanel(await r.json());}catch(_){}

@@ -22,7 +22,28 @@ export default async (req, context) => {
 
     if (req.method === "POST") {
       const body = await req.json().catch(() => ({}));
-      const country = (body.country || "").trim() || "Unknown";
+      let country = (body.country || "").trim();
+
+      // Fallback: use Netlify's IP-based geo when GPS country unavailable
+      if (!country || country === "Unknown") {
+        const geo = context.geo || {};
+        country = geo.country?.name || geo.country || "";
+        // Netlify geo may return country code, map common ones
+        const CODE_TO_NAME = {
+          US:"United States",GB:"United Kingdom",CN:"China",JP:"Japan",DE:"Germany",
+          FR:"France",IN:"India",BR:"Brazil",CA:"Canada",AU:"Australia",KR:"South Korea",
+          RU:"Russia",MX:"Mexico",IT:"Italy",ES:"Spain",TR:"Turkey",ID:"Indonesia",
+          NL:"Netherlands",TW:"Taiwan",TH:"Thailand",VN:"Vietnam",PH:"Philippines",
+          PL:"Poland",SE:"Sweden",SG:"Singapore",MY:"Malaysia",IL:"Israel",UA:"Ukraine",
+          NZ:"New Zealand",AR:"Argentina",CO:"Colombia",EG:"Egypt",NG:"Nigeria",
+          ZA:"South Africa",SA:"Saudi Arabia",IR:"Iran",PK:"Pakistan",BD:"Bangladesh",
+          CL:"Chile",PE:"Peru",PT:"Portugal",IE:"Ireland",NO:"Norway",DK:"Denmark",
+          FI:"Finland",CH:"Switzerland",AT:"Austria",BE:"Belgium",CZ:"Czech Republic",
+          RO:"Romania",HK:"Hong Kong",PY:"Paraguay",UY:"Uruguay",CR:"Costa Rica"
+        };
+        if (country.length === 2) country = CODE_TO_NAME[country] || country;
+        if (!country) country = "Unknown";
+      }
 
       let data = await store.get("counts", { type: "json" });
       if (!data) data = { total: 0, countries: {} };
@@ -31,7 +52,8 @@ export default async (req, context) => {
       data.countries[country] = (data.countries[country] || 0) + 1;
 
       await store.setJSON("counts", data);
-      return Response.json(data, { headers });
+      // Return detected country so frontend knows what was recorded
+      return Response.json({ ...data, detectedCountry: country }, { headers });
     }
 
     return new Response("Method not allowed", { status: 405, headers });
