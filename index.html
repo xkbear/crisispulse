@@ -410,17 +410,24 @@ function updateLangSwitcher() {
 function updateMapPageText() {
   document.getElementById('mapTitle').textContent = t('mapTitle');
   document.getElementById('mapSubtitle').textContent = t('mapSubtitle');
-  document.getElementById('liveTag').textContent = t('liveTag');
+  document.getElementById('liveTag').textContent = formatUpdateDate(lang) || t('liveTag');
   document.getElementById('humanisticMsg').textContent = t('humanisticMsg');
   document.getElementById('riskLabel').textContent = t('riskLabel');
   renderLegend();
-  document.getElementById('dataSource').innerHTML = t('dataSource').replace('\n','<br>');
+  let ds = t('dataSource');
+  if(lastUpdatedDate){
+    const dateStr = lang==='zh'
+      ? `更新至${lastUpdatedDate.getFullYear()}年${lastUpdatedDate.getMonth()+1}月${lastUpdatedDate.getDate()}日`
+      : `Updated ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][lastUpdatedDate.getMonth()]} ${lastUpdatedDate.getDate()}, ${lastUpdatedDate.getFullYear()}`;
+    ds = ds.replace(/Updated March 2026|更新至2026年3月/, dateStr);
+  }
+  document.getElementById('dataSource').innerHTML = ds.replace('\n','<br>');
   if (riskIndex !== null) displayRisk(riskIndex, riskFactorsCache, userLocation);
   else document.getElementById('gpsStatus').textContent = t('gpsLocating');
 }
 
 // ====== CONFLICT DATA (2026.03) ======
-const CONFLICTS = [
+let CONFLICTS = [
   {name:"Russia-Ukraine War",lat:48.5,lon:35.5,intensity:9,type:"Full-Scale War",desc:"Largest conventional war in Europe, ongoing fifth year",
    sources:[{title:"CFR: Russia-Ukraine War",url:"https://www.cfr.org/global-conflict-tracker/conflict/conflict-ukraine"},{title:"ACLED Ukraine Data",url:"https://acleddata.com/ukraine-conflict-monitor/"},{title:"UNHCR Ukraine Emergency",url:"https://www.unhcr.org/ukraine-emergency.html"}]},
   {name:"Israel-Palestine",lat:31.5,lon:34.5,intensity:9,type:"Full-Scale War",desc:"Gaza humanitarian crisis continuing",
@@ -591,8 +598,29 @@ function renderLegend(){
   document.getElementById('mapLegend').innerHTML=items.map(i=>`<div class="legend-item"><div class="legend-dot" style="background:${i.color}"></div>${i.label}</div>`).join('');
 }
 
+// ====== DYNAMIC CONFLICT DATA ======
+let lastUpdatedDate = null;
+async function loadConflictData(){
+  try{
+    const res = await fetch("/api/conflicts");
+    if(!res.ok) return;
+    const data = await res.json();
+    if(data.conflicts && data.conflicts.length > 0) CONFLICTS = data.conflicts;
+    if(data.lastUpdated) lastUpdatedDate = new Date(data.lastUpdated);
+  }catch(_){}
+}
+function formatUpdateDate(l){
+  if(!lastUpdatedDate) return null;
+  if(l==='zh'){
+    return `● ${lastUpdatedDate.getFullYear()}年${lastUpdatedDate.getMonth()+1}月${lastUpdatedDate.getDate()}日态势数据`;
+  }
+  const m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `● ${m[lastUpdatedDate.getMonth()]} ${lastUpdatedDate.getDate()}, ${lastUpdatedDate.getFullYear()} Situation Data`;
+}
+
 // ====== MAP RENDERING ======
-function initMap(){
+async function initMap(){
+  await loadConflictData();
   document.title=t('pageTitle');
   document.documentElement.lang=lang==='zh'?'zh-CN':'en';
   updateLangSwitcher();

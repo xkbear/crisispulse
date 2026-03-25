@@ -19,6 +19,11 @@
   to = "/.netlify/functions/visitor"
   status = 200
 
+[[redirects]]
+  from = "/api/conflicts"
+  to = "/.netlify/functions/conflicts"
+  status = 200
+
 # HSTS header for all pages
 [[headers]]
   for = "/*"
