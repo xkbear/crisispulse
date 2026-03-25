@@ -1,7 +1,28 @@
 [functions]
   directory = "netlify/functions"
 
+# Force HTTPS on all pages
+[[redirects]]
+  from = "http://crisispulse.org/*"
+  to = "https://crisispulse.org/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.crisispulse.org/*"
+  to = "https://crisispulse.org/:splat"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/api/visitor"
   to = "/.netlify/functions/visitor"
   status = 200
+
+# HSTS header for all pages
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
