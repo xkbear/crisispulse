@@ -139,11 +139,20 @@ export default async () => {
 
   // Process in batches of 5 for speed
   const results = [];
-  for (let i = 0; i < BASE_CONFLICTS.length; i += 3) {
-    const batch = BASE_CONFLICTS.slice(i, i + 3);
-    const batchResults = await Promise.all(batch.map(processConflict));
-    results.push(...batchResults);
-    if (i + 3 < BASE_CONFLICTS.length) await new Promise(r => setTimeout(r, 500));
+  // All parallel - scheduled functions have 26s timeout
+  const allResults = await Promise.allSettled(BASE_CONFLICTS.map(processConflict));
+  for (const r of allResults) {
+    if (r.status === 'fulfilled') results.push(r.value);
+  }
+  // Fill in any failed ones with base data
+  if (results.length < BASE_CONFLICTS.length) {
+    const gotNames = new Set(results.map(r => r.conflict.name));
+    for (const base of BASE_CONFLICTS) {
+      if (!gotNames.has(base.name)) {
+        const prev = prevMap[base.name];
+        results.push({ conflict: prev || base, topArticle: null });
+      }
+    }
   }
 
   const updated = results.map(r => r.conflict);
