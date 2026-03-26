@@ -488,7 +488,7 @@ function updateMapPageText() {
     ds = ds.replace(/Updated March 2026|更新至2026年3月/, dateStr);
   }
   document.getElementById('dataSource').innerHTML = ds.replace('\n','<br>');
-  if (riskIndex !== null) displayRisk(riskIndex, riskFactorsCache, userLocation);
+  if (riskIndex !== null) { calculateRisk(userLocation || null); }
   else document.getElementById('gpsStatus').textContent = t('gpsLocating');
 }
 
