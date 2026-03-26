@@ -111,49 +111,51 @@ export default async () => {
     return items;
   }
 
-  // Chinese search keywords
-  const SEARCH_TERMS_ZH = {
-    "Russia-Ukraine War":"俄乌战争","Israel-Palestine":"巴以冲突加沙","US-Israel-Iran Conflict":"伊朗以色列冲突",
-    "Yemen Civil War":"也门胡塞","Sudan Civil War":"苏丹内战","Myanmar Civil War":"缅甸内战",
-    "Syria Conflict":"叙利亚冲突","Lebanon Crisis":"黎巴嫩真主党","Eastern DRC Conflict":"刚果金冲突",
-    "Sahel Region Crisis":"萨赫勒冲突","Somalia":"索马里青年党","Northern Nigeria":"尼日利亚博科圣地",
-    "Ethiopia":"埃塞俄比亚冲突","Afghanistan":"阿富汗塔利班","Northwest Pakistan":"巴基斯坦塔利班",
-    "Haiti":"海地帮派暴力","Colombia":"哥伦比亚武装","Mexico":"墨西哥贩毒暴力",
-    "Iraq":"伊拉克安全","Libya":"利比亚冲突","Southern Philippines":"菲律宾棉兰老",
-    "Kashmir India-Pakistan":"克什米尔印巴","Taiwan Strait":"台海局势","Korean Peninsula":"朝鲜半岛",
-    "South China Sea":"南海争端"
-  };
-
-  async function fetchRSS(query, lang) {
+  // Translate text EN→ZH via Google free API, with fallback
+  async function translateToZh(text) {
+    if (!text) return "";
     try {
-      const url = lang === 'zh'
-        ? `https://www.bing.com/news/search?q=${encodeURIComponent(query)}&format=rss&cc=cn&setlang=zh-CN`
-        : `https://www.bing.com/news/search?q=${encodeURIComponent(query)}&format=rss`;
-      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
-      if (res.ok) return parseRSS(await res.text());
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-CN&dt=t&q=${encodeURIComponent(text)}`;
+      const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
+      if (res.ok) {
+        const data = await res.json();
+        // Response format: [[["translated","original",...],...],...]
+        return data?.[0]?.map(s => s[0]).join("") || text;
+      }
     } catch (_) {}
-    return [];
+    return "";
+  }
+
+  // Batch translate an array of strings
+  async function batchTranslate(texts) {
+    const results = await Promise.allSettled(texts.map(t => translateToZh(t)));
+    return results.map((r, i) => r.status === 'fulfilled' && r.value ? r.value : "");
   }
 
   async function processConflict(base) {
     const query = SEARCH_TERMS[base.name] || base.name;
-    const queryZh = SEARCH_TERMS_ZH[base.name] || base.name;
     const prev = prevMap[base.name];
     let articleCount = 0;
     let topHeadline = prev?.desc || base.desc;
-
     let topLink = null;
 
-    // Fetch EN news
-    const enItems = await fetchRSS(query, 'en');
-    articleCount = enItems.length;
-    if (enItems.length > 0) {
-      let headline = enItems[0].title.replace(/\s*-\s*[^-]+$/, "").trim();
-      if (headline.length > 80) headline = headline.substring(0, 77) + "...";
-      topHeadline = headline;
-      topLink = enItems[0].link;
+    // Fetch EN news from Bing RSS
+    try {
+      const url = `https://www.bing.com/news/search?q=${encodeURIComponent(query)}&format=rss`;
+      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      if (res.ok) {
+        const items = parseRSS(await res.text());
+        articleCount = items.length;
+        if (items.length > 0) {
+          let headline = items[0].title.replace(/\s*-\s*[^-]+$/, "").trim();
+          if (headline.length > 80) headline = headline.substring(0, 77) + "...";
+          topHeadline = headline;
+          topLink = items[0].link;
+        }
+      }
+    } catch (e) {
+      console.warn(`News failed for ${base.name}: ${e.message}`);
     }
-
     console.log(`${base.name}: ${articleCount} articles`);
 
     let delta = articleCount >= 30 ? 1.0 : articleCount >= 15 ? 0.5 : articleCount >= 5 ? 0 : -0.5;
@@ -193,19 +195,29 @@ export default async () => {
 
   const updated = results.map(r => r.conflict);
 
+  // Batch translate all desc to Chinese
+  const descsToTranslate = updated.map(c => c.desc);
+  console.log(`Translating ${descsToTranslate.length} descriptions to Chinese...`);
+  const zhDescs = await batchTranslate(descsToTranslate);
+  for (let i = 0; i < updated.length; i++) {
+    updated[i].descZh = zhDescs[i] || "";
+  }
+
   // Pick top 5 most active conflicts for news feed (by article count)
   const topNews = results
     .filter(r => r.topArticle)
     .sort((a, b) => b.topArticle.articles - a.topArticle.articles)
     .slice(0, 5)
-    .map(r => ({
-      conflict: r.topArticle.conflict,
-      headline: r.conflict.desc,
-
-
-      articles: r.topArticle.articles,
-      url: r.topArticle.link || r.conflict.sources?.[0]?.url || null
-    }));
+    .map(r => {
+      const conflict = updated.find(c => c.name === r.topArticle.conflict) || r.conflict;
+      return {
+        conflict: r.topArticle.conflict,
+        headline: conflict.desc,
+        headlineZh: conflict.descZh || "",
+        articles: r.topArticle.articles,
+        url: r.topArticle.link || r.conflict.sources?.[0]?.url || null
+      };
+    });
 
   await store.setJSON("conflicts", {
     conflicts: updated,

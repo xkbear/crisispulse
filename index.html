@@ -634,7 +634,11 @@ async function loadConflictData(){
     const res = await fetch("/api/conflicts");
     if(!res.ok) return;
     const data = await res.json();
-    if(data.conflicts && data.conflicts.length > 0) CONFLICTS = data.conflicts;
+    if(data.conflicts && data.conflicts.length > 0){
+      CONFLICTS = data.conflicts;
+      // Merge dynamic Chinese descriptions from API into translation map
+      data.conflicts.forEach(c=>{ if(c.descZh) CONFLICT_ZH.descs[c.desc]=c.descZh; });
+    }
     if(data.lastUpdated) lastUpdatedDate = new Date(data.lastUpdated);
     if(data.topNews && data.topNews.length > 0) renderNewsPanel(data.topNews);
   }catch(_){}
@@ -647,7 +651,7 @@ function renderNewsPanel(news){
   if(!panel||!container) return;
   document.getElementById("npTitle").textContent=t("npTitle");
   container.innerHTML=news.map(n=>{
-    const title = lang==='zh' ? tConflict('descs', n.headline) : n.headline;
+    const title = lang==='zh' ? (n.headlineZh || tConflict('descs', n.headline)) : n.headline;
     const conflictName = tConflict('names', n.conflict);
     const headline=n.url
       ? `<a href="${n.url}" target="_blank" rel="noopener">${title}</a>`
