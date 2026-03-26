@@ -137,21 +137,23 @@ export default async () => {
     return { conflict: { ...base, intensity: newIntensity, desc: topHeadline }, topArticle };
   }
 
-  // Process in batches of 5 for speed
+  // Query top 12 highest-intensity conflicts in parallel (keeps under timeout)
+  // Lower-intensity ones keep their base/previous data
+  const sorted = [...BASE_CONFLICTS].sort((a, b) => b.intensity - a.intensity);
+  const toQuery = sorted.slice(0, 12);
+  const skipSet = new Set(sorted.slice(12).map(c => c.name));
+
   const results = [];
-  // All parallel - scheduled functions have 26s timeout
-  const allResults = await Promise.allSettled(BASE_CONFLICTS.map(processConflict));
+  const allResults = await Promise.allSettled(toQuery.map(processConflict));
   for (const r of allResults) {
     if (r.status === 'fulfilled') results.push(r.value);
   }
-  // Fill in any failed ones with base data
-  if (results.length < BASE_CONFLICTS.length) {
-    const gotNames = new Set(results.map(r => r.conflict.name));
-    for (const base of BASE_CONFLICTS) {
-      if (!gotNames.has(base.name)) {
-        const prev = prevMap[base.name];
-        results.push({ conflict: prev || base, topArticle: null });
-      }
+  // Add skipped/failed conflicts with base data
+  const gotNames = new Set(results.map(r => r.conflict.name));
+  for (const base of BASE_CONFLICTS) {
+    if (!gotNames.has(base.name)) {
+      const prev = prevMap[base.name];
+      results.push({ conflict: prev || base, topArticle: null });
     }
   }
 
