@@ -119,7 +119,7 @@ export default async () => {
     let topLink = null;
 
     try {
-      const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en&gl=US&ceid=US:en`;
+      const url = `https://www.bing.com/news/search?q=${encodeURIComponent(query)}&format=rss`;
       const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
       if (res.ok) {
         const xml = await res.text();
