@@ -141,15 +141,11 @@ export default async () => {
     const prev = prevMap[base.name];
     let articleCount = 0;
     let topHeadline = prev?.desc || base.desc;
-    let topHeadlineZh = prev?.descZh || "";
+
     let topLink = null;
 
-    // Fetch EN and ZH news in parallel
-    const [enItems, zhItems] = await Promise.all([
-      fetchRSS(query, 'en'),
-      fetchRSS(queryZh, 'zh')
-    ]);
-
+    // Fetch EN news
+    const enItems = await fetchRSS(query, 'en');
     articleCount = enItems.length;
     if (enItems.length > 0) {
       let headline = enItems[0].title.replace(/\s*-\s*[^-]+$/, "").trim();
@@ -157,13 +153,8 @@ export default async () => {
       topHeadline = headline;
       topLink = enItems[0].link;
     }
-    if (zhItems.length > 0) {
-      let headline = zhItems[0].title.replace(/\s*-\s*[^-]+$/, "").trim();
-      if (headline.length > 80) headline = headline.substring(0, 77) + "...";
-      topHeadlineZh = headline;
-    }
 
-    console.log(`${base.name}: ${articleCount} EN, ${zhItems.length} ZH articles`);
+    console.log(`${base.name}: ${articleCount} articles`);
 
     let delta = articleCount >= 30 ? 1.0 : articleCount >= 15 ? 0.5 : articleCount >= 5 ? 0 : -0.5;
     const prevIntensity = prev?.intensity || base.intensity;
@@ -175,7 +166,7 @@ export default async () => {
     }
 
     return {
-      conflict: { ...base, intensity: newIntensity, desc: topHeadline, descZh: topHeadlineZh },
+      conflict: { ...base, intensity: newIntensity, desc: topHeadline },
       topArticle
     };
   }
@@ -210,7 +201,8 @@ export default async () => {
     .map(r => ({
       conflict: r.topArticle.conflict,
       headline: r.conflict.desc,
-      headlineZh: r.conflict.descZh || "",
+
+
       articles: r.topArticle.articles,
       url: r.topArticle.link || r.conflict.sources?.[0]?.url || null
     }));
