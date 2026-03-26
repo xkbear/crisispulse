@@ -127,20 +127,42 @@ export default async () => {
     const prevIntensity = prev?.intensity || base.intensity;
     let newIntensity = Math.round(Math.min(10, Math.max(1, prevIntensity + delta * 0.3)) * 10) / 10;
 
-    return { ...base, intensity: newIntensity, desc: topHeadline };
+    // Collect top article for news feed
+    let topArticle = null;
+    if (articleCount > 0) {
+      topArticle = { conflict: base.name, articles: articleCount, tone: avgTone };
+    }
+
+    return { conflict: { ...base, intensity: newIntensity, desc: topHeadline }, topArticle };
   }
 
-  // Process in batches of 5 for speed (avoid sequential bottleneck)
-  const updated = [];
+  // Process in batches of 5 for speed
+  const results = [];
   for (let i = 0; i < BASE_CONFLICTS.length; i += 5) {
     const batch = BASE_CONFLICTS.slice(i, i + 5);
-    const results = await Promise.all(batch.map(processConflict));
-    updated.push(...results);
+    const batchResults = await Promise.all(batch.map(processConflict));
+    results.push(...batchResults);
     if (i + 5 < BASE_CONFLICTS.length) await new Promise(r => setTimeout(r, 300));
   }
 
+  const updated = results.map(r => r.conflict);
+
+  // Pick top 5 most active conflicts for news feed (by article count)
+  const topNews = results
+    .filter(r => r.topArticle)
+    .sort((a, b) => b.topArticle.articles - a.topArticle.articles)
+    .slice(0, 5)
+    .map(r => ({
+      conflict: r.topArticle.conflict,
+      headline: r.conflict.desc,
+      articles: r.topArticle.articles,
+      // Link to first source of that conflict
+      url: r.conflict.sources?.[0]?.url || null
+    }));
+
   await store.setJSON("conflicts", {
     conflicts: updated,
+    topNews,
     lastUpdated: new Date().toISOString()
   });
 

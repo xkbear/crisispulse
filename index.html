@@ -149,7 +149,20 @@ select{cursor:pointer}
 .visitor-panel .vp-flag{font-size:14px}
 .visitor-panel .vp-name{flex:1;color:#aaa;font-size:11px}
 .visitor-panel .vp-count{color:#666;font-size:11px;font-variant-numeric:tabular-nums}
-@media(max-width:768px){.visitor-panel{display:none}}
+@media(max-width:768px){.visitor-panel{display:none}.news-panel{display:none}}
+.news-panel{position:fixed;right:14px;bottom:14px;z-index:160;background:rgba(10,10,15,0.88);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;width:320px;max-height:45vh;overflow-y:auto;scrollbar-width:none;color:#e6e6e6;font-size:12px;opacity:0;transition:opacity 0.6s ease}
+.news-panel::-webkit-scrollbar{display:none}
+.news-panel.loaded{opacity:1}
+.news-panel .np-title{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.news-panel .np-title::before{content:"";display:inline-block;width:6px;height:6px;background:#ef4444;border-radius:50%;animation:newsPulse 2s infinite}
+@keyframes newsPulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.news-panel .np-item{padding:8px 0;border-top:1px solid rgba(255,255,255,0.05)}
+.news-panel .np-item:first-child{border-top:none}
+.news-panel .np-conflict{font-size:10px;color:#f59e0b;font-weight:600;margin-bottom:3px}
+.news-panel .np-headline{color:#ccc;font-size:12px;line-height:1.4}
+.news-panel .np-headline a{color:#93c5fd;text-decoration:none}
+.news-panel .np-headline a:hover{text-decoration:underline;color:#60a5fa}
+.news-panel .np-meta{font-size:10px;color:#555;margin-top:2px}
 .source-panel{position:fixed;top:0;right:-380px;width:360px;height:100vh;background:rgba(10,10,15,0.92);backdrop-filter:blur(16px);border-left:1px solid rgba(255,255,255,0.08);z-index:300;transition:right 0.3s ease;padding:24px 20px;overflow-y:auto;color:#e6e6e6}
 .source-panel.open{right:0}
 .source-panel .sp-close{position:absolute;top:12px;right:16px;background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:4px 8px}
@@ -174,6 +187,7 @@ select{cursor:pointer}
 <!-- ====== MAP PAGE ====== -->
 <div class="map-page" id="mapPage">
   <div class="visitor-panel" id="visitorPanel"><div class="vp-title" id="vpTitle">Visitors</div><div class="vp-total" id="vpTotal">—</div><div id="vpCountries"></div></div>
+  <div class="news-panel" id="newsPanel"><div class="np-title" id="npTitle">Today's Key Developments</div><div id="npItems"></div></div>
   <div class="map-header">
     <h1 id="mapTitle"></h1>
     <div class="subtitle" id="mapSubtitle"></div>
@@ -220,6 +234,8 @@ const T = {
     gpsNoSupport:"⚠️ Browser does not support location, using global average",
     gpsError:"⚠️ Unable to get location, using global average",
     vpTitle:"Visitors",
+    npTitle:"Today's Key Developments",
+    npArticles:"articles in 48h",
     riskExtreme:"Extreme Risk Zone — Strongly recommend preparing 6+ months supply",
     riskHigh:"High Risk — Recommend 3-6 months supply, prioritize water and staple grains",
     riskMedium:"Medium Risk — Recommend 1-3 months basic supply as safety buffer",
@@ -308,6 +324,8 @@ const T = {
     gpsNoSupport:"⚠️ 浏览器不支持定位，使用默认风险评估",
     gpsError:"⚠️ 无法获取位置，使用全球平均风险评估",
     vpTitle:"访客",
+    npTitle:"今日重要动态",
+    npArticles:"篇报道（48h内）",
     riskExtreme:"极高风险区域 — 强烈建议立即准备至少6个月应急储备",
     riskHigh:"高风险 — 建议准备3-6个月应急储备，优先确保水和主粮",
     riskMedium:"中等风险 — 建议准备1-3个月基础储备作为安全缓冲",
@@ -413,6 +431,8 @@ function updateMapPageText() {
   document.getElementById('liveTag').textContent = formatUpdateDate(lang) || t('liveTag');
   document.getElementById('humanisticMsg').textContent = t('humanisticMsg');
   document.getElementById('riskLabel').textContent = t('riskLabel');
+  const vpt=document.getElementById("vpTitle");if(vpt)vpt.textContent=t("vpTitle");
+  const npt=document.getElementById("npTitle");if(npt)npt.textContent=t("npTitle");
   renderLegend();
   let ds = t('dataSource');
   if(lastUpdatedDate){
@@ -607,7 +627,21 @@ async function loadConflictData(){
     const data = await res.json();
     if(data.conflicts && data.conflicts.length > 0) CONFLICTS = data.conflicts;
     if(data.lastUpdated) lastUpdatedDate = new Date(data.lastUpdated);
+    if(data.topNews && data.topNews.length > 0) renderNewsPanel(data.topNews);
   }catch(_){}
+}
+function renderNewsPanel(news){
+  const panel=document.getElementById("newsPanel");
+  const container=document.getElementById("npItems");
+  if(!panel||!container) return;
+  document.getElementById("npTitle").textContent=t("npTitle");
+  container.innerHTML=news.map(n=>{
+    const headline=n.url
+      ? `<a href="${n.url}" target="_blank" rel="noopener">${n.headline}</a>`
+      : n.headline;
+    return `<div class="np-item"><div class="np-conflict">${n.conflict}</div><div class="np-headline">${headline}</div><div class="np-meta">${n.articles} ${t("npArticles")}</div></div>`;
+  }).join("");
+  panel.classList.add("loaded");
 }
 function formatUpdateDate(l){
   if(!lastUpdatedDate) return null;
