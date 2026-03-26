@@ -24,6 +24,11 @@
   to = "/.netlify/functions/conflicts"
   status = 200
 
+[[redirects]]
+  from = "/api/subscribe"
+  to = "/.netlify/functions/subscribe"
+  status = 200
+
 # HSTS header for all pages
 [[headers]]
   for = "/*"

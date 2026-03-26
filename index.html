@@ -153,16 +153,31 @@ select{cursor:pointer}
 .news-panel{position:fixed;right:14px;bottom:14px;z-index:160;background:rgba(10,10,15,0.88);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;width:320px;max-height:45vh;overflow-y:auto;scrollbar-width:none;color:#e6e6e6;font-size:12px;opacity:0;transition:opacity 0.6s ease}
 .news-panel::-webkit-scrollbar{display:none}
 .news-panel.loaded{opacity:1}
-.news-panel .np-title{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.news-panel .np-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.news-panel .np-title{font-size:11px;color:#bbb;text-transform:uppercase;letter-spacing:1.2px;display:flex;align-items:center;gap:6px;margin:0}
 .news-panel .np-title::before{content:"";display:inline-block;width:6px;height:6px;background:#ef4444;border-radius:50%;animation:newsPulse 2s infinite}
+.news-panel .np-close{background:none;border:none;color:#888;font-size:16px;cursor:pointer;padding:2px 6px;border-radius:4px}
+.news-panel .np-close:hover{color:#fff;background:rgba(255,255,255,0.1)}
 @keyframes newsPulse{0%,100%{opacity:1}50%{opacity:0.3}}
-.news-panel .np-item{padding:8px 0;border-top:1px solid rgba(255,255,255,0.05)}
+.news-panel .np-item{padding:8px 0;border-top:1px solid rgba(255,255,255,0.08)}
 .news-panel .np-item:first-child{border-top:none}
-.news-panel .np-conflict{font-size:10px;color:#f59e0b;font-weight:600;margin-bottom:3px}
-.news-panel .np-headline{color:#ccc;font-size:12px;line-height:1.4}
+.news-panel .np-conflict{font-size:10px;color:#fbbf24;font-weight:600;margin-bottom:3px}
+.news-panel .np-headline{color:#e5e5e5;font-size:12px;line-height:1.5}
 .news-panel .np-headline a{color:#93c5fd;text-decoration:none}
 .news-panel .np-headline a:hover{text-decoration:underline;color:#60a5fa}
-.news-panel .np-meta{font-size:10px;color:#555;margin-top:2px}
+.news-panel .np-meta{font-size:10px;color:#888;margin-top:3px}
+.subscribe-box{margin:32px auto 0;max-width:480px;background:rgba(37,99,235,0.08);border:1px solid rgba(96,165,250,0.2);border-radius:12px;padding:24px;text-align:center}
+.subscribe-box .sub-title{font-size:16px;font-weight:700;color:#333;margin-bottom:6px}
+.subscribe-box .sub-desc{font-size:13px;color:#888;margin-bottom:16px}
+.subscribe-box .sub-form{display:flex;gap:8px;justify-content:center}
+.subscribe-box .sub-form input{flex:1;max-width:260px;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none}
+.subscribe-box .sub-form input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.15)}
+.subscribe-box .sub-form button{padding:10px 20px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.subscribe-box .sub-form button:hover{background:#2563eb}
+.subscribe-box .sub-form button:disabled{background:#94a3b8;cursor:not-allowed}
+.subscribe-box .sub-msg{font-size:13px;margin-top:10px;min-height:20px}
+.subscribe-box .sub-msg.success{color:#22c55e}
+.subscribe-box .sub-msg.error{color:#ef4444}
 .source-panel{position:fixed;top:0;right:-380px;width:360px;height:100vh;background:rgba(10,10,15,0.92);backdrop-filter:blur(16px);border-left:1px solid rgba(255,255,255,0.08);z-index:300;transition:right 0.3s ease;padding:24px 20px;overflow-y:auto;color:#e6e6e6}
 .source-panel.open{right:0}
 .source-panel .sp-close{position:absolute;top:12px;right:16px;background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:4px 8px}
@@ -187,7 +202,7 @@ select{cursor:pointer}
 <!-- ====== MAP PAGE ====== -->
 <div class="map-page" id="mapPage">
   <div class="visitor-panel" id="visitorPanel"><div class="vp-title" id="vpTitle">Visitors</div><div class="vp-total" id="vpTotal">—</div><div id="vpCountries"></div></div>
-  <div class="news-panel" id="newsPanel"><div class="np-title" id="npTitle">Today's Key Developments</div><div id="npItems"></div></div>
+  <div class="news-panel" id="newsPanel"><div class="np-header"><div class="np-title" id="npTitle">Today's Key Developments</div><button class="np-close" onclick="document.getElementById('newsPanel').style.display='none'" title="Close">✕</button></div><div id="npItems"></div></div>
   <div class="map-header">
     <h1 id="mapTitle"></h1>
     <div class="subtitle" id="mapSubtitle"></div>
@@ -283,6 +298,13 @@ const T = {
     notesText:"Instructions: This list calculates grain/protein/oil needs based on daily calories × reserve days. Quantities are estimates — adjust by actual diet preferences. Purchase in batches, rotate first-in-first-out.",
     backBtn:"← Return to Edit Parameters",
     calcFooterResult:"Crisis Pulse · Open source · No login · No data collected · Preparedness starts with awareness",
+    subTitle:"Stay Informed",
+    subDesc:"Get notified when conflict levels escalate near your region.",
+    subPlaceholder:"your@email.com",
+    subBtn:"Subscribe",
+    subSuccess:"You're subscribed. Stay safe.",
+    subAlready:"You're already on the list.",
+    subError:"Something went wrong. Try again.",
     uBottle:"bottles",uBox:"boxes",uBag:"bags",uPack:"packs",uCan:"cans",uPkg:"packs",uTray:"trays",uSet:"1 set",uUnit:"units",uPcs:"pcs",uAsNeeded:"As needed",uPeople:"people",
     iWater10L:"Drinking Water 10L",iWaterPurif:"Water Purification Tablets (50pk)",iRice10kg:"Rice 10kg bag",iPasta:"Pasta/Noodles 500g",iFlour:"Flour 1.5kg",iOatmeal:"Oatmeal 1kg",
     iOil:"Cooking Oil 2L",iTuna:"Canned Tuna 95g",iBeans:"Canned Beans 400g",iTomato:"Canned Tomatoes 400g",iMeat:"Canned Meat/Spam",iChicken:"Frozen Chicken 1kg",iBeef:"Frozen Ground Beef 500g",
@@ -373,6 +395,13 @@ const T = {
     notesText:"说明：本清单基于日均热量×储备天数计算主粮/蛋白/油脂需求。数量为估算值，请根据实际饮食习惯调整。分批购入，先进先出轮换，避免过度囤积。",
     backBtn:"← 返回修改参数",
     calcFooterResult:"Crisis Pulse · 开源 · 无需登录 · 不收集数据 · 备储从认知开始",
+    subTitle:"保持关注",
+    subDesc:"当您所在地区的冲突等级升级时，我们会通知您。",
+    subPlaceholder:"您的邮箱地址",
+    subBtn:"订阅",
+    subSuccess:"订阅成功，注意安全。",
+    subAlready:"您已经订阅过了。",
+    subError:"出了点问题，请重试。",
     uBottle:"桶",uBox:"盒",uBag:"袋",uPack:"包",uCan:"罐",uPkg:"包",uTray:"板",uSet:"1套",uUnit:"个",uPcs:"个",uAsNeeded:"按需",uPeople:"人",
     iWater10L:"桶装饮用水 10L",iWaterPurif:"净水片(50片装)",iRice10kg:"大米 10kg袋装",iPasta:"意面/挂面 500g",iFlour:"面粉 1.5kg",iOatmeal:"燕麦片 1kg",
     iOil:"食用油 2L",iTuna:"金枪鱼罐头 95g",iBeans:"豆类罐头 400g",iTomato:"番茄罐头 400g",iMeat:"午餐肉/肉罐头",iChicken:"冷冻鸡肉 1kg",iBeef:"冷冻牛肉糜 500g",
@@ -644,6 +673,28 @@ async function loadConflictData(){
   }catch(_){}
 }
 let _newsData = null;
+// ====== EMAIL SUBSCRIBE ======
+async function handleSubscribe(e){
+  e.preventDefault();
+  const btn=document.getElementById("subBtn");
+  const msg=document.getElementById("subMsg");
+  const email=document.getElementById("subEmail").value.trim();
+  if(!email)return;
+  btn.disabled=true;btn.textContent="...";
+  try{
+    const r=await fetch("/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,country:window._userCountry||"Unknown"})});
+    const d=await r.json();
+    if(d.ok){
+      msg.className="sub-msg success";
+      msg.textContent=d.message==="already_subscribed"?t("subAlready"):t("subSuccess");
+      document.getElementById("subEmail").value="";
+    }else{
+      msg.className="sub-msg error";msg.textContent=d.error||t("subError");
+    }
+  }catch(_){msg.className="sub-msg error";msg.textContent=t("subError");}
+  btn.disabled=false;btn.textContent=t("subBtn");
+}
+
 function renderNewsPanel(news){
   _newsData = news;
   const panel=document.getElementById("newsPanel");
@@ -1076,7 +1127,16 @@ function renderResult(){
   </div></div>
   <div class="notes">${t('notesText')}</div>
   <button class="btn back-btn" id="backBtn2">${t('backBtn')}</button>
-  <div class="footer">${t('calcFooterResult')}</div>`;
+  <div class="footer">${t('calcFooterResult')}</div>
+  <div class="subscribe-box" id="subscribeBox">
+    <div class="sub-title">${t('subTitle')}</div>
+    <div class="sub-desc">${t('subDesc')}</div>
+    <form class="sub-form" onsubmit="handleSubscribe(event)">
+      <input type="email" id="subEmail" placeholder="${t('subPlaceholder')}" required>
+      <button type="submit" id="subBtn">${t('subBtn')}</button>
+    </form>
+    <div class="sub-msg" id="subMsg"></div>
+  </div>`;
 }
 
 function bindEvents(){
