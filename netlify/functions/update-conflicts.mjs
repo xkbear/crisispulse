@@ -243,6 +243,33 @@ export default async () => {
   });
 
   console.log(`✅ Updated ${updated.length} conflicts at ${new Date().toISOString()}`);
+
+  // Check for significant escalations (intensity rose ≥ 1.0) → email subscribers
+  const escalations = [];
+  for (const c of updated) {
+    const prev = prevMap[c.name];
+    if (prev && c.intensity - prev.intensity >= 1.0) {
+      escalations.push({
+        name: c.name,
+        prevIntensity: prev.intensity,
+        newIntensity: c.intensity,
+        desc: c.desc
+      });
+    }
+  }
+  if (escalations.length > 0) {
+    console.log(`🚨 ${escalations.length} escalation(s) detected, notifying subscribers...`);
+    try {
+      const notifyUrl = new URL("/api/notify", "https://crisispulse.org");
+      await fetch(notifyUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ escalations })
+      });
+    } catch (e) {
+      console.warn("Notify failed:", e.message);
+    }
+  }
 };
 
 export const config = {

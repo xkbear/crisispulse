@@ -29,6 +29,11 @@
   to = "/.netlify/functions/subscribe"
   status = 200
 
+[[redirects]]
+  from = "/api/notify"
+  to = "/.netlify/functions/notify"
+  status = 200
+
 # HSTS header for all pages
 [[headers]]
   for = "/*"
