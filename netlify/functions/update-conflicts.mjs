@@ -127,21 +127,6 @@ export default async () => {
     return bingUrl;
   }
 
-  // Check if URL is reachable (HEAD request, 3s timeout)
-  async function isUrlReachable(url) {
-    if (!url) return false;
-    try {
-      const res = await fetch(url, {
-        method: 'HEAD',
-        signal: AbortSignal.timeout(3000),
-        redirect: 'follow'
-      });
-      return res.status >= 200 && res.status < 400;
-    } catch (_) {
-      return false;
-    }
-  }
-
   // Translate text EN→ZH via Google free API, with fallback
   async function translateToZh(text) {
     if (!text) return "";
@@ -177,24 +162,12 @@ export default async () => {
       if (res.ok) {
         const items = parseRSS(await res.text());
         articleCount = items.length;
-        // Try first 3 items to find one with a valid link
-        for (const item of items.slice(0, 3)) {
-          let realUrl = extractRealUrl(item.link);
-          if (realUrl && await isUrlReachable(realUrl)) {
-            let headline = item.title.replace(/\s*-\s*[^-]+$/, "").trim();
-            if (headline.length > 80) headline = headline.substring(0, 77) + "...";
-            topHeadline = headline;
-            topLink = realUrl;
-            break;
-          }
-        }
-        // If no valid link found but have items, still use first headline
-        if (!topLink && items.length > 0) {
+        if (items.length > 0) {
           let headline = items[0].title.replace(/\s*-\s*[^-]+$/, "").trim();
           if (headline.length > 80) headline = headline.substring(0, 77) + "...";
           topHeadline = headline;
-          // Fallback to first source URL
-          topLink = base.sources?.[0]?.url || null;
+          // Extract real URL from Bing redirect, fallback to source URL
+          topLink = extractRealUrl(items[0].link) || base.sources?.[0]?.url || null;
         }
       }
     } catch (e) {
