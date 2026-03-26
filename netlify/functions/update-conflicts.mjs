@@ -114,17 +114,17 @@ export default async () => {
   // Extract real URL from Bing redirect links
   function extractRealUrl(bingUrl) {
     if (!bingUrl) return null;
+    // Ensure all HTML entities are decoded first
+    let clean = bingUrl.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
     try {
-      // Bing format: http://www.bing.com/news/apiclick.aspx?...&url=https%3a%2f%2f...&...
-      if (bingUrl.includes('apiclick.aspx') || bingUrl.includes('bing.com')) {
-        const u = new URL(bingUrl);
+      if (clean.includes('apiclick.aspx') || clean.includes('bing.com/news')) {
+        const u = new URL(clean);
         const real = u.searchParams.get('url');
         if (real) return decodeURIComponent(real);
       }
-      // Already a direct URL
-      if (bingUrl.startsWith('http')) return bingUrl;
+      if (clean.startsWith('http')) return clean;
     } catch (_) {}
-    return bingUrl;
+    return clean;
   }
 
   // Translate text EN→ZH via Google free API, with fallback
