@@ -433,6 +433,7 @@ function updateMapPageText() {
   document.getElementById('riskLabel').textContent = t('riskLabel');
   const vpt=document.getElementById("vpTitle");if(vpt)vpt.textContent=t("vpTitle");
   const npt=document.getElementById("npTitle");if(npt)npt.textContent=t("npTitle");
+  if(_newsData)renderNewsPanel(_newsData);
   renderLegend();
   let ds = t('dataSource');
   if(lastUpdatedDate){
@@ -499,6 +500,14 @@ let CONFLICTS = [
   {name:"South China Sea",lat:12,lon:114,intensity:3,type:"Geopolitical Tension",desc:"Multiple territorial disputes",
    sources:[{title:"CFR: South China Sea Disputes",url:"https://www.cfr.org/global-conflict-tracker/conflict/territorial-disputes-south-china-sea"},{title:"Crisis Group: South China Sea",url:"https://www.crisisgroup.org/asia/south-east-asia"}]}
 ];
+
+// Chinese translations for conflict data
+const CONFLICT_ZH = {
+  names:{"Russia-Ukraine War":"俄乌战争","Israel-Palestine":"巴以冲突","US-Israel-Iran Conflict":"美以伊冲突","Yemen Civil War":"也门内战","Sudan Civil War":"苏丹内战","Myanmar Civil War":"缅甸内战","Syria Conflict":"叙利亚冲突","Lebanon Crisis":"黎巴嫩危机","Eastern DRC Conflict":"刚果(金)东部冲突","Sahel Region Crisis":"萨赫勒地区危机","Somalia":"索马里","Northern Nigeria":"尼日利亚北部","Ethiopia":"埃塞俄比亚","Afghanistan":"阿富汗","Northwest Pakistan":"巴基斯坦西北部","Haiti":"海地","Colombia":"哥伦比亚","Mexico":"墨西哥","Iraq":"伊拉克","Libya":"利比亚","Southern Philippines":"菲律宾南部","Kashmir India-Pakistan":"克什米尔印巴争端","Taiwan Strait":"台湾海峡","Korean Peninsula":"朝鲜半岛","South China Sea":"南海"},
+  types:{"Full-Scale War":"全面战争","High Intensity":"高强度冲突","Medium Conflict":"中等冲突","Low Risk":"低风险","Geopolitical Tension":"地缘紧张"},
+  descs:{"Largest conventional war in Europe, ongoing fifth year":"欧洲最大规模常规战争，持续第五年","Gaza humanitarian crisis continuing":"加沙人道主义危机持续","Regional escalation after February 2026 strikes":"2026年2月打击后地区局势升级","Houthi attacks on Red Sea shipping":"胡塞武装袭击红海航运","SAF vs RSF conflict, over 10 million displaced":"苏丹武装力量与快速支援部队冲突，超千万人流离失所","Military junta vs multiple resistance forces":"军政府对抗多支抵抗力量","Multiple factions ongoing":"多派系持续冲突","Israel-Hezbollah conflict spillover":"以色列-真主党冲突外溢","M23 militants vs government forces":"M23武装与政府军冲突","Mali/Burkina Faso/Niger armed conflicts":"马里/布基纳法索/尼日尔武装冲突","Al-Shabaab militant activity":"青年党武装活动","Boko Haram remnants and herder clashes":"博科圣地残余及牧民冲突","Fragile Tigray peace, scattered conflicts":"提格雷脆弱和平，零星冲突","Unstable security under Taliban":"塔利班统治下安全局势不稳","TTP militant attacks":"巴基斯坦塔利班武装袭击","Gang violence and state collapse":"帮派暴力与国家崩溃","Fragile peace, armed groups in some regions":"脆弱和平，部分地区仍有武装组织","Drug cartel violence":"贩毒集团暴力","ISIS remnants and militia clashes":"ISIS残余与民兵冲突","Divided government and militia standoff":"政府分裂与民兵对峙","Mindanao armed remnants":"棉兰老岛武装残余","Ongoing border tensions":"持续的边境紧张","Military exercises, sustained tension":"军事演习，持续紧张","Missile tests and military standoff":"导弹试射与军事对峙","Multiple territorial disputes":"多重领土争端"}
+};
+function tConflict(field, val){ return lang==='zh' ? (CONFLICT_ZH[field]?.[val] || val) : val; }
 
 const COUNTRY_RISK = {
   "Ukraine":9,"Russia":6,"Israel":8,"Palestine":9,"Iran":8,"Yemen":7,
@@ -625,21 +634,29 @@ async function loadConflictData(){
     const res = await fetch("/api/conflicts");
     if(!res.ok) return;
     const data = await res.json();
-    if(data.conflicts && data.conflicts.length > 0) CONFLICTS = data.conflicts;
+    if(data.conflicts && data.conflicts.length > 0){
+      CONFLICTS = data.conflicts;
+      // Merge dynamic Chinese descriptions into translation map
+      data.conflicts.forEach(c=>{if(c.descZh)CONFLICT_ZH.descs[c.desc]=c.descZh;});
+    }
     if(data.lastUpdated) lastUpdatedDate = new Date(data.lastUpdated);
     if(data.topNews && data.topNews.length > 0) renderNewsPanel(data.topNews);
   }catch(_){}
 }
+let _newsData = null;
 function renderNewsPanel(news){
+  _newsData = news;
   const panel=document.getElementById("newsPanel");
   const container=document.getElementById("npItems");
   if(!panel||!container) return;
   document.getElementById("npTitle").textContent=t("npTitle");
   container.innerHTML=news.map(n=>{
+    const title = (lang==='zh' && n.headlineZh) ? n.headlineZh : n.headline;
+    const conflictName = tConflict('names', n.conflict);
     const headline=n.url
-      ? `<a href="${n.url}" target="_blank" rel="noopener">${n.headline}</a>`
-      : n.headline;
-    return `<div class="np-item"><div class="np-conflict">${n.conflict}</div><div class="np-headline">${headline}</div><div class="np-meta">${n.articles} ${t("npArticles")}</div></div>`;
+      ? `<a href="${n.url}" target="_blank" rel="noopener">${title}</a>`
+      : title;
+    return `<div class="np-item"><div class="np-conflict">${conflictName}</div><div class="np-headline">${headline}</div><div class="np-meta">${n.articles} ${t("npArticles")}</div></div>`;
   }).join("");
   panel.classList.add("loaded");
 }
@@ -687,7 +704,7 @@ async function initMap(){
         g.append("circle").attr("class","hotspot-ring").attr("cx",x).attr("cy",y).attr("r",6).attr("fill","none").attr("stroke",intensityColor(c.intensity)).attr("stroke-width",1.5).attr("opacity",0.5);
         g.append("circle").attr("cx",x).attr("cy",y).attr("r",Math.max(2,c.intensity*0.5)).attr("fill",intensityColor(c.intensity)).attr("opacity",0.9);
         g.on("mouseenter",e=>{
-          tooltip.innerHTML=`<div class="ct-name">${c.name}</div><div class="ct-level" style="color:${intensityColor(c.intensity)}">● ${c.type} · ${t('tooltipLevel')} ${c.intensity}/10</div><div class="ct-desc">${c.desc}</div>`;
+          tooltip.innerHTML=`<div class="ct-name">${tConflict('names',c.name)}</div><div class="ct-level" style="color:${intensityColor(c.intensity)}">● ${tConflict('types',c.type)} · ${t('tooltipLevel')} ${c.intensity}/10</div><div class="ct-desc">${tConflict('descs',c.desc)}</div>`;
           tooltip.style.opacity=1;tooltip.style.left=(e.clientX+12)+"px";tooltip.style.top=(e.clientY-10)+"px";
         }).on("mouseleave",()=>{tooltip.style.opacity=0;}).on("click",()=>{openSourcePanel(c);});
       });
@@ -695,7 +712,7 @@ async function initMap(){
       window._projection=projection;window._svg=svg;
       requestGPS();
     }).catch(()=>{
-      document.getElementById("worldMap").innerHTML='<div style="text-align:center;color:#555;padding:40px">Loading map...</div>';
+      document.getElementById("worldMap").innerHTML=`<div style="text-align:center;color:#555;padding:40px">${lang==='zh'?'加载地图中...':'Loading map...'}</div>`;
       requestGPS();
     });
 }
@@ -785,7 +802,7 @@ function calculateRisk(loc){
       ps+=w;if(d<3000)near.push({...c,dist:Math.round(d)});
     });
     score=Math.min(10,Math.max(1,ps/8));score=Math.round(score*10)/10;
-    near.sort((a,b)=>a.dist-b.dist);near.slice(0,3).forEach(c=>factors.push(`${c.name} (${c.dist}km)`));
+    near.sort((a,b)=>a.dist-b.dist);near.slice(0,3).forEach(c=>factors.push(`${tConflict('names',c.name)} (${c.dist}km)`));
     factors.push(t('globalPressure'));if(score>=6)factors.push(t('riskSuggestMore'));
   }
   riskFactorsCache=factors;
@@ -1098,9 +1115,9 @@ function openSourcePanel(c){
   const panel=document.getElementById("sourcePanel");
   const linksHTML=(c.sources||[]).map(s=>`<a class="sp-link" href="${s.url}" target="_blank" rel="noopener">${s.title}<span class="sp-link-arrow">↗</span></a>`).join("");
   document.getElementById("sourcePanelContent").innerHTML=`
-    <div class="sp-name">${c.name}</div>
-    <div class="sp-type" style="color:${intensityColor(c.intensity)}">● ${c.type} · ${t('tooltipLevel')} ${c.intensity}/10</div>
-    <div class="sp-desc">${c.desc}</div>
+    <div class="sp-name">${tConflict('names',c.name)}</div>
+    <div class="sp-type" style="color:${intensityColor(c.intensity)}">● ${tConflict('types',c.type)} · ${t('tooltipLevel')} ${c.intensity}/10</div>
+    <div class="sp-desc">${tConflict('descs',c.desc)}</div>
     <div class="sp-sources-title">${t('sourcesTitle')}</div>
     ${linksHTML}`;
   panel.classList.add("open");
