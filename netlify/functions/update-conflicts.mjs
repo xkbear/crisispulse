@@ -105,8 +105,8 @@ export default async () => {
       const link = (block.match(/<link>([\s\S]*?)<\/link>/) || [])[1] || "";
       const pubDate = (block.match(/<pubDate>([\s\S]*?)<\/pubDate>/) || [])[1] || "";
       // Clean CDATA and HTML entities
-      const cleanTitle = title.replace(/<!\[CDATA\[|\]\]>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
-      items.push({ title: cleanTitle, link, pubDate });
+      const decode = s => s.replace(/<!\[CDATA\[|\]\]>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
+      items.push({ title: decode(title), link: decode(link), pubDate });
     }
     return items;
   }
