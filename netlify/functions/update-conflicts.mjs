@@ -94,44 +94,57 @@ export default async () => {
   }
 
   // Process one conflict against GDELT
+  // Parse RSS XML to extract items
+  function parseRSS(xml) {
+    const items = [];
+    const re = /<item>([\s\S]*?)<\/item>/g;
+    let m;
+    while ((m = re.exec(xml)) !== null) {
+      const block = m[1];
+      const title = (block.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || "";
+      const link = (block.match(/<link>([\s\S]*?)<\/link>/) || [])[1] || "";
+      const pubDate = (block.match(/<pubDate>([\s\S]*?)<\/pubDate>/) || [])[1] || "";
+      // Clean CDATA and HTML entities
+      const cleanTitle = title.replace(/<!\[CDATA\[|\]\]>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
+      items.push({ title: cleanTitle, link, pubDate });
+    }
+    return items;
+  }
+
   async function processConflict(base) {
     const query = SEARCH_TERMS[base.name] || base.name;
     const prev = prevMap[base.name];
-    let articleCount = 0, avgTone = 0;
+    let articleCount = 0;
     let topHeadline = prev?.desc || base.desc;
+    let topLink = null;
 
     try {
-      const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}&mode=artlist&maxrecords=20&timespan=48h&format=json&sort=datedesc`;
-      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en&gl=US&ceid=US:en`;
+      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
       if (res.ok) {
-        const text = await res.text();
-        try {
-          const data = JSON.parse(text);
-          const articles = data.articles || [];
-          articleCount = articles.length;
-          if (articles.length > 0) {
-            avgTone = articles.reduce((s, a) => s + (a.tone || 0), 0) / articles.length;
-            const enArticle = articles.find(a => a.language === "English") || articles[0];
-            if (enArticle?.title) {
-              topHeadline = enArticle.title.length > 80 ? enArticle.title.substring(0, 77) + "..." : enArticle.title;
-            }
-          }
-        } catch (_) {}
+        const xml = await res.text();
+        const items = parseRSS(xml);
+        articleCount = items.length;
+        if (items.length > 0) {
+          // Use first headline, strip " - Source Name" suffix
+          let headline = items[0].title.replace(/\s*-\s*[^-]+$/, "").trim();
+          if (headline.length > 80) headline = headline.substring(0, 77) + "...";
+          topHeadline = headline;
+          topLink = items[0].link;
+        }
       }
     } catch (e) {
-      console.warn(`GDELT failed for ${base.name}: ${e.message}`);
+      console.warn(`News failed for ${base.name}: ${e.message}`);
     }
-    console.log(`${base.name}: ${articleCount} articles, tone=${avgTone.toFixed(1)}`);
+    console.log(`${base.name}: ${articleCount} articles`);
 
     let delta = articleCount >= 30 ? 1.0 : articleCount >= 15 ? 0.5 : articleCount >= 5 ? 0 : -0.5;
-    if (avgTone < -5) delta += 0.5;
     const prevIntensity = prev?.intensity || base.intensity;
     let newIntensity = Math.round(Math.min(10, Math.max(1, prevIntensity + delta * 0.3)) * 10) / 10;
 
-    // Collect top article for news feed
     let topArticle = null;
     if (articleCount > 0) {
-      topArticle = { conflict: base.name, articles: articleCount, tone: avgTone };
+      topArticle = { conflict: base.name, articles: articleCount, link: topLink };
     }
 
     return { conflict: { ...base, intensity: newIntensity, desc: topHeadline }, topArticle };
@@ -168,8 +181,7 @@ export default async () => {
       conflict: r.topArticle.conflict,
       headline: r.conflict.desc,
       articles: r.topArticle.articles,
-      // Link to first source of that conflict
-      url: r.conflict.sources?.[0]?.url || null
+      url: r.topArticle.link || r.conflict.sources?.[0]?.url || null
     }));
 
   await store.setJSON("conflicts", {
