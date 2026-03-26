@@ -1,6 +1,7 @@
 export default async (req) => {
   try {
-    const url = "https://api.gdeltproject.org/api/v2/doc/doc?query=Ukraine+war&mode=artlist&maxrecords=3&timespan=48h&format=json";
+    // Test multiple sources
+    const url = "https://news.google.com/rss/search?q=Ukraine+war&hl=en&gl=US&ceid=US:en";
     const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
     const text = await res.text();
     return new Response(JSON.stringify({
