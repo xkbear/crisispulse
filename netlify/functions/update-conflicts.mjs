@@ -102,7 +102,7 @@ export default async () => {
 
     try {
       const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}&mode=artlist&maxrecords=20&timespan=48h&format=json&sort=datedesc`;
-      const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
       if (res.ok) {
         const text = await res.text();
         try {
@@ -121,6 +121,7 @@ export default async () => {
     } catch (e) {
       console.warn(`GDELT failed for ${base.name}: ${e.message}`);
     }
+    console.log(`${base.name}: ${articleCount} articles, tone=${avgTone.toFixed(1)}`);
 
     let delta = articleCount >= 30 ? 1.0 : articleCount >= 15 ? 0.5 : articleCount >= 5 ? 0 : -0.5;
     if (avgTone < -5) delta += 0.5;
@@ -138,11 +139,11 @@ export default async () => {
 
   // Process in batches of 5 for speed
   const results = [];
-  for (let i = 0; i < BASE_CONFLICTS.length; i += 5) {
-    const batch = BASE_CONFLICTS.slice(i, i + 5);
+  for (let i = 0; i < BASE_CONFLICTS.length; i += 3) {
+    const batch = BASE_CONFLICTS.slice(i, i + 3);
     const batchResults = await Promise.all(batch.map(processConflict));
     results.push(...batchResults);
-    if (i + 5 < BASE_CONFLICTS.length) await new Promise(r => setTimeout(r, 300));
+    if (i + 3 < BASE_CONFLICTS.length) await new Promise(r => setTimeout(r, 500));
   }
 
   const updated = results.map(r => r.conflict);
