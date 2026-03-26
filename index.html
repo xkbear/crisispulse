@@ -36,24 +36,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .legend-dot{width:10px;height:10px;border-radius:50%}
 .risk-panel{max-width:600px;margin:0 auto;padding:16px}
 .risk-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;text-align:center}
-.risk-label{font-size:12px;color:#888;margin-bottom:4px}
+.risk-label{font-size:12px;color:#bbb;margin-bottom:4px}
 .risk-score{font-size:48px;font-weight:800;margin:4px 0}
-.risk-desc{font-size:13px;color:#aaa;margin-bottom:16px;line-height:1.6}
+.risk-desc{font-size:13px;color:#ddd;margin-bottom:16px;line-height:1.6}
 .risk-factors{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:16px}
-.risk-factor{font-size:11px;padding:3px 10px;border-radius:8px;background:rgba(255,255,255,.06);color:#ccc}
-.gps-status{font-size:11px;color:#555;margin-bottom:12px}
+.risk-factor{font-size:11px;padding:3px 10px;border-radius:8px;background:rgba(255,255,255,.08);color:#e0e0e0}
+.gps-status{font-size:11px;color:#999;margin-bottom:12px}
 .gps-status .pin{color:#22c55e}
 .btn-enter{display:block;width:100%;max-width:360px;margin:0 auto;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;color:#fff}
 .btn-enter:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.3)}
 .conflict-tooltip{position:fixed;pointer-events:none;background:rgba(15,15,20,.92);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;font-size:12px;color:#ddd;max-width:240px;z-index:100;opacity:0;transition:opacity .15s}
 .conflict-tooltip .ct-name{font-weight:700;font-size:13px;margin-bottom:3px}
 .conflict-tooltip .ct-level{font-size:11px;margin-bottom:2px}
-.conflict-tooltip .ct-desc{font-size:11px;color:#999}
+.conflict-tooltip .ct-desc{font-size:11px;color:#ccc}
 .hotspot-marker{cursor:pointer}
 .hotspot-ring{animation:ring-pulse 2.5s infinite}
 @keyframes ring-pulse{0%{opacity:.7;r:6}50%{opacity:.2;r:14}100%{opacity:.7;r:6}}
 .user-marker{filter:drop-shadow(0 0 6px rgba(34,197,94,.6))}
-.humanistic-message{margin-bottom:12px;padding:12px 14px;background:rgba(255,255,255,.05);border-left:3px solid rgba(255,255,255,.2);border-radius:6px;font-size:13px;color:#aaa;line-height:1.6;font-style:italic}
+.humanistic-message{margin-bottom:12px;padding:12px 14px;background:rgba(255,255,255,.06);border-left:3px solid rgba(255,255,255,.25);border-radius:6px;font-size:13px;color:#ddd;line-height:1.6;font-style:italic}
 
 /* ====== PAGE: CALCULATOR ====== */
 .calc-page{display:none;background:#f8f8f6;min-height:100vh}
@@ -97,7 +97,7 @@ select{cursor:pointer}
 .inline-field label{color:#666;white-space:nowrap}
 .risk-banner{background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;color:#fff}
 .risk-banner .rb-score{font-size:28px;font-weight:800;min-width:50px;text-align:center}
-.risk-banner .rb-text{font-size:12px;color:#aaa;line-height:1.5}
+.risk-banner .rb-text{font-size:12px;color:#ccc;line-height:1.5}
 .risk-banner .rb-text strong{color:#e6e6e6;font-size:13px}
 .risk-banner .rb-back{margin-left:auto;font-size:11px;color:#666;cursor:pointer;white-space:nowrap;padding:6px 12px;border:1px solid #333;border-radius:8px;background:transparent;transition:all .2s}
 .risk-banner .rb-back:hover{border-color:#555;color:#aaa}
@@ -178,6 +178,12 @@ select{cursor:pointer}
 .subscribe-box .sub-msg{font-size:13px;margin-top:10px;min-height:20px}
 .subscribe-box .sub-msg.success{color:#22c55e}
 .subscribe-box .sub-msg.error{color:#ef4444}
+.subscribe-box.dark{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1)}
+.subscribe-box.dark .sub-title{color:#e5e5e5}
+.subscribe-box.dark .sub-desc{color:#999}
+.subscribe-box.dark .sub-form input{background:#1a1a2e;border-color:#333;color:#e5e5e5}
+.subscribe-box.dark .sub-form input:focus{border-color:#3b82f6}
+.subscribe-box.dark .sub-form input::placeholder{color:#666}
 .source-panel{position:fixed;top:0;right:-380px;width:360px;height:100vh;background:rgba(10,10,15,0.92);backdrop-filter:blur(16px);border-left:1px solid rgba(255,255,255,0.08);z-index:300;transition:right 0.3s ease;padding:24px 20px;overflow-y:auto;color:#e6e6e6}
 .source-panel.open{right:0}
 .source-panel .sp-close{position:absolute;top:12px;right:16px;background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:4px 8px}
@@ -227,6 +233,15 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="data-source" id="dataSource"></div>
+  <div class="subscribe-box dark" id="subscribeBoxMap" style="max-width:420px;margin:24px auto 0">
+    <div class="sub-title" id="subTitleMap"></div>
+    <div class="sub-desc" id="subDescMap"></div>
+    <form class="sub-form" onsubmit="handleSubscribe(event)">
+      <input type="email" id="subEmailMap" placeholder="" required>
+      <button type="submit" id="subBtnMap"></button>
+    </form>
+    <div class="sub-msg" id="subMsgMap"></div>
+  </div>
 </div>
 
 <!-- ====== CALCULATOR PAGE ====== -->
@@ -463,6 +478,7 @@ function updateMapPageText() {
   const vpt=document.getElementById("vpTitle");if(vpt)vpt.textContent=t("vpTitle");
   const npt=document.getElementById("npTitle");if(npt)npt.textContent=t("npTitle");
   if(_newsData)renderNewsPanel(_newsData);
+  initMapSubscribe();
   renderLegend();
   let ds = t('dataSource');
   if(lastUpdatedDate){
@@ -676,9 +692,11 @@ let _newsData = null;
 // ====== EMAIL SUBSCRIBE ======
 async function handleSubscribe(e){
   e.preventDefault();
-  const btn=document.getElementById("subBtn");
-  const msg=document.getElementById("subMsg");
-  const email=document.getElementById("subEmail").value.trim();
+  const form=e.target;
+  const emailInput=form.querySelector('input[type="email"]');
+  const btn=form.querySelector('button[type="submit"]');
+  const msg=form.parentElement.querySelector('.sub-msg');
+  const email=emailInput.value.trim();
   if(!email)return;
   btn.disabled=true;btn.textContent="...";
   try{
@@ -687,12 +705,19 @@ async function handleSubscribe(e){
     if(d.ok){
       msg.className="sub-msg success";
       msg.textContent=d.message==="already_subscribed"?t("subAlready"):t("subSuccess");
-      document.getElementById("subEmail").value="";
+      emailInput.value="";
     }else{
       msg.className="sub-msg error";msg.textContent=d.error||t("subError");
     }
   }catch(_){msg.className="sub-msg error";msg.textContent=t("subError");}
   btn.disabled=false;btn.textContent=t("subBtn");
+}
+function initMapSubscribe(){
+  const el=document.getElementById("subscribeBoxMap");if(!el)return;
+  document.getElementById("subTitleMap").textContent=t("subTitle");
+  document.getElementById("subDescMap").textContent=t("subDesc");
+  document.getElementById("subEmailMap").placeholder=t("subPlaceholder");
+  document.getElementById("subBtnMap").textContent=t("subBtn");
 }
 
 function renderNewsPanel(news){
