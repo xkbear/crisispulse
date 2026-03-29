@@ -3,8 +3,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Global Crisis Monitor & Family Emergency Supply Calculator | Crisis Pulse</title>
-<meta name="description" content="Analyze global conflict situations and generate personalized family emergency supply lists based on your location and family parameters.">
+    <meta name="description" content="Track global conflicts in real time and generate a personalized emergency supply list for your family. Free, open-source, no login required. Data from ACLED, CFR &amp; ICG.">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <meta name="keywords" content="global conflict tracker, crisis monitor, emergency preparedness, emergency supply calculator, conflict map, world crisis 2026, prepper supplies, family emergency kit">
+    <meta name="author" content="Crisis Pulse">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://crisispulse.org/">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://crisispulse.org/">
+    <meta property="og:title" content="Crisis Pulse — Track Global Conflicts, Protect Your Family">
+    <meta property="og:description" content="Real-time global crisis monitoring + personalized emergency supply calculator. Know the risks. Take action.">
+    <meta property="og:image" content="https://crisispulse.org/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Crisis Pulse">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://crisispulse.org/">
+    <meta name="twitter:title" content="Crisis Pulse — Track Global Conflicts, Protect Your Family">
+    <meta name="twitter:description" content="Real-time global crisis monitoring + personalized emergency supply calculator. Free &amp; open-source.">
+    <meta name="twitter:image" content="https://crisispulse.org/og-image.png">
+    <link rel="alternate" hreflang="en" href="https://crisispulse.org/?lang=en">
+    <link rel="alternate" hreflang="zh" href="https://crisispulse.org/?lang=zh">
+    <link rel="alternate" hreflang="x-default" href="https://crisispulse.org/">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Crisis Pulse","url":"https://crisispulse.org","applicationCategory":"UtilityApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Real-time global crisis monitoring and personalized family emergency supply calculator.","featureList":["Real-time global conflict monitoring","Location-based risk assessment","Personalized emergency supply calculator","Multi-language support","No login required","Open source"],"inLanguage":["en","zh"]}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <style>
@@ -202,13 +223,13 @@ select{cursor:pointer}
 <!-- Language Switcher -->
 <div class="lang-switcher" id="langSwitcher">
   <button class="lang-btn" onclick="setLang('en')" id="btnEN">EN</button>
-  <button class="lang-btn" onclick="setLang('zh')" id="btnZH">中文</button>
+  <button class="lang-btn" onclick="setLang('zh')" id="btnZH">ä¸­æ</button>
 </div>
 
 <!-- ====== MAP PAGE ====== -->
 <div class="map-page" id="mapPage">
-  <div class="visitor-panel" id="visitorPanel"><div class="vp-title" id="vpTitle">Visitors</div><div class="vp-total" id="vpTotal">—</div><div id="vpCountries"></div></div>
-  <div class="news-panel" id="newsPanel"><div class="np-header"><div class="np-title" id="npTitle">Today's Key Developments</div><button class="np-close" onclick="document.getElementById('newsPanel').style.display='none'" title="Close">✕</button></div><div id="npItems"></div></div>
+  <div class="visitor-panel" id="visitorPanel"><div class="vp-title" id="vpTitle">Visitors</div><div class="vp-total" id="vpTotal">â</div><div id="vpCountries"></div></div>
+  <div class="news-panel" id="newsPanel"><div class="np-header"><div class="np-title" id="npTitle">Today's Key Developments</div><button class="np-close" onclick="document.getElementById('newsPanel').style.display='none'" title="Close">â</button></div><div id="npItems"></div></div>
   <div class="map-header">
     <h1 id="mapTitle"></h1>
     <div class="subtitle" id="mapSubtitle"></div>
@@ -218,14 +239,14 @@ select{cursor:pointer}
   <div class="map-legend" id="mapLegend"></div>
   <div class="conflict-tooltip" id="conflictTooltip"></div>
   <div class="source-panel" id="sourcePanel">
-    <button class="sp-close" onclick="closeSourcePanel()">×</button>
+    <button class="sp-close" onclick="closeSourcePanel()">Ã</button>
     <div id="sourcePanelContent"></div>
   </div>
   <div class="risk-panel">
     <div class="risk-card">
       <div class="humanistic-message" id="humanisticMsg"></div>
       <div class="risk-label" id="riskLabel"></div>
-      <div class="risk-score" id="riskScore" style="color:#fbbf24">—</div>
+      <div class="risk-score" id="riskScore" style="color:#fbbf24">â</div>
       <div class="risk-desc" id="riskDesc"></div>
       <div class="gps-status" id="gpsStatus"></div>
       <div class="risk-factors" id="riskFactors"></div>
@@ -255,36 +276,36 @@ const T = {
   en: {
     pageTitle:"Global Crisis Monitor & Family Emergency Supply Calculator | Crisis Pulse",
     mapTitle:"Global Crisis Monitor",
-    mapSubtitle:"Crisis Pulse — Know the world. Protect your family.",
-    liveTag:"● March 2026 Situation Data",
+    mapSubtitle:"Crisis Pulse â Know the world. Protect your family.",
+    liveTag:"â March 2026 Situation Data",
     legendWar:"Full-Scale War",legendHigh:"High Intensity",legendMedium:"Medium Conflict",legendLow:"Low Risk",legendGeo:"Watchlist",
     humanisticMsg:"In an uncertain world, understanding risk is the first step to protecting those you love.",
     riskLabel:"Risk Index for Your Location",
-    gpsLocating:"📍 Locating...",
-    gpsNoSupport:"⚠️ Browser does not support location, using global average",
-    gpsError:"⚠️ Unable to get location, using global average",
+    gpsLocating:"ð Locating...",
+    gpsNoSupport:"â ï¸ Browser does not support location, using global average",
+    gpsError:"â ï¸ Unable to get location, using global average",
     vpTitle:"Visitors",
     npTitle:"Today's Key Developments",
     npArticles:"articles in 48h",
-    riskExtreme:"Extreme Risk Zone — Strongly recommend preparing 6+ months supply",
-    riskHigh:"High Risk — Recommend 3-6 months supply, prioritize water and staple grains",
-    riskMedium:"Medium Risk — Recommend 1-3 months basic supply as safety buffer",
-    riskSafe:"Relatively Safe — Still recommend maintaining 2-4 weeks essentials",
+    riskExtreme:"Extreme Risk Zone â Strongly recommend preparing 6+ months supply",
+    riskHigh:"High Risk â Recommend 3-6 months supply, prioritize water and staple grains",
+    riskMedium:"Medium Risk â Recommend 1-3 months basic supply as safety buffer",
+    riskSafe:"Relatively Safe â Still recommend maintaining 2-4 weeks essentials",
     globalFactors:["Global conflict count at historical high","Supply chain disruption risks rising","Geopolitical tensions increasing"],
     globalPressure:"Global supply chain pressure index elevated",
     riskSuggestMore:"Recommend increasing supply reserve period",
-    enterCalcBtn:"Enter Supply Calculator →",
-    dataSource:"Data source: ACLED, CFR Global Conflict Tracker, International Crisis Group · Updated March 2026\nCrisis Pulse · Open source · No login · No data collected · Preparedness starts with awareness",
+    enterCalcBtn:"Enter Supply Calculator â",
+    dataSource:"Data source: ACLED, CFR Global Conflict Tracker, International Crisis Group Â· Updated March 2026\nCrisis Pulse Â· Open source Â· No login Â· No data collected Â· Preparedness starts with awareness",
     tooltipLevel:"Intensity",
     calcTitle:"Family Emergency Supply Calculator",
-    calcSubtitle:"Enter family parameters, automatically generate personalized supply list · Crisis Pulse",
-    currentRisk:"Current Risk Index",suggestGe6:"Recommend ≥6 months",suggestGe3:"Recommend ≥3 months",suggestGe1:"Recommend ≥1 month",
-    supplyOf:"supply",basedOnGPS:"Based on your GPS location",globalAvg:"Global average",backToMap:"← Crisis Monitor",
+    calcSubtitle:"Enter family parameters, automatically generate personalized supply list Â· Crisis Pulse",
+    currentRisk:"Current Risk Index",suggestGe6:"Recommend â¥6 months",suggestGe3:"Recommend â¥3 months",suggestGe1:"Recommend â¥1 month",
+    supplyOf:"supply",basedOnGPS:"Based on your GPS location",globalAvg:"Global average",backToMap:"â Crisis Monitor",
     sec1:"Family Members",colName:"Name",colAge:"Age",colWeight:"Weight(kg)",colGender:"Gender",colSpecial:"Status",addMember:"+ Add Member",
     sec2:"Pets",petWeightLabel:"Weight",sec3:"Region & Housing",regionTypeLabel:"Region Type",
     labelHousing:"Housing",labelVehicles:"Vehicles",labelPeriod:"Period",
     generateBtn:"Generate Emergency Supply List",
-    calcFooter:"Based on Crisis Pulse family emergency preparedness framework · Profile → Environment → Calculate → Execute",
+    calcFooter:"Based on Crisis Pulse family emergency preparedness framework Â· Profile â Environment â Calculate â Execute",
     genderM:"Male",genderF:"Female",
     specialNone:"None",specialGrowing:"Growing",specialPregnant:"Pregnant",specialElderly:"Elderly 65+",specialChronic:"Chronic",
     regions:[
@@ -306,13 +327,13 @@ const T = {
     months3:"3 months",months6:"6 months",months9:"9 months",months12:"12 months",
     riskIndex:"Risk Index",editParams:"Edit Parameters",planPeopleSuffix:" people",petSuffix:"+1 pet",planMonthSuffix:"-month plan",
     labelDailyCal:"Daily Total Calories",labelGrain:"Grain Requirement",labelWater:"Emergency Water",labelBudget:"Total Budget",
-    grainSubPrefix:"Rice/noodles/oats ·",grainSubSuffix:"months",waterSubSuffix:"× 3L × 7 days",budgetSub:"Includes cash reserves",
-    tierUrgent:"Urgent · Complete This Week",tierImportant:"Important · Complete Within Two Weeks",tierGeneral:"General · Complete Within One Month",
+    grainSubPrefix:"Rice/noodles/oats Â·",grainSubSuffix:"months",waterSubSuffix:"Ã 3L Ã 7 days",budgetSub:"Includes cash reserves",
+    tierUrgent:"Urgent Â· Complete This Week",tierImportant:"Important Â· Complete Within Two Weeks",tierGeneral:"General Â· Complete Within One Month",
     thItem:"Item",thQty:"Quantity",thCost:"Cost",thRationale:"Rationale",
     totalUrgent:"Urgent",totalImportant:"Important",totalGeneral:"General",totalLabel:"Total",
-    notesText:"Instructions: This list calculates grain/protein/oil needs based on daily calories × reserve days. Quantities are estimates — adjust by actual diet preferences. Purchase in batches, rotate first-in-first-out.",
-    backBtn:"← Return to Edit Parameters",
-    calcFooterResult:"Crisis Pulse · Open source · No login · No data collected · Preparedness starts with awareness",
+    notesText:"Instructions: This list calculates grain/protein/oil needs based on daily calories Ã reserve days. Quantities are estimates â adjust by actual diet preferences. Purchase in batches, rotate first-in-first-out.",
+    backBtn:"â Return to Edit Parameters",
+    calcFooterResult:"Crisis Pulse Â· Open source Â· No login Â· No data collected Â· Preparedness starts with awareness",
     subTitle:"Stay Informed",
     subDesc:"Get notified when conflict levels escalate near your region.",
     subPlaceholder:"your@email.com",
@@ -332,14 +353,14 @@ const T = {
     iPetPrevMed:"Pet Preventive Med + Treats",iGasBurner:"Portable Gas Burner + Canisters",iPowerBank:"Power Bank 20000mAh",iBatteries:"Batteries + Flashlights",
     iVitamins:"Multivitamins",iCalcium:"Calcium + Vitamin D",iCoffee:"Coffee/Tea + Snacks",iGardenKit:"Vegetable Growing Kit",
     iRadio:"Battery/Hand Crank Radio",iDocPouch:"Waterproof Document Pouch",iPetEmergency:"Pet Emergency Kit",iInsurance:"Insurance Review + Emergency Plan",
-    rWater:(n,wL)=>`${n} people × 3L × 7 days = ${wL}L`,rWaterPurif:"Backup option, 5-year shelf life",
-    rRice:(kg,m)=>`${kg}kg ≈ ${m} months staple`,rPasta:kg=>`${kg}kg backup staple`,rFlour:"For bread/biscuits/noodles",rOatmeal:"Breakfast staple",
+    rWater:(n,wL)=>`${n} people Ã 3L Ã 7 days = ${wL}L`,rWaterPurif:"Backup option, 5-year shelf life",
+    rRice:(kg,m)=>`${kg}kg â ${m} months staple`,rPasta:kg=>`${kg}kg backup staple`,rFlour:"For bread/biscuits/noodles",rOatmeal:"Breakfast staple",
     rOil:(n,l)=>`${n} people monthly ~${l}L`,rTuna:"Long shelf-life protein",rBeans:"Plant protein + fiber",rTomato:"Versatile sauce/soup base",
     rMeat:"High-calorie protein",rChicken:"Stock at lower prices",rBeef:"Versatile protein",rEggs:"Growing children protein needs",rMilk:"Long shelf-life, 1-2 daily",
-    rFirstAid:"Fever/pain/diarrhea/wound care",rRx:"Consult doctor in advance",rPetDry:(g,m,kg)=>`${g}g/day × ${m}mo ≈ ${kg}kg`,rPetWet:"Rotate with dry food",
-    rCash:n=>`${n} people × $300`,rSeasoning:"Adjust by diet",rHoney:"Indefinite shelf life",rMilkPowder:"Long shelf-life calcium + protein",
-    rDriedBeans:"Sprout beans + plant protein",rDriedGoods:"Minerals + flavor",rNuts:"Quality fats",rFrzVeg:n=>`${n} people × ~1kg/week`,rFrzEdamame:"High vitamin density",
-    rFuelTank:"Incl. fuel cost",rToiletPaper:(n,m)=>`${n} people × ${m} months`,rCleaning:"",rPersonalCare:"Stock all at once",rFemHygiene:"",
+    rFirstAid:"Fever/pain/diarrhea/wound care",rRx:"Consult doctor in advance",rPetDry:(g,m,kg)=>`${g}g/day Ã ${m}mo â ${kg}kg`,rPetWet:"Rotate with dry food",
+    rCash:n=>`${n} people Ã $300`,rSeasoning:"Adjust by diet",rHoney:"Indefinite shelf life",rMilkPowder:"Long shelf-life calcium + protein",
+    rDriedBeans:"Sprout beans + plant protein",rDriedGoods:"Minerals + flavor",rNuts:"Quality fats",rFrzVeg:n=>`${n} people Ã ~1kg/week`,rFrzEdamame:"High vitamin density",
+    rFuelTank:"Incl. fuel cost",rToiletPaper:(n,m)=>`${n} people Ã ${m} months`,rCleaning:"",rPersonalCare:"Stock all at once",rFemHygiene:"",
     rPetPrevMed:"Flea/tick prevention",rGasBurner:"Backup for power outages",rPowerBank:"Phone charging",rBatteries:"20+ AA/AAA each",
     rVitamins:"Supplement veggie shortage",rCalcium:"Senior bone health",rCoffee:"Morale item",rGardenKit:"Scallions/chives/lettuce",
     rRadio:"Emergency info channel",rDocPouch:"Passport/insurance storage",rPetEmergency:"Exam + leash + water bowl",rInsurance:"Checklist item",
@@ -350,101 +371,101 @@ const T = {
     countrySelectDefault:"-- Select Country (Optional) --"
   },
   zh: {
-    pageTitle:"全球危机态势 & 家庭应急储备计算器 | Crisis Pulse",
-    mapTitle:"全球危机态势监控",
-    mapSubtitle:"Crisis Pulse — 了解世界，守护家庭",
-    liveTag:"● 2026年3月态势数据",
-    legendWar:"全面战争",legendHigh:"高强度冲突",legendMedium:"中等冲突",legendLow:"低风险",legendGeo:"关注区",
-    humanisticMsg:"在不确定的世界里，了解风险是保护家人的第一步。",
-    riskLabel:"您所在位置的风险指数",
-    gpsLocating:"📍 定位中...",
-    gpsNoSupport:"⚠️ 浏览器不支持定位，使用默认风险评估",
-    gpsError:"⚠️ 无法获取位置，使用全球平均风险评估",
-    vpTitle:"访客",
-    npTitle:"今日重要动态",
-    npArticles:"篇报道（48h内）",
-    riskExtreme:"极高风险区域 — 强烈建议立即准备至少6个月应急储备",
-    riskHigh:"高风险 — 建议准备3-6个月应急储备，优先确保水和主粮",
-    riskMedium:"中等风险 — 建议准备1-3个月基础储备作为安全缓冲",
-    riskSafe:"相对安全 — 仍建议保持2-4周基本应急物资",
-    globalFactors:["全球冲突数量历史高位","供应链中断风险上升","地缘紧张加剧"],
-    globalPressure:"全球供应链压力指数偏高",
-    riskSuggestMore:"建议提高储备周期",
-    enterCalcBtn:"进入应急储备计算器 →",
-    dataSource:"数据来源：ACLED、CFR全球冲突追踪、国际危机组织 · 更新至2026年3月\nCrisis Pulse · 开源 · 无需登录 · 不收集数据 · 备储从认知开始",
-    tooltipLevel:"烈度",
-    calcTitle:"家庭应急储备计算器",
-    calcSubtitle:"输入家庭参数，自动生成个性化储备清单 · Crisis Pulse",
-    currentRisk:"当前风险指数",suggestGe6:"建议 ≥6个月",suggestGe3:"建议 ≥3个月",suggestGe1:"建议 ≥1个月",
-    supplyOf:"储备",basedOnGPS:"基于您的GPS位置",globalAvg:"全球平均",backToMap:"← 态势图",
-    sec1:"家庭成员",colName:"称呼",colAge:"年龄",colWeight:"体重(kg)",colGender:"性别",colSpecial:"特殊状态",addMember:"+ 添加成员",
-    sec2:"宠物",petWeightLabel:"体重",sec3:"地域与居住",regionTypeLabel:"所在地区类型",
-    labelHousing:"住宅",labelVehicles:"车辆",labelPeriod:"周期",
-    generateBtn:"生成应急储备清单",
-    calcFooter:"基于 Crisis Pulse 家庭应急储备框架 · 画像→环境→计算→执行",
-    genderM:"男",genderF:"女",
-    specialNone:"无",specialGrowing:"发育期",specialPregnant:"孕期",specialElderly:"高龄65+",specialChronic:"慢性病",
+    pageTitle:"å¨çå±æºæå¿ & å®¶åº­åºæ¥å¨å¤è®¡ç®å¨ | Crisis Pulse",
+    mapTitle:"å¨çå±æºæå¿çæ§",
+    mapSubtitle:"Crisis Pulse â äºè§£ä¸çï¼å®æ¤å®¶åº­",
+    liveTag:"â 2026å¹´3ææå¿æ°æ®",
+    legendWar:"å¨é¢æäº",legendHigh:"é«å¼ºåº¦å²çª",legendMedium:"ä¸­ç­å²çª",legendLow:"ä½é£é©",legendGeo:"å³æ³¨åº",
+    humanisticMsg:"å¨ä¸ç¡®å®çä¸çéï¼äºè§£é£é©æ¯ä¿æ¤å®¶äººçç¬¬ä¸æ­¥ã",
+    riskLabel:"æ¨æå¨ä½ç½®çé£é©ææ°",
+    gpsLocating:"ð å®ä½ä¸­...",
+    gpsNoSupport:"â ï¸ æµè§å¨ä¸æ¯æå®ä½ï¼ä½¿ç¨é»è®¤é£é©è¯ä¼°",
+    gpsError:"â ï¸ æ æ³è·åä½ç½®ï¼ä½¿ç¨å¨çå¹³åé£é©è¯ä¼°",
+    vpTitle:"è®¿å®¢",
+    npTitle:"ä»æ¥éè¦å¨æ",
+    npArticles:"ç¯æ¥éï¼48håï¼",
+    riskExtreme:"æé«é£é©åºå â å¼ºçå»ºè®®ç«å³åå¤è³å°6ä¸ªæåºæ¥å¨å¤",
+    riskHigh:"é«é£é© â å»ºè®®åå¤3-6ä¸ªæåºæ¥å¨å¤ï¼ä¼åç¡®ä¿æ°´åä¸»ç²®",
+    riskMedium:"ä¸­ç­é£é© â å»ºè®®åå¤1-3ä¸ªæåºç¡å¨å¤ä½ä¸ºå®å¨ç¼å²",
+    riskSafe:"ç¸å¯¹å®å¨ â ä»å»ºè®®ä¿æ2-4å¨åºæ¬åºæ¥ç©èµ",
+    globalFactors:["å¨çå²çªæ°éåå²é«ä½","ä¾åºé¾ä¸­æ­é£é©ä¸å","å°ç¼ç´§å¼ å å§"],
+    globalPressure:"å¨çä¾åºé¾ååææ°åé«",
+    riskSuggestMore:"å»ºè®®æé«å¨å¤å¨æ",
+    enterCalcBtn:"è¿å¥åºæ¥å¨å¤è®¡ç®å¨ â",
+    dataSource:"æ°æ®æ¥æºï¼ACLEDãCFRå¨çå²çªè¿½è¸ªãå½éå±æºç»ç» Â· æ´æ°è³2026å¹´3æ\nCrisis Pulse Â· å¼æº Â· æ éç»å½ Â· ä¸æ¶éæ°æ® Â· å¤å¨ä»è®¤ç¥å¼å§",
+    tooltipLevel:"çåº¦",
+    calcTitle:"å®¶åº­åºæ¥å¨å¤è®¡ç®å¨",
+    calcSubtitle:"è¾å¥å®¶åº­åæ°ï¼èªå¨çæä¸ªæ§åå¨å¤æ¸å Â· Crisis Pulse",
+    currentRisk:"å½åé£é©ææ°",suggestGe6:"å»ºè®® â¥6ä¸ªæ",suggestGe3:"å»ºè®® â¥3ä¸ªæ",suggestGe1:"å»ºè®® â¥1ä¸ªæ",
+    supplyOf:"å¨å¤",basedOnGPS:"åºäºæ¨çGPSä½ç½®",globalAvg:"å¨çå¹³å",backToMap:"â æå¿å¾",
+    sec1:"å®¶åº­æå",colName:"ç§°å¼",colAge:"å¹´é¾",colWeight:"ä½é(kg)",colGender:"æ§å«",colSpecial:"ç¹æ®ç¶æ",addMember:"+ æ·»å æå",
+    sec2:"å® ç©",petWeightLabel:"ä½é",sec3:"å°åä¸å±ä½",regionTypeLabel:"æå¨å°åºç±»å",
+    labelHousing:"ä½å®",labelVehicles:"è½¦è¾",labelPeriod:"å¨æ",
+    generateBtn:"çæåºæ¥å¨å¤æ¸å",
+    calcFooter:"åºäº Crisis Pulse å®¶åº­åºæ¥å¨å¤æ¡æ¶ Â· ç»åâç¯å¢âè®¡ç®âæ§è¡",
+    genderM:"ç·",genderF:"å¥³",
+    specialNone:"æ ",specialGrowing:"åè²æ",specialPregnant:"å­æ",specialElderly:"é«é¾65+",specialChronic:"æ¢æ§ç",
     regions:[
-      {id:"island_import",label:"岛国/进口依赖型",desc:"如新西兰、日本、新加坡、台湾",fuelRisk:3,foodRisk:2},
-      {id:"coastal_mixed",label:"沿海/混合型",desc:"如中国沿海、韩国、欧洲",fuelRisk:2,foodRisk:1},
-      {id:"inland_self",label:"内陆/自给型",desc:"如美国中西部、中国内地",fuelRisk:1,foodRisk:1},
-      {id:"tropical",label:"热带/发展中",desc:"如东南亚、南美",fuelRisk:2,foodRisk:2}
+      {id:"island_import",label:"å²å½/è¿å£ä¾èµå",desc:"å¦æ°è¥¿å°ãæ¥æ¬ãæ°å å¡ãå°æ¹¾",fuelRisk:3,foodRisk:2},
+      {id:"coastal_mixed",label:"æ²¿æµ·/æ··åå",desc:"å¦ä¸­å½æ²¿æµ·ãé©å½ãæ¬§æ´²",fuelRisk:2,foodRisk:1},
+      {id:"inland_self",label:"åé/èªç»å",desc:"å¦ç¾å½ä¸­è¥¿é¨ãä¸­å½åå°",fuelRisk:1,foodRisk:1},
+      {id:"tropical",label:"ç­å¸¦/åå±ä¸­",desc:"å¦ä¸åäºãåç¾",fuelRisk:2,foodRisk:2}
     ],
     housings:[
-      {id:"house",label:"独栋/联排",gardenOk:true},
-      {id:"apt_big",label:"大公寓(3房+)",gardenOk:true},
-      {id:"apt_small",label:"小公寓(1-2房)",gardenOk:false}
+      {id:"house",label:"ç¬æ /èæ",gardenOk:true},
+      {id:"apt_big",label:"å¤§å¬å¯(3æ¿+)",gardenOk:true},
+      {id:"apt_small",label:"å°å¬å¯(1-2æ¿)",gardenOk:false}
     ],
     pets:[
-      {id:"none",label:"无宠物"},{id:"dog_large",label:"大型犬(25kg+)"},
-      {id:"dog_medium",label:"中型犬(10-25kg)"},{id:"dog_small",label:"小型犬(<10kg)"},{id:"cat",label:"猫"}
+      {id:"none",label:"æ å® ç©"},{id:"dog_large",label:"å¤§åç¬(25kg+)"},
+      {id:"dog_medium",label:"ä¸­åç¬(10-25kg)"},{id:"dog_small",label:"å°åç¬(<10kg)"},{id:"cat",label:"ç«"}
     ],
-    vehicles0:"0台",vehicles1:"1台",vehicles2:"2台",vehicles3:"3台",
-    months3:"3个月",months6:"6个月",months9:"9个月",months12:"12个月",
-    riskIndex:"风险指数",editParams:"修改参数",planPeopleSuffix:"人",petSuffix:"+1宠",planMonthSuffix:"个月储备方案",
-    labelDailyCal:"日均总热量",labelGrain:"主粮需求",labelWater:"应急储水",labelBudget:"总预算",
-    grainSubPrefix:"米面燕麦·",grainSubSuffix:"个月",waterSubSuffix:"×3L×7天",budgetSub:"含现金储备",
-    tierUrgent:"紧急 · 本周完成",tierImportant:"重要 · 两周内完成",tierGeneral:"一般 · 一个月内完成",
-    thItem:"物资",thQty:"数量",thCost:"金额",thRationale:"依据",
-    totalUrgent:"紧急",totalImportant:"重要",totalGeneral:"一般",totalLabel:"总计",
-    notesText:"说明：本清单基于日均热量×储备天数计算主粮/蛋白/油脂需求。数量为估算值，请根据实际饮食习惯调整。分批购入，先进先出轮换，避免过度囤积。",
-    backBtn:"← 返回修改参数",
-    calcFooterResult:"Crisis Pulse · 开源 · 无需登录 · 不收集数据 · 备储从认知开始",
-    subTitle:"保持关注",
-    subDesc:"当您所在地区的冲突等级升级时，我们会通知您。",
-    subPlaceholder:"您的邮箱地址",
-    subBtn:"订阅",
-    subSuccess:"订阅成功，注意安全。",
-    subAlready:"您已经订阅过了。",
-    subError:"出了点问题，请重试。",
-    uBottle:"桶",uBox:"盒",uBag:"袋",uPack:"包",uCan:"罐",uPkg:"包",uTray:"板",uSet:"1套",uUnit:"个",uPcs:"个",uAsNeeded:"按需",uPeople:"人",
-    iWater10L:"桶装饮用水 10L",iWaterPurif:"净水片(50片装)",iRice10kg:"大米 10kg袋装",iPasta:"意面/挂面 500g",iFlour:"面粉 1.5kg",iOatmeal:"燕麦片 1kg",
-    iOil:"食用油 2L",iTuna:"金枪鱼罐头 95g",iBeans:"豆类罐头 400g",iTomato:"番茄罐头 400g",iMeat:"午餐肉/肉罐头",iChicken:"冷冻鸡肉 1kg",iBeef:"冷冻牛肉糜 500g",
-    iEggs:"鸡蛋(30枚装)",iMilk:"UHT牛奶 1L",iFirstAid:"基础药品套装",iRx:"处方药(额外1月)",
-    iDogFood:"狗粮",iCatFood:"猫粮",iDogWet:"狗罐头湿粮",iCatWet:"猫罐头湿粮",iCash:"小面额现金",
-    iSeasoning:"调味品套装(盐/糖/酱油/醋/香料)",iHoney:"蜂蜜 500g",iMilkPowder:"奶粉 1kg(全脂)",
-    iDriedBeans:"干豆类 1kg",iDriedGoods:"干货(紫菜/海带/香菇)",iNuts:"坚果 1kg",
-    iFrzVeg:"冷冻蔬菜 1kg",iFrzEdamame:"冷冻毛豆/西兰花",iFuelTank:"备用油桶 20L",
-    iToiletPaper:"卫生纸(12卷装)",iCleaning:"洗涤用品套装",iPersonalCare:"个人护理套装",iFemHygiene:"女性卫生用品",
-    iPetPrevMed:"宠物预防药+零食",iGasBurner:"便携燃气炉+气罐",iPowerBank:"充电宝 20000mAh",iBatteries:"电池+手电筒",
-    iVitamins:"综合维生素",iCalcium:"钙片+维D",iCoffee:"咖啡/茶+零食",iGardenKit:"种菜套装",
-    iRadio:"收音机(电池/手摇)",iDocPouch:"防水文件袋",iPetEmergency:"宠物应急包",iInsurance:"保险检查+应急计划",
-    rWater:(n,wL)=>`${n}人×3L×7天=${wL}L`,rWaterPurif:"备用方案，保质5年",
-    rRice:(kg,m)=>`${kg}kg≈${m}月主粮`,rPasta:kg=>`${kg}kg轮换主食`,rFlour:"做饼/馒头/面条",rOatmeal:"早餐主力",
-    rOil:(n,l)=>`${n}人月耗~${l}L`,rTuna:"长保质蛋白",rBeans:"植物蛋白+纤维",rTomato:"百搭酱/汤底",
-    rMeat:"高热量蛋白",rChicken:"趁低价囤入",rBeef:"百搭蛋白",rEggs:"发育期蛋白需求高",rMilk:"长保质，每天1-2杯",
-    rFirstAid:"退烧/止痛/止泻/外伤",rRx:"跟医生提前沟通",rPetDry:(g,m,kg)=>`${g}g/天×${m}月≈${kg}kg`,rPetWet:"轮换/拌食",
-    rCash:n=>`${n}人×$300`,rSeasoning:"按饮食习惯配",rHoney:"无限期保质",rMilkPowder:"长保质钙+蛋白",
-    rDriedBeans:"发豆芽+植物蛋白",rDriedGoods:"矿物质+提鲜",rNuts:"优质脂肪",rFrzVeg:n=>`${n}人×~1kg/周`,rFrzEdamame:"维生素密度高",
-    rFuelTank:"含油费",rToiletPaper:(n,m)=>`${n}人×${m}月`,rCleaning:"",rPersonalCare:"一次性补齐",rFemHygiene:"",
-    rPetPrevMed:"跳蚤/蜱虫预防",rGasBurner:"停电备用",rPowerBank:"手机充电",rBatteries:"AA/AAA各20+",
-    rVitamins:"补充蔬菜不足",rCalcium:"中老年骨骼",rCoffee:"士气物资",rGardenKit:"葱/韭菜/生菜",
-    rRadio:"极端情况信息通道",rDocPouch:"护照/保单保管",rPetEmergency:"体检+牵引绳+水碗",rInsurance:"检查清单项",
-    memberDefault:"成员",perDay:"/天",ageUnit:"岁",
-    sourcesTitle:"信息来源",
-    gpsYourLocation:"您的位置",
-    labelCountry:"国家/地区",
-    countrySelectDefault:"-- 选择国家（可选）--"
+    vehicles0:"0å°",vehicles1:"1å°",vehicles2:"2å°",vehicles3:"3å°",
+    months3:"3ä¸ªæ",months6:"6ä¸ªæ",months9:"9ä¸ªæ",months12:"12ä¸ªæ",
+    riskIndex:"é£é©ææ°",editParams:"ä¿®æ¹åæ°",planPeopleSuffix:"äºº",petSuffix:"+1å® ",planMonthSuffix:"ä¸ªæå¨å¤æ¹æ¡",
+    labelDailyCal:"æ¥åæ»ç­é",labelGrain:"ä¸»ç²®éæ±",labelWater:"åºæ¥å¨æ°´",labelBudget:"æ»é¢ç®",
+    grainSubPrefix:"ç±³é¢çéº¦Â·",grainSubSuffix:"ä¸ªæ",waterSubSuffix:"Ã3LÃ7å¤©",budgetSub:"å«ç°éå¨å¤",
+    tierUrgent:"ç´§æ¥ Â· æ¬å¨å®æ",tierImportant:"éè¦ Â· ä¸¤å¨åå®æ",tierGeneral:"ä¸è¬ Â· ä¸ä¸ªæåå®æ",
+    thItem:"ç©èµ",thQty:"æ°é",thCost:"éé¢",thRationale:"ä¾æ®",
+    totalUrgent:"ç´§æ¥",totalImportant:"éè¦",totalGeneral:"ä¸è¬",totalLabel:"æ»è®¡",
+    notesText:"è¯´æï¼æ¬æ¸ååºäºæ¥åç­éÃå¨å¤å¤©æ°è®¡ç®ä¸»ç²®/èç½/æ²¹èéæ±ãæ°éä¸ºä¼°ç®å¼ï¼è¯·æ ¹æ®å®éé¥®é£ä¹ æ¯è°æ´ãåæ¹è´­å¥ï¼åè¿ååºè½®æ¢ï¼é¿åè¿åº¦å¤ç§¯ã",
+    backBtn:"â è¿åä¿®æ¹åæ°",
+    calcFooterResult:"Crisis Pulse Â· å¼æº Â· æ éç»å½ Â· ä¸æ¶éæ°æ® Â· å¤å¨ä»è®¤ç¥å¼å§",
+    subTitle:"ä¿æå³æ³¨",
+    subDesc:"å½æ¨æå¨å°åºçå²çªç­çº§åçº§æ¶ï¼æä»¬ä¼éç¥æ¨ã",
+    subPlaceholder:"æ¨çé®ç®±å°å",
+    subBtn:"è®¢é",
+    subSuccess:"è®¢éæåï¼æ³¨æå®å¨ã",
+    subAlready:"æ¨å·²ç»è®¢éè¿äºã",
+    subError:"åºäºç¹é®é¢ï¼è¯·éè¯ã",
+    uBottle:"æ¡¶",uBox:"ç",uBag:"è¢",uPack:"å",uCan:"ç½",uPkg:"å",uTray:"æ¿",uSet:"1å¥",uUnit:"ä¸ª",uPcs:"ä¸ª",uAsNeeded:"æé",uPeople:"äºº",
+    iWater10L:"æ¡¶è£é¥®ç¨æ°´ 10L",iWaterPurif:"åæ°´ç(50çè£)",iRice10kg:"å¤§ç±³ 10kgè¢è£",iPasta:"æé¢/æé¢ 500g",iFlour:"é¢ç² 1.5kg",iOatmeal:"çéº¦ç 1kg",
+    iOil:"é£ç¨æ²¹ 2L",iTuna:"éæªé±¼ç½å¤´ 95g",iBeans:"è±ç±»ç½å¤´ 400g",iTomato:"çªèç½å¤´ 400g",iMeat:"åé¤è/èç½å¤´",iChicken:"å·å»é¸¡è 1kg",iBeef:"å·å»çèç³ 500g",
+    iEggs:"é¸¡è(30æè£)",iMilk:"UHTçå¥¶ 1L",iFirstAid:"åºç¡è¯åå¥è£",iRx:"å¤æ¹è¯(é¢å¤1æ)",
+    iDogFood:"çç²®",iCatFood:"ç«ç²®",iDogWet:"çç½å¤´æ¹¿ç²®",iCatWet:"ç«ç½å¤´æ¹¿ç²®",iCash:"å°é¢é¢ç°é",
+    iSeasoning:"è°å³åå¥è£(ç/ç³/é±æ²¹/é/é¦æ)",iHoney:"èè 500g",iMilkPowder:"å¥¶ç² 1kg(å¨è)",
+    iDriedBeans:"å¹²è±ç±» 1kg",iDriedGoods:"å¹²è´§(ç´«è/æµ·å¸¦/é¦è)",iNuts:"åæ 1kg",
+    iFrzVeg:"å·å»è¬è 1kg",iFrzEdamame:"å·å»æ¯è±/è¥¿å°è±",iFuelTank:"å¤ç¨æ²¹æ¡¶ 20L",
+    iToiletPaper:"å«ççº¸(12å·è£)",iCleaning:"æ´æ¶¤ç¨åå¥è£",iPersonalCare:"ä¸ªäººæ¤çå¥è£",iFemHygiene:"å¥³æ§å«çç¨å",
+    iPetPrevMed:"å® ç©é¢é²è¯+é¶é£",iGasBurner:"ä¾¿æºçæ°ç+æ°ç½",iPowerBank:"åçµå® 20000mAh",iBatteries:"çµæ± +æçµç­",
+    iVitamins:"ç»¼åç»´çç´ ",iCalcium:"éç+ç»´D",iCoffee:"åå¡/è¶+é¶é£",iGardenKit:"ç§èå¥è£",
+    iRadio:"æ¶é³æº(çµæ± /ææ)",iDocPouch:"é²æ°´æä»¶è¢",iPetEmergency:"å® ç©åºæ¥å",iInsurance:"ä¿é©æ£æ¥+åºæ¥è®¡å",
+    rWater:(n,wL)=>`${n}äººÃ3LÃ7å¤©=${wL}L`,rWaterPurif:"å¤ç¨æ¹æ¡ï¼ä¿è´¨5å¹´",
+    rRice:(kg,m)=>`${kg}kgâ${m}æä¸»ç²®`,rPasta:kg=>`${kg}kgè½®æ¢ä¸»é£`,rFlour:"åé¥¼/é¦å¤´/é¢æ¡",rOatmeal:"æ©é¤ä¸»å",
+    rOil:(n,l)=>`${n}äººæè~${l}L`,rTuna:"é¿ä¿è´¨èç½",rBeans:"æ¤ç©èç½+çº¤ç»´",rTomato:"ç¾æ­é±/æ±¤åº",
+    rMeat:"é«ç­éèç½",rChicken:"è¶ä½ä»·å¤å¥",rBeef:"ç¾æ­èç½",rEggs:"åè²æèç½éæ±é«",rMilk:"é¿ä¿è´¨ï¼æ¯å¤©1-2æ¯",
+    rFirstAid:"éç§/æ­¢ç/æ­¢æ³»/å¤ä¼¤",rRx:"è·å»çæåæ²é",rPetDry:(g,m,kg)=>`${g}g/å¤©Ã${m}æâ${kg}kg`,rPetWet:"è½®æ¢/æé£",
+    rCash:n=>`${n}äººÃ$300`,rSeasoning:"æé¥®é£ä¹ æ¯é",rHoney:"æ éæä¿è´¨",rMilkPowder:"é¿ä¿è´¨é+èç½",
+    rDriedBeans:"åè±è½+æ¤ç©èç½",rDriedGoods:"ç¿ç©è´¨+æé²",rNuts:"ä¼è´¨èèª",rFrzVeg:n=>`${n}äººÃ~1kg/å¨`,rFrzEdamame:"ç»´çç´ å¯åº¦é«",
+    rFuelTank:"å«æ²¹è´¹",rToiletPaper:(n,m)=>`${n}äººÃ${m}æ`,rCleaning:"",rPersonalCare:"ä¸æ¬¡æ§è¡¥é½",rFemHygiene:"",
+    rPetPrevMed:"è·³è¤/è±è«é¢é²",rGasBurner:"åçµå¤ç¨",rPowerBank:"ææºåçµ",rBatteries:"AA/AAAå20+",
+    rVitamins:"è¡¥åè¬èä¸è¶³",rCalcium:"ä¸­èå¹´éª¨éª¼",rCoffee:"å£«æ°ç©èµ",rGardenKit:"è±/é­è/çè",
+    rRadio:"æç«¯æåµä¿¡æ¯éé",rDocPouch:"æ¤ç§/ä¿åä¿ç®¡",rPetEmergency:"ä½æ£+çµå¼ç»³+æ°´ç¢",rInsurance:"æ£æ¥æ¸åé¡¹",
+    memberDefault:"æå",perDay:"/å¤©",ageUnit:"å²",
+    sourcesTitle:"ä¿¡æ¯æ¥æº",
+    gpsYourLocation:"æ¨çä½ç½®",
+    labelCountry:"å½å®¶/å°åº",
+    countrySelectDefault:"-- éæ©å½å®¶ï¼å¯éï¼--"
   }
 };
 
@@ -483,9 +504,9 @@ function updateMapPageText() {
   let ds = t('dataSource');
   if(lastUpdatedDate){
     const dateStr = lang==='zh'
-      ? `更新至${lastUpdatedDate.getFullYear()}年${lastUpdatedDate.getMonth()+1}月${lastUpdatedDate.getDate()}日`
+      ? `æ´æ°è³${lastUpdatedDate.getFullYear()}å¹´${lastUpdatedDate.getMonth()+1}æ${lastUpdatedDate.getDate()}æ¥`
       : `Updated ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][lastUpdatedDate.getMonth()]} ${lastUpdatedDate.getDate()}, ${lastUpdatedDate.getFullYear()}`;
-    ds = ds.replace(/Updated March 2026|更新至2026年3月/, dateStr);
+    ds = ds.replace(/Updated March 2026|æ´æ°è³2026å¹´3æ/, dateStr);
   }
   document.getElementById('dataSource').innerHTML = ds.replace('\n','<br>');
   if (riskIndex !== null) { calculateRisk(userLocation || null); }
@@ -548,9 +569,9 @@ let CONFLICTS = [
 
 // Chinese translations for conflict data
 const CONFLICT_ZH = {
-  names:{"Russia-Ukraine War":"俄乌战争","Israel-Palestine":"巴以冲突","US-Israel-Iran Conflict":"美以伊冲突","Yemen Civil War":"也门内战","Sudan Civil War":"苏丹内战","Myanmar Civil War":"缅甸内战","Syria Conflict":"叙利亚冲突","Lebanon Crisis":"黎巴嫩危机","Eastern DRC Conflict":"刚果(金)东部冲突","Sahel Region Crisis":"萨赫勒地区危机","Somalia":"索马里","Northern Nigeria":"尼日利亚北部","Ethiopia":"埃塞俄比亚","Afghanistan":"阿富汗","Northwest Pakistan":"巴基斯坦西北部","Haiti":"海地","Colombia":"哥伦比亚","Mexico":"墨西哥","Iraq":"伊拉克","Libya":"利比亚","Southern Philippines":"菲律宾南部","Kashmir India-Pakistan":"克什米尔印巴争端","Taiwan Strait":"台湾海峡","Korean Peninsula":"朝鲜半岛","South China Sea":"南海"},
-  types:{"Full-Scale War":"全面战争","High Intensity":"高强度冲突","Medium Conflict":"中等冲突","Low Risk":"低风险","Geopolitical Tension":"地缘紧张"},
-  descs:{"Largest conventional war in Europe, ongoing fifth year":"欧洲最大规模常规战争，持续第五年","Gaza humanitarian crisis continuing":"加沙人道主义危机持续","Regional escalation after February 2026 strikes":"2026年2月打击后地区局势升级","Houthi attacks on Red Sea shipping":"胡塞武装袭击红海航运","SAF vs RSF conflict, over 10 million displaced":"苏丹武装力量与快速支援部队冲突，超千万人流离失所","Military junta vs multiple resistance forces":"军政府对抗多支抵抗力量","Multiple factions ongoing":"多派系持续冲突","Israel-Hezbollah conflict spillover":"以色列-真主党冲突外溢","M23 militants vs government forces":"M23武装与政府军冲突","Mali/Burkina Faso/Niger armed conflicts":"马里/布基纳法索/尼日尔武装冲突","Al-Shabaab militant activity":"青年党武装活动","Boko Haram remnants and herder clashes":"博科圣地残余及牧民冲突","Fragile Tigray peace, scattered conflicts":"提格雷脆弱和平，零星冲突","Unstable security under Taliban":"塔利班统治下安全局势不稳","TTP militant attacks":"巴基斯坦塔利班武装袭击","Gang violence and state collapse":"帮派暴力与国家崩溃","Fragile peace, armed groups in some regions":"脆弱和平，部分地区仍有武装组织","Drug cartel violence":"贩毒集团暴力","ISIS remnants and militia clashes":"ISIS残余与民兵冲突","Divided government and militia standoff":"政府分裂与民兵对峙","Mindanao armed remnants":"棉兰老岛武装残余","Ongoing border tensions":"持续的边境紧张","Military exercises, sustained tension":"军事演习，持续紧张","Missile tests and military standoff":"导弹试射与军事对峙","Multiple territorial disputes":"多重领土争端"}
+  names:{"Russia-Ukraine War":"ä¿ä¹æäº","Israel-Palestine":"å·´ä»¥å²çª","US-Israel-Iran Conflict":"ç¾ä»¥ä¼å²çª","Yemen Civil War":"ä¹é¨åæ","Sudan Civil War":"èä¸¹åæ","Myanmar Civil War":"ç¼ç¸åæ","Syria Conflict":"åå©äºå²çª","Lebanon Crisis":"é»å·´å«©å±æº","Eastern DRC Conflict":"åæ(é)ä¸é¨å²çª","Sahel Region Crisis":"è¨èµ«åå°åºå±æº","Somalia":"ç´¢é©¬é","Northern Nigeria":"å°¼æ¥å©äºåé¨","Ethiopia":"åå¡ä¿æ¯äº","Afghanistan":"é¿å¯æ±","Northwest Pakistan":"å·´åºæ¯å¦è¥¿åé¨","Haiti":"æµ·å°","Colombia":"å¥ä¼¦æ¯äº","Mexico":"å¢¨è¥¿å¥","Iraq":"ä¼æå","Libya":"å©æ¯äº","Southern Philippines":"è²å¾å®¾åé¨","Kashmir India-Pakistan":"åä»ç±³å°å°å·´äºç«¯","Taiwan Strait":"å°æ¹¾æµ·å³¡","Korean Peninsula":"æé²åå²","South China Sea":"åæµ·"},
+  types:{"Full-Scale War":"å¨é¢æäº","High Intensity":"é«å¼ºåº¦å²çª","Medium Conflict":"ä¸­ç­å²çª","Low Risk":"ä½é£é©","Geopolitical Tension":"å°ç¼ç´§å¼ "},
+  descs:{"Largest conventional war in Europe, ongoing fifth year":"æ¬§æ´²æå¤§è§æ¨¡å¸¸è§æäºï¼æç»­ç¬¬äºå¹´","Gaza humanitarian crisis continuing":"å æ²äººéä¸»ä¹å±æºæç»­","Regional escalation after February 2026 strikes":"2026å¹´2ææå»åå°åºå±å¿åçº§","Houthi attacks on Red Sea shipping":"è¡å¡æ­¦è£è¢­å»çº¢æµ·èªè¿","SAF vs RSF conflict, over 10 million displaced":"èä¸¹æ­¦è£åéä¸å¿«éæ¯æ´é¨éå²çªï¼è¶åä¸äººæµç¦»å¤±æ","Military junta vs multiple resistance forces":"åæ¿åºå¯¹æå¤æ¯æµæåé","Multiple factions ongoing":"å¤æ´¾ç³»æç»­å²çª","Israel-Hezbollah conflict spillover":"ä»¥è²å-çä¸»åå²çªå¤æº¢","M23 militants vs government forces":"M23æ­¦è£ä¸æ¿åºåå²çª","Mali/Burkina Faso/Niger armed conflicts":"é©¬é/å¸åºçº³æ³ç´¢/å°¼æ¥å°æ­¦è£å²çª","Al-Shabaab militant activity":"éå¹´åæ­¦è£æ´»å¨","Boko Haram remnants and herder clashes":"åç§å£å°æ®ä½åç§æ°å²çª","Fragile Tigray peace, scattered conflicts":"ææ ¼é·èå¼±åå¹³ï¼é¶æå²çª","Unstable security under Taliban":"å¡å©ç­ç»æ²»ä¸å®å¨å±å¿ä¸ç¨³","TTP militant attacks":"å·´åºæ¯å¦å¡å©ç­æ­¦è£è¢­å»","Gang violence and state collapse":"å¸®æ´¾æ´åä¸å½å®¶å´©æº","Fragile peace, armed groups in some regions":"èå¼±åå¹³ï¼é¨åå°åºä»ææ­¦è£ç»ç»","Drug cartel violence":"è´©æ¯éå¢æ´å","ISIS remnants and militia clashes":"ISISæ®ä½ä¸æ°åµå²çª","Divided government and militia standoff":"æ¿åºåè£ä¸æ°åµå¯¹å³","Mindanao armed remnants":"æ£å°èå²æ­¦è£æ®ä½","Ongoing border tensions":"æç»­çè¾¹å¢ç´§å¼ ","Military exercises, sustained tension":"åäºæ¼ä¹ ï¼æç»­ç´§å¼ ","Missile tests and military standoff":"å¯¼å¼¹è¯å°ä¸åäºå¯¹å³","Multiple territorial disputes":"å¤éé¢åäºç«¯"}
 };
 function tConflict(field, val){ return lang==='zh' ? (CONFLICT_ZH[field]?.[val] || val) : val; }
 
@@ -565,94 +586,94 @@ const COUNTRY_RISK = {
 };
 
 const COUNTRY_PROFILES = {
-  "US":{en:"United States",zh:"美国",currency:"USD",symbol:"$",rate:1,region:"inland_self",
+  "US":{en:"United States",zh:"ç¾å½",currency:"USD",symbol:"$",rate:1,region:"inland_self",
     staples:{rice:0.25,pasta:0.30,flour:0.30,oat:0.15},
     proteins:{tuna:0.25,beans:0.25,meat:0.25,chicken:0.15,beef:0.10},
-    culturalItems:[{en:"Peanut Butter 500g",zh:"花生酱 500g",q:3,c:5,r:{en:"American staple protein",zh:"美式主力蛋白"}},{en:"Maple Syrup",zh:"枫糖浆",q:2,c:8,r:{en:"Long shelf life sweetener",zh:"长保质甜味剂"}}]},
-  "CN":{en:"China",zh:"中国",currency:"CNY",symbol:"¥",rate:7.2,region:"coastal_mixed",
+    culturalItems:[{en:"Peanut Butter 500g",zh:"è±çé± 500g",q:3,c:5,r:{en:"American staple protein",zh:"ç¾å¼ä¸»åèç½"}},{en:"Maple Syrup",zh:"æ«ç³æµ",q:2,c:8,r:{en:"Long shelf life sweetener",zh:"é¿ä¿è´¨çå³å"}}]},
+  "CN":{en:"China",zh:"ä¸­å½",currency:"CNY",symbol:"Â¥",rate:7.2,region:"coastal_mixed",
     staples:{rice:0.60,pasta:0.25,flour:0.10,oat:0.05},
     proteins:{tuna:0.15,beans:0.20,meat:0.25,chicken:0.25,beef:0.15},
-    culturalItems:[{en:"Soy Sauce 500ml",zh:"酱油 500ml",q:3,c:2,r:{en:"Essential Chinese seasoning",zh:"中式必备调味"}},{en:"Dried Noodles 1kg",zh:"挂面 1kg",q:5,c:1.5,r:{en:"Quick staple food",zh:"速食主粮"}},{en:"Preserved Eggs (6pk)",zh:"皮蛋/咸蛋(6枚)",q:4,c:2,r:{en:"Long shelf-life protein",zh:"长保质蛋白"}}]},
-  "JP":{en:"Japan",zh:"日本",currency:"JPY",symbol:"¥",rate:155,region:"island_import",
+    culturalItems:[{en:"Soy Sauce 500ml",zh:"é±æ²¹ 500ml",q:3,c:2,r:{en:"Essential Chinese seasoning",zh:"ä¸­å¼å¿å¤è°å³"}},{en:"Dried Noodles 1kg",zh:"æé¢ 1kg",q:5,c:1.5,r:{en:"Quick staple food",zh:"éé£ä¸»ç²®"}},{en:"Preserved Eggs (6pk)",zh:"ç®è/å¸è(6æ)",q:4,c:2,r:{en:"Long shelf-life protein",zh:"é¿ä¿è´¨èç½"}}]},
+  "JP":{en:"Japan",zh:"æ¥æ¬",currency:"JPY",symbol:"Â¥",rate:155,region:"island_import",
     staples:{rice:0.75,pasta:0.15,flour:0.05,oat:0.05},
     proteins:{tuna:0.30,beans:0.10,meat:0.20,chicken:0.20,beef:0.20},
-    culturalItems:[{en:"Miso Paste 1kg",zh:"味噌 1kg",q:2,c:4,r:{en:"Essential Japanese seasoning",zh:"日式必备调味"}},{en:"Instant Ramen (5pk)",zh:"方便面(5包装)",q:8,c:3,r:{en:"Emergency quick meal",zh:"应急速食"}},{en:"Soy Sauce 1L",zh:"酱油 1L",q:2,c:3,r:{en:"Basic seasoning",zh:"基础调味"}}]},
-  "NZ":{en:"New Zealand",zh:"新西兰",currency:"NZD",symbol:"NZ$",rate:1.7,region:"island_import",
+    culturalItems:[{en:"Miso Paste 1kg",zh:"å³å 1kg",q:2,c:4,r:{en:"Essential Japanese seasoning",zh:"æ¥å¼å¿å¤è°å³"}},{en:"Instant Ramen (5pk)",zh:"æ¹ä¾¿é¢(5åè£)",q:8,c:3,r:{en:"Emergency quick meal",zh:"åºæ¥éé£"}},{en:"Soy Sauce 1L",zh:"é±æ²¹ 1L",q:2,c:3,r:{en:"Basic seasoning",zh:"åºç¡è°å³"}}]},
+  "NZ":{en:"New Zealand",zh:"æ°è¥¿å°",currency:"NZD",symbol:"NZ$",rate:1.7,region:"island_import",
     staples:{rice:0.25,pasta:0.35,flour:0.25,oat:0.15},
     proteins:{tuna:0.20,beans:0.20,meat:0.25,chicken:0.20,beef:0.15},
-    culturalItems:[{en:"Vegemite/Marmite 250g",zh:"Vegemite/Marmite 250g",q:2,c:5,r:{en:"NZ/AU staple spread",zh:"新澳必备涂酱"}},{en:"Lamb Canned 400g",zh:"羊肉罐头 400g",q:6,c:7,r:{en:"Local protein source",zh:"当地蛋白来源"}}]},
-  "KR":{en:"South Korea",zh:"韩国",currency:"KRW",symbol:"₩",rate:1350,region:"coastal_mixed",
+    culturalItems:[{en:"Vegemite/Marmite 250g",zh:"Vegemite/Marmite 250g",q:2,c:5,r:{en:"NZ/AU staple spread",zh:"æ°æ¾³å¿å¤æ¶é±"}},{en:"Lamb Canned 400g",zh:"ç¾èç½å¤´ 400g",q:6,c:7,r:{en:"Local protein source",zh:"å½å°èç½æ¥æº"}}]},
+  "KR":{en:"South Korea",zh:"é©å½",currency:"KRW",symbol:"â©",rate:1350,region:"coastal_mixed",
     staples:{rice:0.70,pasta:0.15,flour:0.10,oat:0.05},
     proteins:{tuna:0.25,beans:0.15,meat:0.25,chicken:0.20,beef:0.15},
-    culturalItems:[{en:"Gochujang 500g",zh:"韩式辣酱 500g",q:2,c:4,r:{en:"Korean essential sauce",zh:"韩式必备酱料"}},{en:"Instant Ramen (5pk)",zh:"方便面(5包装)",q:10,c:3,r:{en:"Korean staple emergency food",zh:"韩式应急主食"}},{en:"Kimchi 1kg (canned)",zh:"泡菜罐头 1kg",q:4,c:5,r:{en:"Fermented vegetable",zh:"发酵蔬菜"}}]},
-  "GB":{en:"United Kingdom",zh:"英国",currency:"GBP",symbol:"£",rate:0.79,region:"coastal_mixed",
+    culturalItems:[{en:"Gochujang 500g",zh:"é©å¼è¾£é± 500g",q:2,c:4,r:{en:"Korean essential sauce",zh:"é©å¼å¿å¤é±æ"}},{en:"Instant Ramen (5pk)",zh:"æ¹ä¾¿é¢(5åè£)",q:10,c:3,r:{en:"Korean staple emergency food",zh:"é©å¼åºæ¥ä¸»é£"}},{en:"Kimchi 1kg (canned)",zh:"æ³¡èç½å¤´ 1kg",q:4,c:5,r:{en:"Fermented vegetable",zh:"åéµè¬è"}}]},
+  "GB":{en:"United Kingdom",zh:"è±å½",currency:"GBP",symbol:"Â£",rate:0.79,region:"coastal_mixed",
     staples:{rice:0.20,pasta:0.30,flour:0.30,oat:0.20},
     proteins:{tuna:0.25,beans:0.30,meat:0.20,chicken:0.15,beef:0.10},
-    culturalItems:[{en:"Baked Beans 400g",zh:"茄汁焗豆 400g",q:12,c:1,r:{en:"British staple",zh:"英式主食"}},{en:"Tea Bags (240pk)",zh:"茶包(240袋)",q:2,c:5,r:{en:"Essential British supply",zh:"英式必需品"}}]},
-  "AU":{en:"Australia",zh:"澳大利亚",currency:"AUD",symbol:"A$",rate:1.55,region:"coastal_mixed",
+    culturalItems:[{en:"Baked Beans 400g",zh:"èæ±çè± 400g",q:12,c:1,r:{en:"British staple",zh:"è±å¼ä¸»é£"}},{en:"Tea Bags (240pk)",zh:"è¶å(240è¢)",q:2,c:5,r:{en:"Essential British supply",zh:"è±å¼å¿éå"}}]},
+  "AU":{en:"Australia",zh:"æ¾³å¤§å©äº",currency:"AUD",symbol:"A$",rate:1.55,region:"coastal_mixed",
     staples:{rice:0.25,pasta:0.30,flour:0.30,oat:0.15},
     proteins:{tuna:0.25,beans:0.20,meat:0.25,chicken:0.15,beef:0.15},
-    culturalItems:[{en:"Vegemite 220g",zh:"Vegemite 220g",q:2,c:5,r:{en:"Australian staple",zh:"澳洲必备"}},{en:"Tim Tams",zh:"Tim Tam巧克力饼干",q:4,c:4,r:{en:"Morale food",zh:"士气食品"}}]},
-  "IN":{en:"India",zh:"印度",currency:"INR",symbol:"₹",rate:83,region:"tropical",
+    culturalItems:[{en:"Vegemite 220g",zh:"Vegemite 220g",q:2,c:5,r:{en:"Australian staple",zh:"æ¾³æ´²å¿å¤"}},{en:"Tim Tams",zh:"Tim Tamå·§ååé¥¼å¹²",q:4,c:4,r:{en:"Morale food",zh:"å£«æ°é£å"}}]},
+  "IN":{en:"India",zh:"å°åº¦",currency:"INR",symbol:"â¹",rate:83,region:"tropical",
     staples:{rice:0.40,pasta:0.05,flour:0.45,oat:0.10},
     proteins:{tuna:0.05,beans:0.45,meat:0.10,chicken:0.25,beef:0.15},
-    culturalItems:[{en:"Dal/Lentils 1kg",zh:"扁豆/豆类 1kg",q:8,c:2,r:{en:"Indian protein staple",zh:"印度主力蛋白"}},{en:"Spice Kit (turmeric/cumin/chili)",zh:"香料套装(姜黄/孜然/辣椒)",q:1,c:10,r:{en:"Essential Indian cooking",zh:"印度烹饪必备"}},{en:"Ghee 1L",zh:"酥油 1L",q:2,c:8,r:{en:"Indian cooking fat",zh:"印度烹饪油脂"}}]},
-  "DE":{en:"Germany",zh:"德国",currency:"EUR",symbol:"€",rate:0.92,region:"coastal_mixed",
+    culturalItems:[{en:"Dal/Lentils 1kg",zh:"æè±/è±ç±» 1kg",q:8,c:2,r:{en:"Indian protein staple",zh:"å°åº¦ä¸»åèç½"}},{en:"Spice Kit (turmeric/cumin/chili)",zh:"é¦æå¥è£(å§é»/å­ç¶/è¾£æ¤)",q:1,c:10,r:{en:"Essential Indian cooking",zh:"å°åº¦ç¹é¥ªå¿å¤"}},{en:"Ghee 1L",zh:"é¥æ²¹ 1L",q:2,c:8,r:{en:"Indian cooking fat",zh:"å°åº¦ç¹é¥ªæ²¹è"}}]},
+  "DE":{en:"Germany",zh:"å¾·å½",currency:"EUR",symbol:"â¬",rate:0.92,region:"coastal_mixed",
     staples:{rice:0.15,pasta:0.35,flour:0.35,oat:0.15},
     proteins:{tuna:0.20,beans:0.25,meat:0.25,chicken:0.15,beef:0.15},
-    culturalItems:[{en:"Bread Mix 1kg",zh:"面包预拌粉 1kg",q:5,c:3,r:{en:"German bread staple",zh:"德式面包主食"}},{en:"Sauerkraut 700g",zh:"德式酸菜 700g",q:6,c:2,r:{en:"Fermented vegetable, long shelf life",zh:"发酵蔬菜，长保质"}}]},
-  "FR":{en:"France",zh:"法国",currency:"EUR",symbol:"€",rate:0.92,region:"coastal_mixed",
+    culturalItems:[{en:"Bread Mix 1kg",zh:"é¢åé¢æç² 1kg",q:5,c:3,r:{en:"German bread staple",zh:"å¾·å¼é¢åä¸»é£"}},{en:"Sauerkraut 700g",zh:"å¾·å¼é¸è 700g",q:6,c:2,r:{en:"Fermented vegetable, long shelf life",zh:"åéµè¬èï¼é¿ä¿è´¨"}}]},
+  "FR":{en:"France",zh:"æ³å½",currency:"EUR",symbol:"â¬",rate:0.92,region:"coastal_mixed",
     staples:{rice:0.15,pasta:0.40,flour:0.30,oat:0.15},
     proteins:{tuna:0.30,beans:0.20,meat:0.20,chicken:0.15,beef:0.15},
-    culturalItems:[{en:"UHT Milk 1L (extra)",zh:"常温牛奶 1L(额外)",q:12,c:1.5,r:{en:"French essential",zh:"法式必需"}},{en:"Sardines 120g",zh:"沙丁鱼罐头 120g",q:12,c:2,r:{en:"French protein staple",zh:"法式蛋白主食"}}]},
-  "TW":{en:"Taiwan",zh:"台湾",currency:"TWD",symbol:"NT$",rate:32,region:"island_import",
+    culturalItems:[{en:"UHT Milk 1L (extra)",zh:"å¸¸æ¸©çå¥¶ 1L(é¢å¤)",q:12,c:1.5,r:{en:"French essential",zh:"æ³å¼å¿é"}},{en:"Sardines 120g",zh:"æ²ä¸é±¼ç½å¤´ 120g",q:12,c:2,r:{en:"French protein staple",zh:"æ³å¼èç½ä¸»é£"}}]},
+  "TW":{en:"Taiwan",zh:"å°æ¹¾",currency:"TWD",symbol:"NT$",rate:32,region:"island_import",
     staples:{rice:0.60,pasta:0.25,flour:0.10,oat:0.05},
     proteins:{tuna:0.20,beans:0.15,meat:0.25,chicken:0.25,beef:0.15},
-    culturalItems:[{en:"Soy Sauce 500ml",zh:"酱油 500ml",q:3,c:2,r:{en:"Essential seasoning",zh:"必备调味"}},{en:"Instant Noodles (5pk)",zh:"方便面(5包装)",q:8,c:2.5,r:{en:"Emergency quick meal",zh:"应急速食"}},{en:"Dried Noodles 1kg",zh:"面线/米粉 1kg",q:5,c:1.5,r:{en:"Quick staple",zh:"速食主粮"}}]},
-  "SG":{en:"Singapore",zh:"新加坡",currency:"SGD",symbol:"S$",rate:1.35,region:"island_import",
+    culturalItems:[{en:"Soy Sauce 500ml",zh:"é±æ²¹ 500ml",q:3,c:2,r:{en:"Essential seasoning",zh:"å¿å¤è°å³"}},{en:"Instant Noodles (5pk)",zh:"æ¹ä¾¿é¢(5åè£)",q:8,c:2.5,r:{en:"Emergency quick meal",zh:"åºæ¥éé£"}},{en:"Dried Noodles 1kg",zh:"é¢çº¿/ç±³ç² 1kg",q:5,c:1.5,r:{en:"Quick staple",zh:"éé£ä¸»ç²®"}}]},
+  "SG":{en:"Singapore",zh:"æ°å å¡",currency:"SGD",symbol:"S$",rate:1.35,region:"island_import",
     staples:{rice:0.65,pasta:0.20,flour:0.10,oat:0.05},
     proteins:{tuna:0.25,beans:0.15,meat:0.25,chicken:0.20,beef:0.15},
-    culturalItems:[{en:"Curry Paste 200g",zh:"咖喱酱 200g",q:4,c:3,r:{en:"SE Asian seasoning",zh:"东南亚调味"}},{en:"Coconut Milk 400ml",zh:"椰浆 400ml",q:8,c:2,r:{en:"Cooking essential",zh:"烹饪必备"}}]},
-  "TH":{en:"Thailand",zh:"泰国",currency:"THB",symbol:"฿",rate:35,region:"tropical",
+    culturalItems:[{en:"Curry Paste 200g",zh:"åå±é± 200g",q:4,c:3,r:{en:"SE Asian seasoning",zh:"ä¸åäºè°å³"}},{en:"Coconut Milk 400ml",zh:"æ¤°æµ 400ml",q:8,c:2,r:{en:"Cooking essential",zh:"ç¹é¥ªå¿å¤"}}]},
+  "TH":{en:"Thailand",zh:"æ³°å½",currency:"THB",symbol:"à¸¿",rate:35,region:"tropical",
     staples:{rice:0.75,pasta:0.10,flour:0.10,oat:0.05},
     proteins:{tuna:0.25,beans:0.10,meat:0.20,chicken:0.30,beef:0.15},
-    culturalItems:[{en:"Fish Sauce 500ml",zh:"鱼露 500ml",q:2,c:2,r:{en:"Thai essential seasoning",zh:"泰式必备调味"}},{en:"Curry Paste 200g",zh:"咖喱酱 200g",q:4,c:2,r:{en:"Thai cooking base",zh:"泰式烹饪基底"}},{en:"Coconut Milk 400ml",zh:"椰浆 400ml",q:8,c:1.5,r:{en:"Thai cooking essential",zh:"泰式烹饪必备"}}]},
-  "MY":{en:"Malaysia",zh:"马来西亚",currency:"MYR",symbol:"RM",rate:4.7,region:"tropical",
+    culturalItems:[{en:"Fish Sauce 500ml",zh:"é±¼é² 500ml",q:2,c:2,r:{en:"Thai essential seasoning",zh:"æ³°å¼å¿å¤è°å³"}},{en:"Curry Paste 200g",zh:"åå±é± 200g",q:4,c:2,r:{en:"Thai cooking base",zh:"æ³°å¼ç¹é¥ªåºåº"}},{en:"Coconut Milk 400ml",zh:"æ¤°æµ 400ml",q:8,c:1.5,r:{en:"Thai cooking essential",zh:"æ³°å¼ç¹é¥ªå¿å¤"}}]},
+  "MY":{en:"Malaysia",zh:"é©¬æ¥è¥¿äº",currency:"MYR",symbol:"RM",rate:4.7,region:"tropical",
     staples:{rice:0.70,pasta:0.15,flour:0.10,oat:0.05},
     proteins:{tuna:0.20,beans:0.15,meat:0.25,chicken:0.25,beef:0.15},
-    culturalItems:[{en:"Sambal Paste 250g",zh:"参巴酱 250g",q:3,c:2,r:{en:"Malaysian essential",zh:"马来必备"}},{en:"Coconut Milk 400ml",zh:"椰浆 400ml",q:6,c:1.5,r:{en:"Cooking staple",zh:"烹饪主料"}}]},
-  "PH":{en:"Philippines",zh:"菲律宾",currency:"PHP",symbol:"₱",rate:56,region:"island_import",
+    culturalItems:[{en:"Sambal Paste 250g",zh:"åå·´é± 250g",q:3,c:2,r:{en:"Malaysian essential",zh:"é©¬æ¥å¿å¤"}},{en:"Coconut Milk 400ml",zh:"æ¤°æµ 400ml",q:6,c:1.5,r:{en:"Cooking staple",zh:"ç¹é¥ªä¸»æ"}}]},
+  "PH":{en:"Philippines",zh:"è²å¾å®¾",currency:"PHP",symbol:"â±",rate:56,region:"island_import",
     staples:{rice:0.80,pasta:0.10,flour:0.05,oat:0.05},
     proteins:{tuna:0.25,beans:0.15,meat:0.25,chicken:0.20,beef:0.15},
-    culturalItems:[{en:"Canned Sardines 155g",zh:"沙丁鱼罐头 155g",q:12,c:1,r:{en:"Filipino staple protein",zh:"菲律宾主力蛋白"}},{en:"Soy Sauce 500ml",zh:"酱油 500ml",q:3,c:1.5,r:{en:"Essential seasoning",zh:"必备调味"}}]},
-  "ID":{en:"Indonesia",zh:"印度尼西亚",currency:"IDR",symbol:"Rp",rate:15800,region:"tropical",
+    culturalItems:[{en:"Canned Sardines 155g",zh:"æ²ä¸é±¼ç½å¤´ 155g",q:12,c:1,r:{en:"Filipino staple protein",zh:"è²å¾å®¾ä¸»åèç½"}},{en:"Soy Sauce 500ml",zh:"é±æ²¹ 500ml",q:3,c:1.5,r:{en:"Essential seasoning",zh:"å¿å¤è°å³"}}]},
+  "ID":{en:"Indonesia",zh:"å°åº¦å°¼è¥¿äº",currency:"IDR",symbol:"Rp",rate:15800,region:"tropical",
     staples:{rice:0.75,pasta:0.10,flour:0.10,oat:0.05},
     proteins:{tuna:0.20,beans:0.20,meat:0.20,chicken:0.25,beef:0.15},
-    culturalItems:[{en:"Instant Noodles (5pk)",zh:"方便面(5包装)",q:10,c:1,r:{en:"Indonesian staple",zh:"印尼主食"}},{en:"Sambal 250g",zh:"参巴酱 250g",q:3,c:1.5,r:{en:"Essential sauce",zh:"必备酱料"}}]},
-  "BR":{en:"Brazil",zh:"巴西",currency:"BRL",symbol:"R$",rate:5.0,region:"tropical",
+    culturalItems:[{en:"Instant Noodles (5pk)",zh:"æ¹ä¾¿é¢(5åè£)",q:10,c:1,r:{en:"Indonesian staple",zh:"å°å°¼ä¸»é£"}},{en:"Sambal 250g",zh:"åå·´é± 250g",q:3,c:1.5,r:{en:"Essential sauce",zh:"å¿å¤é±æ"}}]},
+  "BR":{en:"Brazil",zh:"å·´è¥¿",currency:"BRL",symbol:"R$",rate:5.0,region:"tropical",
     staples:{rice:0.50,pasta:0.20,flour:0.20,oat:0.10},
     proteins:{tuna:0.10,beans:0.35,meat:0.25,chicken:0.20,beef:0.10},
-    culturalItems:[{en:"Black Beans 1kg",zh:"黑豆 1kg",q:8,c:2,r:{en:"Brazilian staple",zh:"巴西主食"}},{en:"Coffee 500g",zh:"咖啡粉 500g",q:3,c:5,r:{en:"Brazilian essential",zh:"巴西必需品"}}]},
-  "MX":{en:"Mexico",zh:"墨西哥",currency:"MXN",symbol:"MX$",rate:17,region:"tropical",
+    culturalItems:[{en:"Black Beans 1kg",zh:"é»è± 1kg",q:8,c:2,r:{en:"Brazilian staple",zh:"å·´è¥¿ä¸»é£"}},{en:"Coffee 500g",zh:"åå¡ç² 500g",q:3,c:5,r:{en:"Brazilian essential",zh:"å·´è¥¿å¿éå"}}]},
+  "MX":{en:"Mexico",zh:"å¢¨è¥¿å¥",currency:"MXN",symbol:"MX$",rate:17,region:"tropical",
     staples:{rice:0.25,pasta:0.10,flour:0.55,oat:0.10},
     proteins:{tuna:0.15,beans:0.35,meat:0.20,chicken:0.20,beef:0.10},
-    culturalItems:[{en:"Tortilla Flour (Masa) 2kg",zh:"玉米面粉 2kg",q:5,c:3,r:{en:"Mexican staple",zh:"墨西哥主食"}},{en:"Canned Jalapeños 400g",zh:"腌辣椒罐头 400g",q:4,c:2,r:{en:"Mexican essential",zh:"墨西哥必备"}},{en:"Dried Chile Peppers",zh:"干辣椒",q:3,c:2,r:{en:"Seasoning staple",zh:"调味主料"}}]},
-  "CA":{en:"Canada",zh:"加拿大",currency:"CAD",symbol:"C$",rate:1.36,region:"inland_self",
+    culturalItems:[{en:"Tortilla Flour (Masa) 2kg",zh:"çç±³é¢ç² 2kg",q:5,c:3,r:{en:"Mexican staple",zh:"å¢¨è¥¿å¥ä¸»é£"}},{en:"Canned JalapeÃ±os 400g",zh:"èè¾£æ¤ç½å¤´ 400g",q:4,c:2,r:{en:"Mexican essential",zh:"å¢¨è¥¿å¥å¿å¤"}},{en:"Dried Chile Peppers",zh:"å¹²è¾£æ¤",q:3,c:2,r:{en:"Seasoning staple",zh:"è°å³ä¸»æ"}}]},
+  "CA":{en:"Canada",zh:"å æ¿å¤§",currency:"CAD",symbol:"C$",rate:1.36,region:"inland_self",
     staples:{rice:0.20,pasta:0.30,flour:0.30,oat:0.20},
     proteins:{tuna:0.25,beans:0.25,meat:0.20,chicken:0.15,beef:0.15},
-    culturalItems:[{en:"Maple Syrup 500ml",zh:"枫糖浆 500ml",q:2,c:10,r:{en:"Canadian staple",zh:"加拿大必备"}},{en:"Peanut Butter 500g",zh:"花生酱 500g",q:3,c:4,r:{en:"High calorie spread",zh:"高热量涂酱"}}]},
-  "IL":{en:"Israel",zh:"以色列",currency:"ILS",symbol:"₪",rate:3.7,region:"coastal_mixed",
+    culturalItems:[{en:"Maple Syrup 500ml",zh:"æ«ç³æµ 500ml",q:2,c:10,r:{en:"Canadian staple",zh:"å æ¿å¤§å¿å¤"}},{en:"Peanut Butter 500g",zh:"è±çé± 500g",q:3,c:4,r:{en:"High calorie spread",zh:"é«ç­éæ¶é±"}}]},
+  "IL":{en:"Israel",zh:"ä»¥è²å",currency:"ILS",symbol:"âª",rate:3.7,region:"coastal_mixed",
     staples:{rice:0.25,pasta:0.30,flour:0.30,oat:0.15},
     proteins:{tuna:0.25,beans:0.30,meat:0.15,chicken:0.20,beef:0.10},
-    culturalItems:[{en:"Tahini 500g",zh:"芝麻酱 500g",q:3,c:4,r:{en:"Israeli staple",zh:"以色列必备"}},{en:"Hummus (canned) 400g",zh:"鹰嘴豆泥罐头 400g",q:8,c:2,r:{en:"Middle Eastern protein",zh:"中东蛋白来源"}}]},
-  "SA":{en:"Saudi Arabia",zh:"沙特阿拉伯",currency:"SAR",symbol:"﷼",rate:3.75,region:"tropical",
+    culturalItems:[{en:"Tahini 500g",zh:"èéº»é± 500g",q:3,c:4,r:{en:"Israeli staple",zh:"ä»¥è²åå¿å¤"}},{en:"Hummus (canned) 400g",zh:"é¹°å´è±æ³¥ç½å¤´ 400g",q:8,c:2,r:{en:"Middle Eastern protein",zh:"ä¸­ä¸èç½æ¥æº"}}]},
+  "SA":{en:"Saudi Arabia",zh:"æ²ç¹é¿æä¼¯",currency:"SAR",symbol:"ï·¼",rate:3.75,region:"tropical",
     staples:{rice:0.60,pasta:0.15,flour:0.20,oat:0.05},
     proteins:{tuna:0.20,beans:0.20,meat:0.25,chicken:0.25,beef:0.10},
-    culturalItems:[{en:"Dates 1kg",zh:"椰枣 1kg",q:4,c:5,r:{en:"Arabian staple, high energy",zh:"阿拉伯主食，高能量"}},{en:"Arabic Coffee 500g",zh:"阿拉伯咖啡 500g",q:2,c:6,r:{en:"Cultural essential",zh:"文化必需品"}}]},
-  "ZA":{en:"South Africa",zh:"南非",currency:"ZAR",symbol:"R",rate:18.5,region:"coastal_mixed",
+    culturalItems:[{en:"Dates 1kg",zh:"æ¤°æ£ 1kg",q:4,c:5,r:{en:"Arabian staple, high energy",zh:"é¿æä¼¯ä¸»é£ï¼é«è½é"}},{en:"Arabic Coffee 500g",zh:"é¿æä¼¯åå¡ 500g",q:2,c:6,r:{en:"Cultural essential",zh:"æåå¿éå"}}]},
+  "ZA":{en:"South Africa",zh:"åé",currency:"ZAR",symbol:"R",rate:18.5,region:"coastal_mixed",
     staples:{rice:0.25,pasta:0.20,flour:0.40,oat:0.15},
     proteins:{tuna:0.20,beans:0.30,meat:0.20,chicken:0.20,beef:0.10},
-    culturalItems:[{en:"Maize Meal 2.5kg",zh:"玉米粉 2.5kg",q:4,c:3,r:{en:"South African staple (pap)",zh:"南非主食"}},{en:"Rooibos Tea (80pk)",zh:"博士茶(80包)",q:3,c:3,r:{en:"South African tea",zh:"南非茶"}}]}
+    culturalItems:[{en:"Maize Meal 2.5kg",zh:"çç±³ç² 2.5kg",q:4,c:3,r:{en:"South African staple (pap)",zh:"åéä¸»é£"}},{en:"Rooibos Tea (80pk)",zh:"åå£«è¶(80å)",q:3,c:3,r:{en:"South African tea",zh:"åéè¶"}}]}
 };
 
 function intensityColor(i){if(i>=9)return"#991b1b";if(i>=7)return"#ef4444";if(i>=5)return"#f97316";if(i>=3)return"#fbbf24";return"#4ade80";}
@@ -739,10 +760,10 @@ function renderNewsPanel(news){
 function formatUpdateDate(l){
   if(!lastUpdatedDate) return null;
   if(l==='zh'){
-    return `● ${lastUpdatedDate.getFullYear()}年${lastUpdatedDate.getMonth()+1}月${lastUpdatedDate.getDate()}日态势数据`;
+    return `â ${lastUpdatedDate.getFullYear()}å¹´${lastUpdatedDate.getMonth()+1}æ${lastUpdatedDate.getDate()}æ¥æå¿æ°æ®`;
   }
   const m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  return `● ${m[lastUpdatedDate.getMonth()]} ${lastUpdatedDate.getDate()}, ${lastUpdatedDate.getFullYear()} Situation Data`;
+  return `â ${m[lastUpdatedDate.getMonth()]} ${lastUpdatedDate.getDate()}, ${lastUpdatedDate.getFullYear()} Situation Data`;
 }
 
 // ====== MAP RENDERING ======
@@ -780,7 +801,7 @@ async function initMap(){
         g.append("circle").attr("class","hotspot-ring").attr("cx",x).attr("cy",y).attr("r",6).attr("fill","none").attr("stroke",intensityColor(c.intensity)).attr("stroke-width",1.5).attr("opacity",0.5);
         g.append("circle").attr("cx",x).attr("cy",y).attr("r",Math.max(2,c.intensity*0.5)).attr("fill",intensityColor(c.intensity)).attr("opacity",0.9);
         g.on("mouseenter",e=>{
-          tooltip.innerHTML=`<div class="ct-name">${tConflict('names',c.name)}</div><div class="ct-level" style="color:${intensityColor(c.intensity)}">● ${tConflict('types',c.type)} · ${t('tooltipLevel')} ${c.intensity}/10</div><div class="ct-desc">${tConflict('descs',c.desc)}</div>`;
+          tooltip.innerHTML=`<div class="ct-name">${tConflict('names',c.name)}</div><div class="ct-level" style="color:${intensityColor(c.intensity)}">â ${tConflict('types',c.type)} Â· ${t('tooltipLevel')} ${c.intensity}/10</div><div class="ct-desc">${tConflict('descs',c.desc)}</div>`;
           tooltip.style.opacity=1;tooltip.style.left=(e.clientX+12)+"px";tooltip.style.top=(e.clientY-10)+"px";
         }).on("mouseleave",()=>{tooltip.style.opacity=0;}).on("click",()=>{openSourcePanel(c);});
       });
@@ -788,7 +809,7 @@ async function initMap(){
       window._projection=projection;window._svg=svg;
       requestGPS();
     }).catch(()=>{
-      document.getElementById("worldMap").innerHTML=`<div style="text-align:center;color:#555;padding:40px">${lang==='zh'?'加载地图中...':'Loading map...'}</div>`;
+      document.getElementById("worldMap").innerHTML=`<div style="text-align:center;color:#555;padding:40px">${lang==='zh'?'å è½½å°å¾ä¸­...':'Loading map...'}</div>`;
       requestGPS();
     });
 }
@@ -811,7 +832,7 @@ function requestGPS(){
       }
       const latDir=userLocation.lat>=0?"N":"S";
       const lonDir=userLocation.lon>=0?"E":"W";
-      el.innerHTML=`<span class="pin">📍</span> ${userCountryName?userCountryName+" · ":""}${Math.abs(userLocation.lat).toFixed(2)}°${latDir}, ${Math.abs(userLocation.lon).toFixed(2)}°${lonDir}`;
+      el.innerHTML=`<span class="pin">ð</span> ${userCountryName?userCountryName+" Â· ":""}${Math.abs(userLocation.lat).toFixed(2)}Â°${latDir}, ${Math.abs(userLocation.lon).toFixed(2)}Â°${lonDir}`;
       if(window._projection&&window._svg){
         const[ux,uy]=window._projection([userLocation.lon,userLocation.lat]);
         if(ux&&uy){
@@ -822,7 +843,7 @@ function requestGPS(){
           g.style("cursor","pointer");
           g.on("mouseenter",e=>{
             const tooltip=document.getElementById("conflictTooltip");
-            tooltip.innerHTML=`<div class="ct-name">${userCountryName||t('gpsYourLocation')}</div><div class="ct-desc" style="color:#22c55e">📍 ${t('gpsYourLocation')}</div>`;
+            tooltip.innerHTML=`<div class="ct-name">${userCountryName||t('gpsYourLocation')}</div><div class="ct-desc" style="color:#22c55e">ð ${t('gpsYourLocation')}</div>`;
             tooltip.style.opacity=1;tooltip.style.left=(e.clientX+12)+"px";tooltip.style.top=(e.clientY-10)+"px";
           }).on("mouseleave",()=>{document.getElementById("conflictTooltip").style.opacity=0;});
         }
@@ -836,7 +857,7 @@ function requestGPS(){
 }
 
 // ====== VISITOR COUNTER ======
-const COUNTRY_FLAGS={"United States":"🇺🇸","China":"🇨🇳","Japan":"🇯🇵","Germany":"🇩🇪","United Kingdom":"🇬🇧","France":"🇫🇷","India":"🇮🇳","Brazil":"🇧🇷","Canada":"🇨🇦","Australia":"🇦🇺","South Korea":"🇰🇷","Russia":"🇷🇺","Mexico":"🇲🇽","Italy":"🇮🇹","Spain":"🇪🇸","Turkey":"🇹🇷","Indonesia":"🇮🇩","Netherlands":"🇳🇱","Taiwan":"🇹🇼","Thailand":"🇹🇭","Vietnam":"🇻🇳","Philippines":"🇵🇭","Poland":"🇵🇱","Sweden":"🇸🇪","Singapore":"🇸🇬","Malaysia":"🇲🇾","Israel":"🇮🇱","Ukraine":"🇺🇦","New Zealand":"🇳🇿","Argentina":"🇦🇷","Colombia":"🇨🇴","Egypt":"🇪🇬","Nigeria":"🇳🇬","South Africa":"🇿🇦","Saudi Arabia":"🇸🇦","Iran":"🇮🇷","Pakistan":"🇵🇰","Bangladesh":"🇧🇩","Chile":"🇨🇱","Peru":"🇵🇪","Portugal":"🇵🇹","Ireland":"🇮🇪","Norway":"🇳🇴","Denmark":"🇩🇰","Finland":"🇫🇮","Switzerland":"🇨🇭","Austria":"🇦🇹","Belgium":"🇧🇪","Czech Republic":"🇨🇿","Romania":"🇷🇴","Unknown":"🌐"};
+const COUNTRY_FLAGS={"United States":"ðºð¸","China":"ð¨ð³","Japan":"ð¯ðµ","Germany":"ð©ðª","United Kingdom":"ð¬ð§","France":"ð«ð·","India":"ð®ð³","Brazil":"ð§ð·","Canada":"ð¨ð¦","Australia":"ð¦ðº","South Korea":"ð°ð·","Russia":"ð·ðº","Mexico":"ð²ð½","Italy":"ð®ð¹","Spain":"ðªð¸","Turkey":"ð¹ð·","Indonesia":"ð®ð©","Netherlands":"ð³ð±","Taiwan":"ð¹ð¼","Thailand":"ð¹ð­","Vietnam":"ð»ð³","Philippines":"ðµð­","Poland":"ðµð±","Sweden":"ð¸ðª","Singapore":"ð¸ð¬","Malaysia":"ð²ð¾","Israel":"ð®ð±","Ukraine":"ðºð¦","New Zealand":"ð³ð¿","Argentina":"ð¦ð·","Colombia":"ð¨ð´","Egypt":"ðªð¬","Nigeria":"ð³ð¬","South Africa":"ð¿ð¦","Saudi Arabia":"ð¸ð¦","Iran":"ð®ð·","Pakistan":"ðµð°","Bangladesh":"ð§ð©","Chile":"ð¨ð±","Peru":"ðµðª","Portugal":"ðµð¹","Ireland":"ð®ðª","Norway":"ð³ð´","Denmark":"ð©ð°","Finland":"ð«ð®","Switzerland":"ð¨ð­","Austria":"ð¦ð¹","Belgium":"ð§ðª","Czech Republic":"ð¨ð¿","Romania":"ð·ð´","Unknown":"ð"};
 let _visitorCounted=false;
 async function initVisitorCounter(){
   if(_visitorCounted)return;_visitorCounted=true;
@@ -855,7 +876,7 @@ function renderVisitorPanel(data){
   document.getElementById("vpTotal").textContent=(data.total||0).toLocaleString();
   const sorted=Object.entries(data.countries||{}).sort((a,b)=>b[1]-a[1]).slice(0,15);
   document.getElementById("vpCountries").innerHTML=sorted.map(([name,count])=>
-    `<div class="vp-country"><span class="vp-flag">${COUNTRY_FLAGS[name]||"🌍"}</span><span class="vp-name">${name}</span><span class="vp-count">${count.toLocaleString()}</span></div>`
+    `<div class="vp-country"><span class="vp-flag">${COUNTRY_FLAGS[name]||"ð"}</span><span class="vp-name">${name}</span><span class="vp-count">${count.toLocaleString()}</span></div>`
   ).join("");
   p.classList.add("loaded");
 }
@@ -998,8 +1019,8 @@ function generate(){
   const tpQ=Math.max(Math.ceil(n*0.8*Math.min(s.months,3)/3),3);
   important.push({n:t('iToiletPaper'),q:`${tpQ} ${t('uPkg')}`,c:tpQ*12,r:t('rToiletPaper')(n,Math.min(s.months,3))});
   important.push({n:t('iCleaning'),q:`3mo`,c:Math.round(15+n*5),r:t('rCleaning')});
-  important.push({n:t('iPersonalCare'),q:`${n}${t('uPeople')}×3mo`,c:Math.round(n*12),r:t('rPersonalCare')});
-  if(femaleCount>0)important.push({n:t('iFemHygiene'),q:`${femaleCount}×3mo`,c:femaleCount*25,r:t('rFemHygiene')});
+  important.push({n:t('iPersonalCare'),q:`${n}${t('uPeople')}Ã3mo`,c:Math.round(n*12),r:t('rPersonalCare')});
+  if(femaleCount>0)important.push({n:t('iFemHygiene'),q:`${femaleCount}Ã3mo`,c:femaleCount*25,r:t('rFemHygiene')});
   if(pet.daily>0)important.push({n:t('iPetPrevMed'),q:`${s.months}mo`,c:Math.round(s.months*15),r:t('rPetPrevMed')});
   important.push({n:t('iGasBurner'),q:t('uSet'),c:Math.round(50+n*5),r:t('rGasBurner')});
   important.push({n:t('iPowerBank'),q:`${Math.max(Math.ceil(n/3),1)} ${Un}`,c:Math.max(Math.ceil(n/3),1)*50,r:t('rPowerBank')});
@@ -1012,7 +1033,7 @@ function generate(){
   general.push({n:t('iRadio'),q:`1 ${Un}`,c:40,r:t('rRadio')});
   general.push({n:t('iDocPouch'),q:`${Math.ceil(n/3)} ${t('uPcs')}`,c:Math.ceil(n/3)*10,r:t('rDocPouch')});
   if(pet.daily>0)general.push({n:t('iPetEmergency'),q:t('uSet'),c:80,r:t('rPetEmergency')});
-  general.push({n:t('iInsurance'),q:"—",c:0,r:t('rInsurance')});
+  general.push({n:t('iInsurance'),q:"â",c:0,r:t('rInsurance')});
 
   // Add cultural items from country profile
   if(cp&&cp.culturalItems){
@@ -1053,7 +1074,7 @@ function renderInput(){
   <input type="number" value="${m.weight}" data-field="weight" min="1" max="300">
   <select data-field="gender"><option value="m"${m.gender==="m"?" selected":""}>${t('genderM')}</option><option value="f"${m.gender==="f"?" selected":""}>${t('genderF')}</option></select>
   <select data-field="special"><option value=""${m.special===""?" selected":""}>${t('specialNone')}</option><option value="growing"${m.special==="growing"?" selected":""}>${t('specialGrowing')}</option><option value="pregnant"${m.special==="pregnant"?" selected":""}>${t('specialPregnant')}</option><option value="elderly"${m.special==="elderly"?" selected":""}>${t('specialElderly')}</option><option value="chronic"${m.special==="chronic"?" selected":""}>${t('specialChronic')}</option></select>
-  ${calcState.members.length>1?`<button class="btn btn-sm btn-danger" data-remove="${m.id}">×</button>`:`<div></div>`}
+  ${calcState.members.length>1?`<button class="btn btn-sm btn-danger" data-remove="${m.id}">Ã</button>`:`<div></div>`}
   </div>`).join("");
 
   let countryOpts=`<option value="">${t('countrySelectDefault')}</option>`;
@@ -1079,8 +1100,8 @@ function renderInput(){
 
   return`
   <div class="risk-banner">
-    <div class="rb-score" style="color:${rc}">${riskIndex!==null?riskIndex.toFixed(1):'—'}</div>
-    <div class="rb-text"><strong>${t('currentRisk')}</strong><br>${sm} ${t('supplyOf')} · ${userLocation?t('basedOnGPS'):t('globalAvg')}</div>
+    <div class="rb-score" style="color:${rc}">${riskIndex!==null?riskIndex.toFixed(1):'â'}</div>
+    <div class="rb-text"><strong>${t('currentRisk')}</strong><br>${sm} ${t('supplyOf')} Â· ${userLocation?t('basedOnGPS'):t('globalAvg')}</div>
     <button class="rb-back" onclick="backToMap()">${t('backToMap')}</button>
   </div>
   <h1>${t('calcTitle')}</h1>
@@ -1112,10 +1133,10 @@ function renderInput(){
 function renderResult(){
   const r=generate();
   const pu=t('uPeople'),pd=t('perDay'),au=t('ageUnit');
-  const memberTags=r.md.map(m=>`<span class="member-tag">${m.label||t('memberDefault')+m.id} ${m.age}${au}/${m.weight}kg → ${m.cal.toLocaleString()}kcal${pd}</span>`).join("");
-  const petTag=r.pet.daily>0?`<span class="member-tag pet">${lang==='zh'?'宠物':'Pet'} → ${r.pet.daily}g${pd}</span>`:"";
+  const memberTags=r.md.map(m=>`<span class="member-tag">${m.label||t('memberDefault')+m.id} ${m.age}${au}/${m.weight}kg â ${m.cal.toLocaleString()}kcal${pd}</span>`).join("");
+  const petTag=r.pet.daily>0?`<span class="member-tag pet">${lang==='zh'?'å® ç©':'Pet'} â ${r.pet.daily}g${pd}</span>`:"";
   const petSfx=calcState.petType!=="none"?t('petSuffix'):"";
-  const planTitle=lang==='zh'?`${calcState.members.length}${t('planPeopleSuffix')}${petSfx}·${calcState.months}${t('planMonthSuffix')}`:`${calcState.members.length} ${t('planPeopleSuffix')}${petSfx} · ${calcState.months}${t('planMonthSuffix')}`;
+  const planTitle=lang==='zh'?`${calcState.members.length}${t('planPeopleSuffix')}${petSfx}Â·${calcState.months}${t('planMonthSuffix')}`:`${calcState.members.length} ${t('planPeopleSuffix')}${petSfx} Â· ${calcState.months}${t('planMonthSuffix')}`;
   const rc=riskIndex!==null?(riskIndex>=7?'#ef4444':riskIndex>=4?'#f97316':'#fbbf24'):'#fbbf24';
 
   function tierHTML(items,title,tag){
@@ -1126,7 +1147,7 @@ function renderResult(){
 
   return`
   <div class="risk-banner">
-    <div class="rb-score" style="color:${rc}">${riskIndex!==null?riskIndex.toFixed(1):'—'}</div>
+    <div class="rb-score" style="color:${rc}">${riskIndex!==null?riskIndex.toFixed(1):'â'}</div>
     <div class="rb-text"><strong>${t('riskIndex')}</strong><br>${userLocation?t('basedOnGPS'):t('globalAvg')}</div>
     <button class="rb-back" onclick="backToMap()">${t('backToMap')}</button>
   </div>
@@ -1136,7 +1157,7 @@ function renderResult(){
   </div>
   <div class="member-tags">${memberTags}${petTag}</div>
   <div class="summary-grid">
-  <div class="summary-card"><div class="sc-label">${t('labelDailyCal')}</div><div class="sc-value">${r.totalCal.toLocaleString()}</div><div class="sc-sub">kcal · ${calcState.members.length} ${pu}</div></div>
+  <div class="summary-card"><div class="sc-label">${t('labelDailyCal')}</div><div class="sc-value">${r.totalCal.toLocaleString()}</div><div class="sc-sub">kcal Â· ${calcState.members.length} ${pu}</div></div>
   <div class="summary-card"><div class="sc-label">${t('labelGrain')}</div><div class="sc-value">${r.grainKg}kg</div><div class="sc-sub">${t('grainSubPrefix')} ${Math.min(calcState.months,3)} ${t('grainSubSuffix')}</div></div>
   <div class="summary-card"><div class="sc-label">${t('labelWater')}</div><div class="sc-value">${r.waterL}L</div><div class="sc-sub">${calcState.members.length} ${pu} ${t('waterSubSuffix')}</div></div>
   <div class="summary-card"><div class="sc-label">${t('labelBudget')}</div><div class="sc-value" style="color:#c53030">${r.currSymbol}${r.total.toLocaleString()}</div><div class="sc-sub">${t('budgetSub')}</div></div>
@@ -1198,10 +1219,10 @@ function bindEvents(){
 // ====== SOURCE PANEL ======
 function openSourcePanel(c){
   const panel=document.getElementById("sourcePanel");
-  const linksHTML=(c.sources||[]).map(s=>`<a class="sp-link" href="${s.url}" target="_blank" rel="noopener">${s.title}<span class="sp-link-arrow">↗</span></a>`).join("");
+  const linksHTML=(c.sources||[]).map(s=>`<a class="sp-link" href="${s.url}" target="_blank" rel="noopener">${s.title}<span class="sp-link-arrow">â</span></a>`).join("");
   document.getElementById("sourcePanelContent").innerHTML=`
     <div class="sp-name">${tConflict('names',c.name)}</div>
-    <div class="sp-type" style="color:${intensityColor(c.intensity)}">● ${tConflict('types',c.type)} · ${t('tooltipLevel')} ${c.intensity}/10</div>
+    <div class="sp-type" style="color:${intensityColor(c.intensity)}">â ${tConflict('types',c.type)} Â· ${t('tooltipLevel')} ${c.intensity}/10</div>
     <div class="sp-desc">${tConflict('descs',c.desc)}</div>
     <div class="sp-sources-title">${t('sourcesTitle')}</div>
     ${linksHTML}`;
