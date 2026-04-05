@@ -1,0 +1,33 @@
+# Crisis Pulse
+
+> Crisis Pulse (crisispulse.org) is a free web application that monitors 25+ active global conflict hotspots in real time and generates personalized emergency supply checklists. It combines a D3.js interactive world map with daily intensity scoring pulled from real news feeds, plus a location-aware preparedness calculator. The entire application ships as a single HTML file with no signup, no tracking, and no cost.
+
+Crisis Pulse is built for anyone who wants to stay aware of global conflict dynamics and turn that awareness into concrete household preparedness. It is especially useful for journalists, researchers, OSINT analysts, policy observers, international travelers, expatriates, and households in regions affected by instability.
+
+## Core Features
+
+- [Interactive World Map](https://crisispulse.org/): D3.js visualization of 25+ global conflict hotspots with real-time intensity indicators
+- [Emergency Supply Calculator](https://crisispulse.org/): Personalized preparedness checklist based on country, housing type, household size, and special needs
+- [Daily News Updates](https://crisispulse.org/): Automated Bing RSS crawler updates intensity scores and top headlines every 24 hours
+- [Bilingual Support](https://crisispulse.org/): Full English and Chinese (Simplified) localization including conflict names, descriptions, and translated news headlines
+
+## Key Facts
+
+- Version: Beta 0.1
+- Cost: Free forever, no signup, no account required
+- Languages: English, Chinese (Simplified)
+- Conflicts tracked: 25+ including Russia-Ukraine War, Gaza, Sudan, Myanmar, Taiwan Strait, Yemen, Haiti
+- Update frequency: Daily (automated)
+- Architecture: Single HTML file, Netlify Functions, Netlify Blobs (no external database)
+- Privacy: No tracking, no cookies, no analytics scripts
+- Open source philosophy with transparent methodology
+
+## Documentation
+
+- [Product Hunt Launch](https://www.producthunt.com/products/crisispulse): Community discussion and feedback
+- [Technical Architecture](https://dev.to/xkbear/i-built-a-global-conflict-monitor-in-a-single-html-file-heres-how-the-serverless-architecture-324i): Detailed writeup of the serverless stack
+
+## Optional
+
+- [LinkedIn Announcement](https://www.linkedin.com/feed/update/urn:li:share:7446515728826028032)
+- [X (Twitter) Thread](https://x.com/XK88570598/status/2040750684677812567)

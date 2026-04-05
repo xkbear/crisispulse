@@ -7,7 +7,20 @@
 <link rel="icon" type="image/svg+xml" href="logo.svg">
     <meta name="keywords" content="global conflict tracker, crisis monitor, emergency preparedness, emergency supply calculator, conflict map, world crisis 2026, prepper supplies, family emergency kit">
     <meta name="author" content="Crisis Pulse">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-image-preview:large">
+    <meta name="bingbot" content="index, follow">
+    <meta name="GPTBot" content="index, follow">
+    <meta name="ChatGPT-User" content="index, follow">
+    <meta name="ClaudeBot" content="index, follow">
+    <meta name="PerplexityBot" content="index, follow">
+    <meta name="Google-Extended" content="index, follow">
+    <meta name="category" content="Geopolitics, Emergency Preparedness, News Monitoring, OSINT">
+    <meta name="rating" content="General">
+    <meta name="distribution" content="global">
+    <meta name="coverage" content="Worldwide">
+    <meta name="target" content="all">
+    <meta name="theme-color" content="#0a0a0f">
     <link rel="canonical" href="https://crisispulse.org/">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://crisispulse.org/">
@@ -24,7 +37,7 @@
     <meta name="twitter:image" content="https://crisispulse.org/og-image.png">
     <link rel="alternate" hreflang="en" href="https://crisispulse.org/?lang=en">
     <link rel="alternate" hreflang="zh" href="https://crisispulse.org/?lang=zh">
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Crisis Pulse","url":"https://crisispulse.org","description":"Real-time global conflict monitoring with a personalized family emergency supply calculator.","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Organization","name":"Crisis Pulse"}}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://crisispulse.org/#webapp","name":"Crisis Pulse","alternateName":["CrisisPulse","危机脉搏"],"url":"https://crisispulse.org","description":"Free global conflict monitoring tool tracking 25+ hotspots with daily intensity scores from real news feeds, plus a personalized emergency supply calculator based on your location, housing, and household.","applicationCategory":["UtilitiesApplication","NewsApplication","SecurityApplication"],"applicationSubCategory":"Geopolitical Intelligence","operatingSystem":"Web Browser","browserRequirements":"Requires JavaScript. Works on modern browsers.","softwareVersion":"Beta 0.1","inLanguage":["en","zh"],"isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"},"featureList":["25+ global conflict hotspot tracking","Daily intensity scoring from news feeds","D3.js interactive world map","Personalized emergency supply calculator","Bilingual English and Chinese","Single HTML file, no signup","Real-time news headlines per conflict","Visitor statistics by country"],"screenshot":"https://crisispulse.org/og-image.png","author":{"@id":"https://crisispulse.org/#org"},"publisher":{"@id":"https://crisispulse.org/#org"}},{"@type":"Organization","@id":"https://crisispulse.org/#org","name":"Crisis Pulse","url":"https://crisispulse.org","logo":"https://crisispulse.org/logo.svg","description":"Open-source project building tools that connect global awareness to personal preparedness.","foundingDate":"2026","sameAs":["https://www.producthunt.com/products/crisispulse","https://dev.to/xkbear"]},{"@type":"WebSite","@id":"https://crisispulse.org/#website","url":"https://crisispulse.org","name":"Crisis Pulse","description":"Global conflict monitor + emergency prep calculator","publisher":{"@id":"https://crisispulse.org/#org"},"inLanguage":["en","zh"]},{"@type":"FAQPage","@id":"https://crisispulse.org/#faq","mainEntity":[{"@type":"Question","name":"What is Crisis Pulse?","acceptedAnswer":{"@type":"Answer","text":"Crisis Pulse is a free web application that monitors 25+ active global conflict hotspots in real time and generates personalized emergency supply checklists based on your location. It visualizes conflicts on an interactive D3.js world map with daily intensity scores pulled from real news feeds, and includes an emergency preparedness calculator tailored to your country, housing type, household size, and local risk factors."}},{"@type":"Question","name":"How does Crisis Pulse calculate conflict intensity?","acceptedAnswer":{"@type":"Answer","text":"Crisis Pulse calculates daily conflict intensity scores by analyzing article volume from news feeds for each tracked hotspot. The scoring algorithm computes intensity deltas (rising or falling) so users can spot escalations early. Scores update automatically every 24 hours via a Netlify Scheduled Function."}},{"@type":"Question","name":"Is Crisis Pulse free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Crisis Pulse is completely free, requires no signup, no account, and no payment. There are no ads, no tracking, and no hidden fees. The tool is released as Beta 0.1 with open access for everyone."}},{"@type":"Question","name":"Which conflicts does Crisis Pulse track?","acceptedAnswer":{"@type":"Answer","text":"Crisis Pulse tracks 25+ active conflict hotspots including the Russia-Ukraine War, the Israel-Hamas conflict in Gaza, the Sudan civil war, the Myanmar crisis, Taiwan Strait tensions, the Yemen conflict, the Haiti gang crisis, and other major global flashpoints. The list is updated as new conflicts emerge."}},{"@type":"Question","name":"How does the emergency supply calculator work?","acceptedAnswer":{"@type":"Answer","text":"The calculator asks about your country, housing type (apartment, house, rural, etc.), household size, and special needs (medical, pets, infants). It then generates a personalized preparedness checklist covering water, food, medical supplies, power backup, documents, and communications gear — calibrated to your actual situation rather than a generic 72-hour kit."}},{"@type":"Question","name":"Does Crisis Pulse support Chinese?","acceptedAnswer":{"@type":"Answer","text":"Yes. Crisis Pulse fully supports both English and Chinese. Conflict names, types, descriptions, and daily news headlines are all bilingual. Users can switch languages at any time via the top-right language switcher."}},{"@type":"Question","name":"Who built Crisis Pulse?","acceptedAnswer":{"@type":"Answer","text":"Crisis Pulse was built by an independent developer as an open-source project. The entire application ships as a single HTML file with Netlify Functions for daily news updates and Netlify Blobs for serverless persistence. No external database, no build pipeline, no framework."}},{"@type":"Question","name":"How often is the data updated?","acceptedAnswer":{"@type":"Answer","text":"Conflict intensity scores and news headlines are updated daily via an automated Netlify Scheduled Function. The update timestamp is shown at the bottom of the map. The data pipeline runs in the cloud without requiring any user action."}}]}]}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <style>
@@ -218,6 +231,51 @@ select{cursor:pointer}
 </style>
 </head>
 <body>
+
+<!-- ====== SEO / GEO content block: crawlable by search engines and LLMs ====== -->
+<noscript>
+  <header>
+    <h1>Crisis Pulse — Global Conflict Monitor &amp; Emergency Supply Calculator</h1>
+    <p><strong>Crisis Pulse</strong> is a free web application that monitors 25+ active global conflict hotspots in real time and generates personalized emergency supply checklists based on your location. It combines an interactive D3.js world map with daily intensity scoring from real news feeds, plus a location-aware preparedness calculator. No signup, no tracking, no cost.</p>
+  </header>
+  <section>
+    <h2>What Crisis Pulse Does</h2>
+    <ul>
+      <li><strong>Tracks 25+ active conflict zones</strong> including Russia-Ukraine, Gaza, Sudan, Myanmar, Taiwan Strait, Yemen, Haiti, and more.</li>
+      <li><strong>Daily intensity scores</strong> calculated from real news article volume, updated automatically every 24 hours.</li>
+      <li><strong>Personalized emergency supply calculator</strong> based on your country, housing type, household size, and special needs.</li>
+      <li><strong>Bilingual support</strong> for English and Chinese, including translated news headlines.</li>
+      <li><strong>Visitor analytics by country</strong> without cookies or third-party tracking.</li>
+    </ul>
+  </section>
+  <section>
+    <h2>Who Uses Crisis Pulse</h2>
+    <p>International travelers, expatriates, journalists, researchers, OSINT analysts, policy observers, and households in regions affected by instability. Anyone who wants to stay aware of global conflict dynamics and turn that awareness into concrete household preparedness.</p>
+  </section>
+  <section>
+    <h2>Frequently Asked Questions</h2>
+    <h3>Is Crisis Pulse free?</h3>
+    <p>Yes. Crisis Pulse is completely free, requires no signup, no account, and no payment. There are no ads, no tracking, and no hidden fees.</p>
+    <h3>How does the intensity scoring work?</h3>
+    <p>Each conflict receives a daily intensity score calculated by analyzing news article volume from Bing News RSS feeds. The algorithm compares today's article count against a rolling baseline to compute deltas (rising or falling), so users can spot escalations early. Scores update automatically every 24 hours.</p>
+    <h3>Is Crisis Pulse a prediction engine?</h3>
+    <p>No. Crisis Pulse is a daily signal aggregator, not a prediction tool. It shows where news volume is unusually high or rising relative to each conflict's baseline. Rising intensity does not guarantee escalation.</p>
+    <h3>Which conflicts are tracked?</h3>
+    <p>Crisis Pulse tracks 25+ conflicts including the Russia-Ukraine War, the Israel-Hamas conflict in Gaza, the Sudan civil war, the Myanmar civil war, Taiwan Strait tensions, the Yemen conflict, the Haiti gang crisis, Ethiopia conflict, DRC instability, Sahel region insurgencies, Syria, Iran-Israel, Lebanon-Israel, Armenia-Azerbaijan, Kashmir, South China Sea, Korean Peninsula, Colombian armed conflict, Mexican cartel violence, Somalia, Nigeria, Mozambique, Central African Republic, Western Sahara, and Libya.</p>
+    <h3>How does the emergency supply calculator work?</h3>
+    <p>The calculator asks about your country, housing type (apartment, house, rural), household size, and special needs (medical, pets, infants). It generates a tailored checklist covering water, food, medical supplies, power backup, documents, and communications gear — calibrated to your actual situation rather than a generic 72-hour kit.</p>
+    <h3>Does Crisis Pulse support Chinese?</h3>
+    <p>Yes. Crisis Pulse fully supports English and Simplified Chinese. Conflict names, types, descriptions, and daily news headlines are all bilingual. Language switching is instant.</p>
+    <h3>Is my data private?</h3>
+    <p>Crisis Pulse does not use cookies or third-party tracking. The only data collected is anonymous visitor counts by country for a simple statistics panel. GPS location, if granted, is used only to position your marker on the map and is never transmitted or stored.</p>
+    <h3>Who built Crisis Pulse?</h3>
+    <p>Crisis Pulse is built by an independent developer as an open project. The entire application ships as a single HTML file with Netlify Functions for daily news updates and Netlify Blobs for serverless persistence. No external database, no build pipeline, no framework.</p>
+  </section>
+  <footer>
+    <p>Visit <a href="https://crisispulse.org">crisispulse.org</a> · Free · English &amp; Chinese · No signup · Beta 0.1</p>
+  </footer>
+</noscript>
+<!-- ====== End SEO / GEO block ====== -->
 
 <!-- Language Switcher -->
 <div class="lang-switcher" id="langSwitcher">

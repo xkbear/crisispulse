@@ -1,0 +1,166 @@
+# Crisis Pulse — Complete Reference
+
+> Crisis Pulse (crisispulse.org) is a free, open-access web application that combines global conflict monitoring with personalized emergency preparedness planning. It tracks 25+ active conflict hotspots worldwide with daily intensity scoring from real news feeds, visualizes them on an interactive D3.js world map, and generates tailored emergency supply checklists based on the user's country, housing type, household composition, and local risk factors.
+
+## What Crisis Pulse Is
+
+Crisis Pulse is a single-purpose tool designed around one core idea: **awareness before action**. Most people do not think about emergency preparedness until something is already escalating near them. By then, supply chains are stressed and the calm decision-making window has closed. Crisis Pulse shortens the distance between noticing a global event and doing something concrete about it at the household level.
+
+The application is deliberately minimalist. There is no signup wall, no account creation, no dashboard, no paid tier, no advertising, and no third-party tracking. Users land on the map, see the current state of the world, and can transition directly into the preparedness calculator.
+
+## Who Uses Crisis Pulse
+
+- **International travelers and expatriates** who need situational awareness across multiple regions
+- **Journalists and researchers** following conflict dynamics without enterprise OSINT tools
+- **Policy observers and students** studying geopolitical escalation patterns
+- **Households in affected regions** wanting practical preparedness guidance
+- **Independent analysts** who want a lightweight monitoring layer over raw news feeds
+- **Anyone concerned about global stability** who prefers signal over panic
+
+## Core Features in Detail
+
+### 1. Global Conflict Map
+
+The map is rendered using D3.js with a TopoJSON world outline. Each tracked conflict appears as a pulsing hotspot marker, color-coded by intensity. Users can hover over any hotspot to see the conflict name, type, current intensity level, a short description, and today's top news headlines with direct links to original reporting. The user's own location is shown as a green marker if GPS access is granted, or inferred from IP-based geolocation as a fallback.
+
+Tracked conflicts include but are not limited to:
+
+- Russia-Ukraine War
+- Israel-Hamas conflict in Gaza
+- Sudan civil war
+- Myanmar civil war
+- Taiwan Strait tensions
+- Yemen conflict
+- Haiti gang crisis
+- Ethiopia conflict
+- Democratic Republic of Congo (DRC) instability
+- Sahel region insurgencies (Mali, Burkina Faso, Niger)
+- Syria ongoing instability
+- Iran-Israel shadow war
+- Lebanon-Israel tensions
+- Armenia-Azerbaijan dispute
+- Kashmir tensions
+- South China Sea tensions
+- Korean Peninsula tensions
+- Colombian armed conflict
+- Mexican cartel violence
+- Somalia Al-Shabaab conflict
+- Nigeria Boko Haram/bandit conflicts
+- Mozambique Cabo Delgado insurgency
+- Central African Republic instability
+- Western Sahara dispute
+- Libya civil conflict
+
+The list is reviewed regularly and updated as situations emerge or resolve.
+
+### 2. Daily Intensity Scoring
+
+Each conflict receives a daily intensity score calculated by a Netlify Scheduled Function that runs every 24 hours. The function:
+
+1. Fetches the Bing News RSS feed for each conflict using targeted search queries
+2. Counts the number of fresh articles within the last 24 hours
+3. Compares against a rolling baseline to compute a delta (rising or falling)
+4. Normalizes the score to a comparable scale across conflicts
+5. Extracts and validates the top 5 headline links per conflict
+
+The scoring is **not predictive**. It is a descriptive signal aggregator designed to highlight which situations are generating abnormal news volume today relative to their baseline. A rising intensity does not guarantee escalation; it simply means more of the world is reporting on it.
+
+### 3. Personalized Emergency Supply Calculator
+
+The calculator is the action-oriented half of the application. Users answer a short set of questions:
+
+- **Country and region** — determines baseline risk factors, climate, infrastructure reliability
+- **Housing type** — apartment, detached house, rural/farm, RV/mobile — affects storage capacity, water sources, power options
+- **Household size** — number of adults and children, used to scale water and food calculations
+- **Special needs** — medical conditions, pets, infants, elderly members
+- **Existing supplies** — optional, lets users track what they already have
+
+Based on these inputs, the calculator generates a tailored checklist covering:
+
+- **Water** — gallons per person per day, storage duration targets
+- **Food** — shelf-stable calorie targets, protein and fat balance, dietary constraints
+- **Medical** — first aid essentials, prescription medication buffers, special-needs items
+- **Power** — backup options appropriate to housing type (power bank, solar, generator)
+- **Documents** — identity copies, insurance, cash reserves, digital backups
+- **Communications** — radio options, emergency contact lists, backup channels
+- **Tools and sanitation** — basic household survival gear
+
+Each item comes with a quantity, a brief rationale, and optional links to typical examples. The output is a printable checklist, not a shopping funnel.
+
+### 4. Bilingual Support
+
+Crisis Pulse supports English and Simplified Chinese as first-class languages. Users can switch at any time via the top-right language switcher.
+
+- Conflict names, types, and descriptions are stored in a static bilingual map (`CONFLICT_ZH`)
+- Dynamic news headlines are batch-translated daily via the Google Translate `gtx` endpoint
+- UI labels, form fields, and calculator output are all bilingual
+- Language state persists across map page and calculator page
+
+### 5. Visitor Analytics by Country
+
+A lightweight, privacy-respecting visitor counter tracks unique page loads by country. The counter uses Netlify's built-in geolocation (`context.geo`) to attribute visits without cookies or third-party analytics scripts. The left-side panel displays the top countries with flag emoji. Total visitor count and per-country counts are stored in Netlify Blobs.
+
+## Technical Architecture
+
+Crisis Pulse is deliberately built with severe constraints to ensure longevity and simplicity:
+
+- **Frontend**: Pure HTML, CSS, and vanilla JavaScript. D3.js and TopoJSON are loaded from CDN. The entire UI ships as a single HTML file of approximately 99KB.
+- **No framework**: No React, no Vue, no Svelte. No build step, no bundler, no transpilation.
+- **No database**: Netlify Blobs is used as a serverless key-value store for visitor counts, conflict data cache, and subscriber emails.
+- **Daily jobs**: Netlify Scheduled Functions run the daily news crawler and intensity recalculation.
+- **Email**: Resend API is used for optional email alerts when conflicts cross intensity thresholds.
+- **Hosting**: Netlify with automatic HTTPS via Let's Encrypt. DNS via Cloudflare (gray cloud, not proxied).
+
+The single-file constraint is a feature, not a limitation. It forces every line to justify its existence, eliminates dependency rot, and ensures the app can be downloaded and run locally as a static file if needed.
+
+## Philosophy
+
+Crisis Pulse rejects several common patterns in both news aggregation and preparedness content:
+
+- **No engagement optimization**. The map does not use algorithms to surface "what you should care about". It shows a flat view of the world, and users bring their own judgment.
+- **No fear marketing**. Preparedness content often traffics in anxiety. Crisis Pulse presents conflict data as facts and preparedness as a calm, one-time exercise.
+- **No affiliate funnels**. The supply calculator does not link to monetized product recommendations. Users are expected to source their own supplies.
+- **No data harvesting**. The application does not collect personal information beyond anonymous visitor counts by country.
+- **No paid tier**. Crisis Pulse is free and is designed to remain free. There is no freemium model in the roadmap.
+
+## Roadmap and Limitations
+
+Crisis Pulse is in Beta 0.1. Known limitations:
+
+- Intensity scores reflect news volume, not ground-truth escalation. They are descriptive, not predictive.
+- The conflict list is manually curated. Emerging or under-reported conflicts may be missing.
+- News headlines depend on external RSS feeds that can occasionally return stale or incomplete data.
+- The emergency calculator uses regional heuristics, not country-specific legal or logistical guidance. Users in unusual situations (extreme climate, very remote areas, dense urban cores with restricted storage) may need to adjust the output.
+- No mobile app. The web version is responsive but a native app is not planned.
+
+## Frequently Asked Questions
+
+### Is Crisis Pulse a prediction engine?
+No. Crisis Pulse does not predict conflicts, escalations, or outcomes. It is a daily signal aggregator that shows where news volume is unusually high or rising.
+
+### How accurate is the intensity score?
+The score reflects relative news activity for each conflict compared to its own baseline. It is most useful for spotting sudden changes rather than absolute severity.
+
+### Is my data private?
+Crisis Pulse does not use cookies or third-party tracking. The only data collected is anonymous visitor counts by country, used to display a simple statistics panel. GPS location, if granted, is used only to position your marker on the map and is never transmitted or stored.
+
+### Can I use Crisis Pulse offline?
+The map and calculator require an internet connection to fetch the latest data. However, because the entire application is a single HTML file, it can be downloaded and run locally with stale data for offline reference.
+
+### Who is behind Crisis Pulse?
+Crisis Pulse is built by an independent developer as an open project. It is not affiliated with any government, NGO, media organization, or commercial preparedness vendor.
+
+### How can I contribute or suggest a conflict to track?
+Feedback is welcome through the project's public channels. Suggestions for additional conflicts, calculator refinements, or bilingual improvements are considered in each update cycle.
+
+## Key URLs
+
+- Homepage: https://crisispulse.org
+- Product Hunt: https://www.producthunt.com/products/crisispulse
+- Technical writeup: https://dev.to/xkbear/i-built-a-global-conflict-monitor-in-a-single-html-file-heres-how-the-serverless-architecture-324i
+- LinkedIn: https://www.linkedin.com/feed/update/urn:li:share:7446515728826028032
+- X/Twitter: https://x.com/XK88570598/status/2040750684677812567
+
+## License and Use
+
+Crisis Pulse is free for personal and non-commercial use. Citations, academic references, and journalistic mentions are welcome with a link back to https://crisispulse.org.
