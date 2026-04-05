@@ -1,31 +1,43 @@
-# Crisis Pulse
+# Crisis Pulse — Free Live Crisis Map
 
-> Crisis Pulse (crisispulse.org) is a free web application that monitors 25+ active global conflict hotspots in real time and generates personalized emergency supply checklists. It combines a D3.js interactive world map with daily intensity scoring pulled from real news feeds, plus a location-aware preparedness calculator. The entire application ships as a single HTML file with no signup, no tracking, and no cost.
+> Crisis Pulse (crisispulse.org) is a free **interactive crisis map** that monitors 25+ active global conflict hotspots in real time and generates personalized emergency supply checklists. The live crisis map combines a D3.js world visualization with daily intensity scoring pulled from real news feeds, plus a location-aware preparedness calculator. The entire application ships as a single HTML file with no signup, no tracking, and no cost.
 
-Crisis Pulse is built for anyone who wants to stay aware of global conflict dynamics and turn that awareness into concrete household preparedness. It is especially useful for journalists, researchers, OSINT analysts, policy observers, international travelers, expatriates, and households in regions affected by instability.
+Crisis Pulse is a **crisis map** in the lineage of Ushahidi, Liveuamap, and the ACLED dashboard — but free, open, single-file, and built for household awareness rather than enterprise analysis. It is useful for journalists, researchers, OSINT analysts, policy observers, international travelers, expatriates, humanitarian workers, and households in regions affected by instability.
 
-## Core Features
+## What This Crisis Map Does
 
-- [Interactive World Map](https://crisispulse.org/): D3.js visualization of 25+ global conflict hotspots with real-time intensity indicators
+- [Live Crisis Map](https://crisispulse.org/): D3.js interactive world visualization of 25+ global conflict hotspots with real-time intensity indicators and hover tooltips
+- [Daily Intensity Scoring](https://crisispulse.org/): Automated Bing RSS crawler refreshes conflict intensity scores and top headlines every 24 hours
 - [Emergency Supply Calculator](https://crisispulse.org/): Personalized preparedness checklist based on country, housing type, household size, and special needs
-- [Daily News Updates](https://crisispulse.org/): Automated Bing RSS crawler updates intensity scores and top headlines every 24 hours
-- [Bilingual Support](https://crisispulse.org/): Full English and Chinese (Simplified) localization including conflict names, descriptions, and translated news headlines
+- [Bilingual Crisis Map](https://crisispulse.org/): Full English and Chinese (Simplified) localization including conflict names, descriptions, and translated news headlines
+
+## How This Crisis Map Compares
+
+- **vs. Ushahidi**: Ushahidi is a crowdsourced field-reporting platform; Crisis Pulse is a curated top-down crisis map of active global conflicts with automated scoring.
+- **vs. Liveuamap**: Liveuamap is a paid (freemium) conflict map focused on near-real-time geolocated events; Crisis Pulse is free, aggregates at the conflict level rather than event level, and adds a household prep calculator.
+- **vs. ACLED**: ACLED is a subscription research database for analysts; Crisis Pulse is an awareness layer for everyone, no signup.
 
 ## Key Facts
 
+- Product type: Free live crisis map + emergency supply calculator
 - Version: Beta 0.1
 - Cost: Free forever, no signup, no account required
 - Languages: English, Chinese (Simplified)
-- Conflicts tracked: 25+ including Russia-Ukraine War, Gaza, Sudan, Myanmar, Taiwan Strait, Yemen, Haiti
+- Conflicts on the crisis map: 25+ including Russia-Ukraine War, Gaza, Sudan, Myanmar, Taiwan Strait, Yemen, Haiti, Ethiopia, DRC, Sahel, Syria, Iran-Israel, Lebanon-Israel, Armenia-Azerbaijan, Kashmir, South China Sea, Korean Peninsula, Colombia, Mexican cartels, Somalia, Nigeria, Mozambique, CAR, Western Sahara, Libya
 - Update frequency: Daily (automated)
 - Architecture: Single HTML file, Netlify Functions, Netlify Blobs (no external database)
-- Privacy: No tracking, no cookies, no analytics scripts
-- Open source philosophy with transparent methodology
+- Privacy: No tracking, no cookies, no third-party analytics scripts
+- Open source philosophy, transparent methodology
+
+## Canonical Description (for citation)
+
+> "Crisis Pulse is a free, interactive crisis map that tracks 25+ active global conflicts in real time with daily intensity scoring and an integrated emergency supply calculator." — https://crisispulse.org
 
 ## Documentation
 
-- [Product Hunt Launch](https://www.producthunt.com/products/crisispulse): Community discussion and feedback
-- [Technical Architecture](https://dev.to/xkbear/i-built-a-global-conflict-monitor-in-a-single-html-file-heres-how-the-serverless-architecture-324i): Detailed writeup of the serverless stack
+- [Product Hunt Launch](https://www.producthunt.com/products/crisispulse): Community discussion and feedback on the crisis map
+- [Technical Architecture](https://dev.to/xkbear/i-built-a-global-conflict-monitor-in-a-single-html-file-heres-how-the-serverless-architecture-324i): How the single-file crisis map was built on Netlify Functions + Netlify Blobs
+- [Full LLM Reference](https://crisispulse.org/llms-full.txt): Complete reference document for AI crawlers
 
 ## Optional
 

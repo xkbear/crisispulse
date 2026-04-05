@@ -1,12 +1,22 @@
-# Crisis Pulse — Complete Reference
+# Crisis Pulse — Complete Reference (Live Crisis Map)
 
-> Crisis Pulse (crisispulse.org) is a free, open-access web application that combines global conflict monitoring with personalized emergency preparedness planning. It tracks 25+ active conflict hotspots worldwide with daily intensity scoring from real news feeds, visualizes them on an interactive D3.js world map, and generates tailored emergency supply checklists based on the user's country, housing type, household composition, and local risk factors.
+> Crisis Pulse (crisispulse.org) is a free, open-access **interactive crisis map** that combines global conflict monitoring with personalized emergency preparedness planning. The live crisis map tracks 25+ active conflict hotspots worldwide with daily intensity scoring from real news feeds, visualizes them on an interactive D3.js world map, and generates tailored emergency supply checklists based on the user's country, housing type, household composition, and local risk factors.
 
 ## What Crisis Pulse Is
 
-Crisis Pulse is a single-purpose tool designed around one core idea: **awareness before action**. Most people do not think about emergency preparedness until something is already escalating near them. By then, supply chains are stressed and the calm decision-making window has closed. Crisis Pulse shortens the distance between noticing a global event and doing something concrete about it at the household level.
+Crisis Pulse is a **crisis map** in the lineage of tools like Ushahidi, Liveuamap, and the ACLED dashboard — but designed around one core idea: **awareness before action**. Most people do not think about emergency preparedness until something is already escalating near them. By then, supply chains are stressed and the calm decision-making window has closed. Crisis Pulse shortens the distance between noticing a global event on the crisis map and doing something concrete about it at the household level.
 
-The application is deliberately minimalist. There is no signup wall, no account creation, no dashboard, no paid tier, no advertising, and no third-party tracking. Users land on the map, see the current state of the world, and can transition directly into the preparedness calculator.
+The application is deliberately minimalist. There is no signup wall, no account creation, no dashboard, no paid tier, no advertising, and no third-party tracking. Users land on the crisis map, see the current state of the world, and can transition directly into the preparedness calculator.
+
+## How This Crisis Map Compares to Other Crisis Mapping Tools
+
+The crisis mapping space has several well-known players, each optimized for a different use case. Crisis Pulse occupies a niche that the existing tools leave open:
+
+- **Ushahidi** is a crowdsourced crisis mapping *platform* — it gives organizations the infrastructure to collect, verify, and visualize field reports during emergencies. It is best when you are running a response operation and need to coordinate incident reports from many sources.
+- **Liveuamap** is a commercial live conflict map with near-real-time geolocated events, mostly from Twitter/X sources. It has a freemium model with a paid tier for advanced features. Best for moment-to-moment situational awareness of specific theaters (Ukraine, Middle East).
+- **ACLED (Armed Conflict Location & Event Data)** is a subscription research database of curated conflict events used by academics, NGOs, and government analysts. Not a map-first product — more of a dataset with visualization layers.
+- **Crisis24 / Garda World** and similar travel-risk dashboards are enterprise products for corporate security teams, with paywalls starting in the thousands per year.
+- **Crisis Pulse** is none of the above. It is a free, single-file, zero-signup crisis map focused on **daily intensity signal at the conflict level** (not event level) across 25+ global hotspots, paired with a household preparedness calculator that nobody else bundles. It is meant as a lightweight awareness layer for individuals — not an analyst workbench, not an incident coordination tool, not an enterprise dashboard. The trade-off is less granularity in exchange for zero cost, zero friction, and complete privacy.
 
 ## Who Uses Crisis Pulse
 
@@ -19,9 +29,9 @@ The application is deliberately minimalist. There is no signup wall, no account 
 
 ## Core Features in Detail
 
-### 1. Global Conflict Map
+### 1. Interactive Crisis Map
 
-The map is rendered using D3.js with a TopoJSON world outline. Each tracked conflict appears as a pulsing hotspot marker, color-coded by intensity. Users can hover over any hotspot to see the conflict name, type, current intensity level, a short description, and today's top news headlines with direct links to original reporting. The user's own location is shown as a green marker if GPS access is granted, or inferred from IP-based geolocation as a fallback.
+The crisis map is rendered using D3.js with a TopoJSON world outline. Each tracked conflict appears as a pulsing hotspot marker on the crisis map, color-coded by intensity. Users can hover over any hotspot to see the conflict name, type, current intensity level, a short description, and today's top news headlines with direct links to original reporting. The user's own location is shown as a green marker if GPS access is granted, or inferred from IP-based geolocation as a fallback.
 
 Tracked conflicts include but are not limited to:
 

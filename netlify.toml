@@ -34,6 +34,36 @@
   to = "/.netlify/functions/notify"
   status = 200
 
+# SEO keyword-rich alias URLs. 200 (rewrite) serves index.html directly so the
+# URL stays in the address bar and is independently crawlable. The canonical
+# tag in <head> points to https://crisispulse.org/ which consolidates ranking
+# signal while keeping the exact-match keyword slug live for external anchor
+# text and AI crawler retrieval.
+[[redirects]]
+  from = "/crisis-map"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/live-crisis-map"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/global-crisis-map"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/world-crisis-map"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/interactive-crisis-map"
+  to = "/index.html"
+  status = 200
+
 # HSTS header for all pages
 [[headers]]
   for = "/*"
