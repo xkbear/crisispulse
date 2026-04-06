@@ -257,18 +257,37 @@ export default async () => {
       });
     }
   }
+  const notifyUrl = new URL("/api/notify", "https://crisispulse.org");
+
+  // 1) Escalation alerts (intensity rose ≥ 1.0)
   if (escalations.length > 0) {
     console.log(`🚨 ${escalations.length} escalation(s) detected, notifying subscribers...`);
     try {
-      const notifyUrl = new URL("/api/notify", "https://crisispulse.org");
       await fetch(notifyUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ escalations })
       });
     } catch (e) {
-      console.warn("Notify failed:", e.message);
+      console.warn("Escalation notify failed:", e.message);
     }
+  }
+
+  // 2) Daily brief — top 5 conflicts by intensity (sent every day)
+  try {
+    const topConflicts = [...updated]
+      .sort((a, b) => b.intensity - a.intensity)
+      .slice(0, 5)
+      .map(c => ({ name: c.name, intensity: c.intensity, type: c.type, desc: c.desc }));
+
+    console.log(`📧 Sending daily brief (top ${topConflicts.length} conflicts)...`);
+    await fetch(notifyUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ dailyBrief: true, topConflicts })
+    });
+  } catch (e) {
+    console.warn("Daily brief notify failed:", e.message);
   }
 };
 
