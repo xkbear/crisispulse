@@ -184,7 +184,20 @@ select{cursor:pointer}
 .visitor-panel .vp-flag{font-size:14px}
 .visitor-panel .vp-name{flex:1;color:#aaa;font-size:11px}
 .visitor-panel .vp-count{color:#666;font-size:11px;font-variant-numeric:tabular-nums}
-@media(max-width:768px){.visitor-panel{display:none}.news-panel{display:none}}
+.subscribe-panel{position:fixed;left:12px;bottom:14px;z-index:150;background:rgba(10,10,15,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px 16px;width:180px;color:#e6e6e6;font-size:12px;transition:opacity 0.4s ease}
+.vp-sub-title{font-size:12px;font-weight:700;color:#e5e5e5;margin-bottom:4px}
+.vp-sub-desc{font-size:10px;color:#888;margin-bottom:8px;line-height:1.4}
+.vp-sub-form{display:flex;flex-direction:column;gap:6px}
+.vp-sub-form input{width:100%;padding:8px 10px;border:1px solid rgba(255,255,255,0.15);border-radius:6px;font-size:12px;background:rgba(255,255,255,0.06);color:#e5e5e5;outline:none;box-sizing:border-box}
+.vp-sub-form input:focus{border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,0.2)}
+.vp-sub-form input::placeholder{color:#666}
+.vp-sub-form button{width:100%;padding:8px 12px;background:#3b82f6;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s}
+.vp-sub-form button:hover{background:#2563eb}
+.vp-sub-form button:disabled{background:#94a3b8;cursor:not-allowed}
+.vp-sub-msg{font-size:10px;margin-top:4px;min-height:14px}
+.vp-sub-msg.success{color:#22c55e}
+.vp-sub-msg.error{color:#ef4444}
+@media(max-width:768px){.visitor-panel{display:none}.news-panel{display:none}.subscribe-panel{left:50%;bottom:10px;transform:translateX(-50%);width:calc(100% - 32px);max-width:360px}}
 .news-panel{position:fixed;right:14px;bottom:14px;z-index:160;background:rgba(10,10,15,0.88);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;width:320px;max-height:45vh;overflow-y:auto;scrollbar-width:none;color:#e6e6e6;font-size:12px;opacity:0;transition:opacity 0.6s ease}
 .news-panel::-webkit-scrollbar{display:none}
 .news-panel.loaded{opacity:1}
@@ -320,6 +333,15 @@ select{cursor:pointer}
 <!-- ====== MAP PAGE ====== -->
 <div class="map-page" id="mapPage">
   <div class="visitor-panel" id="visitorPanel"><div class="vp-title" id="vpTitle">Visitors</div><div class="vp-total" id="vpTotal">—</div><div id="vpCountries"></div></div>
+  <div class="subscribe-panel" id="subscribeBoxMap">
+    <div class="vp-sub-title" id="subTitleMap"></div>
+    <div class="vp-sub-desc" id="subDescMap"></div>
+    <form class="vp-sub-form" onsubmit="handleSubscribe(event)">
+      <input type="email" id="subEmailMap" placeholder="" required>
+      <button type="submit" id="subBtnMap"></button>
+    </form>
+    <div class="vp-sub-msg" id="subMsgMap"></div>
+  </div>
   <div class="news-panel" id="newsPanel"><div class="np-header"><div class="np-title" id="npTitle">Today's Key Developments</div><button class="np-close" onclick="document.getElementById('newsPanel').style.display='none'" title="Close">✕</button></div><div id="npItems"></div></div>
   <div class="map-header">
     <h1 id="mapTitle"></h1>
@@ -345,15 +367,6 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="data-source" id="dataSource"></div>
-  <div class="subscribe-box dark" id="subscribeBoxMap" style="max-width:420px;margin:24px auto 0">
-    <div class="sub-title" id="subTitleMap"></div>
-    <div class="sub-desc" id="subDescMap"></div>
-    <form class="sub-form" onsubmit="handleSubscribe(event)">
-      <input type="email" id="subEmailMap" placeholder="" required>
-      <button type="submit" id="subBtnMap"></button>
-    </form>
-    <div class="sub-msg" id="subMsgMap"></div>
-  </div>
 </div>
 
 <!-- ====== CALCULATOR PAGE ====== -->
@@ -807,7 +820,7 @@ async function handleSubscribe(e){
   const form=e.target;
   const emailInput=form.querySelector('input[type="email"]');
   const btn=form.querySelector('button[type="submit"]');
-  const msg=form.parentElement.querySelector('.sub-msg');
+  const msg=form.parentElement.querySelector('.sub-msg')||form.parentElement.querySelector('.vp-sub-msg');
   const email=emailInput.value.trim();
   if(!email)return;
   btn.disabled=true;btn.textContent="...";
@@ -815,13 +828,15 @@ async function handleSubscribe(e){
     const r=await fetch("/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,country:window._userCountry||"Unknown"})});
     const d=await r.json();
     if(d.ok){
-      msg.className="sub-msg success";
+      const cls=msg.classList.contains('vp-sub-msg')?"vp-sub-msg":"sub-msg";
+      msg.className=cls+" success";
       msg.textContent=d.message==="already_subscribed"?t("subAlready"):t("subSuccess");
       emailInput.value="";
     }else{
-      msg.className="sub-msg error";msg.textContent=d.error||t("subError");
+      const cls=msg.classList.contains('vp-sub-msg')?"vp-sub-msg":"sub-msg";
+      msg.className=cls+" error";msg.textContent=d.error||t("subError");
     }
-  }catch(_){msg.className="sub-msg error";msg.textContent=t("subError");}
+  }catch(_){const cls=msg.classList.contains('vp-sub-msg')?"vp-sub-msg":"sub-msg";msg.className=cls+" error";msg.textContent=t("subError");}
   btn.disabled=false;btn.textContent=t("subBtn");
 }
 function initMapSubscribe(){
