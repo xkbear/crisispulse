@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Conflict Tracker — CrisPulse</title>
+  <meta name="description" content="Track major armed conflicts worldwide — Ukraine, Sudan, Gaza, Myanmar. Real-time data, casualty figures, humanitarian impact. Free on CrisPulse.org.">
+  <link rel="canonical" href="https://crisispulse.org/conflicts/">
+  <meta property="og:title" content="Global Conflict Tracker — CrisPulse">
+  <meta property="og:description" content="Track major armed conflicts worldwide — Ukraine, Sudan, Gaza, Myanmar. Real-time data, casualty figures, humanitarian impact. Free on CrisPulse.org.">
+  <meta property="og:url" content="https://crisispulse.org/conflicts/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="CrisPulse">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Global Conflict Tracker — CrisPulse">
+  <meta name="twitter:description" content="Track major armed conflicts worldwide — Ukraine, Sudan, Gaza, Myanmar. Real-time data, casualty figures, humanitarian impact. Free on CrisPulse.org.">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; color: #e6e6e6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.7; min-height: 100vh; }
+    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,15,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 0.8rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: #e6e6e6; }
+    .nav-brand .pulse { width: 10px; height: 10px; border-radius: 50%; background: #ff4444; animation: pulse-glow 2s ease-in-out infinite; }
+    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 4px #ff4444; } 50% { box-shadow: 0 0 16px #ff4444, 0 0 32px rgba(255,68,68,0.3); } }
+    .nav-brand span { font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px; }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-links a:hover { color: #fff; }
+    .container { max-width: 860px; margin: 0 auto; padding: 5rem 1.5rem 3rem; }
+    h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fff, #ccc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .crisis-badge { display: inline-block; background: rgba(255,68,68,0.15); color: #ff6b6b; padding: 0.35rem 0.8rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; margin-bottom: 2rem; }
+    h2 { font-size: 1.5rem; color: #fff; margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 1rem; border-left: 3px solid #ff4444; }
+    h3 { font-size: 1.15rem; color: #ddd; margin-top: 1.5rem; margin-bottom: 0.6rem; }
+    p { margin-bottom: 1rem; color: #ccc; }
+    ul, ol { margin: 0.5rem 0 1.2rem 1.5rem; color: #ccc; }
+    li { margin-bottom: 0.5rem; }
+    li strong { color: #e6e6e6; }
+    a { color: #ff6b6b; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .stay-informed { background: rgba(255,68,68,0.06); border: 1px solid rgba(255,68,68,0.15); border-radius: 8px; padding: 1.5rem; margin-top: 2rem; }
+    .stay-informed a { color: #ff6b6b; font-weight: 600; text-decoration: none; }
+    .stay-informed a:hover { text-decoration: underline; }
+    .footer { text-align: center; padding: 2rem; color: #666; font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 3rem; }
+    .footer a { color: #ff6b6b; }
+    .cta-box { text-align: center; margin: 2rem 0; }
+    .cta-btn { display: inline-block; padding: 0.8rem 2rem; background: #ff4444; color: #fff; border-radius: 6px; font-weight: 600; text-decoration: none; transition: background 0.2s; }
+    .cta-btn:hover { background: #e53935; text-decoration: none; }
+    @media (max-width: 600px) { .container { padding: 4.5rem 1rem 2rem; } h1 { font-size: 1.8rem; } h2 { font-size: 1.3rem; } .nav { padding: 0.6rem 1rem; } .nav-links { display: none; } }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="https://crisispulse.org" class="nav-brand">
+      <div class="pulse"></div>
+      <span>CrisPulse</span>
+    </a>
+    <div class="nav-links">
+      <a href="https://crisispulse.org">Crisis Map</a>
+      <a href="https://crisispulse.org/conflicts/ukraine-russia">Ukraine</a>
+      <a href="https://crisispulse.org/conflicts/sudan">Sudan</a>
+      <a href="https://crisispulse.org/conflicts/gaza">Gaza</a>
+      <a href="https://crisispulse.org/conflicts/myanmar">Myanmar</a>
+    </div>
+  </nav>
+  <div class="container">
+
+    <h1>Global Conflict Tracker</h1>
+    <p class="crisis-badge">46 Active Armed Conflicts Worldwide</p>
+    <p>CrisPulse tracks major armed conflicts and humanitarian crises around the world. Select a conflict below for in-depth analysis, casualty data, and humanitarian impact.</p>
+
+    <h2>Major Active Conflicts</h2>
+    <div style="display:grid;gap:1rem;margin-top:1.5rem;">
+      <a href="/conflicts/ukraine-russia" style="display:block;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:1.5rem;text-decoration:none;transition:border-color 0.2s;">
+        <h3 style="color:#fff;margin:0 0 0.3rem;">Russia-Ukraine War</h3>
+        <p style="color:#999;margin:0;font-size:0.9rem;">4+ years · 1.2M Russian casualties · Deadliest conflict by reported deaths</p>
+      </a>
+      <a href="/conflicts/sudan" style="display:block;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:1.5rem;text-decoration:none;transition:border-color 0.2s;">
+        <h3 style="color:#fff;margin:0 0 0.3rem;">Sudan Civil War</h3>
+        <p style="color:#999;margin:0;font-size:0.9rem;">150,000+ killed · 24.6M facing hunger · World's worst humanitarian crisis</p>
+      </a>
+      <a href="/conflicts/gaza" style="display:block;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:1.5rem;text-decoration:none;transition:border-color 0.2s;">
+        <h3 style="color:#fff;margin:0 0 0.3rem;">Gaza-Israel-Palestine</h3>
+        <p style="color:#999;margin:0;font-size:0.9rem;">Ceasefire in effect · 2M displaced · Implementation contested</p>
+      </a>
+      <a href="/conflicts/myanmar" style="display:block;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:1.5rem;text-decoration:none;transition:border-color 0.2s;">
+        <h3 style="color:#fff;margin:0 0 0.3rem;">Myanmar Civil War</h3>
+        <p style="color:#999;margin:0;font-size:0.9rem;">96,000 killed · 3.6M displaced · Junta controls <40% of townships</p>
+      </a>
+    </div>
+
+    <div class="stay-informed" style="margin-top:2.5rem;">
+      <h2>About CrisPulse</h2>
+      <p>CrisPulse is a free, open-source global crisis monitoring platform. We aggregate data from ACLED, CFR, International Crisis Group, and other authoritative sources to provide real-time conflict tracking. <a href="https://crisispulse.org">View the Live Crisis Map →</a></p>
+    </div>
+
+    <div class="cta-box">
+      <a href="https://crisispulse.org" class="cta-btn">View Live Crisis Map →</a>
+    </div>
+  </div>
+  <footer class="footer">
+    <p>© 2026 <a href="https://crisispulse.org">CrisPulse.org</a> — Free, open-source global crisis monitoring</p>
+  </footer>
+</body>
+</html>
