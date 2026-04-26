@@ -179,13 +179,41 @@ export default async () => {
     const prevIntensity = prev?.intensity || base.intensity;
     let newIntensity = Math.round(Math.min(10, Math.max(1, prevIntensity + delta * 0.3)) * 10) / 10;
 
+    // Track when this conflict first appeared (for NEW badge).
+    // If prev exists but lacks firstSeen, this conflict was already tracked
+    // before this feature shipped — backdate to 30 days ago so it's NOT NEW.
+    const nowIso = new Date().toISOString();
+    const isPrevSeenButUntimestamped = prev && !prev.firstSeen;
+    const firstSeen = prev?.firstSeen
+      || (isPrevSeenButUntimestamped ? new Date(Date.now() - 30 * 86400 * 1000).toISOString() : nowIso);
+
+    // Detect news spike: article count today is >= 2x rolling average AND >= 20 articles
+    const prevArticleCount = prev?.articleCount || 0;
+    const articleHistory = prev?.articleHistory || [];
+    const recentHistory = [...articleHistory, articleCount].slice(-7); // last 7 days
+    const avgRecent = recentHistory.length >= 3
+      ? recentHistory.slice(0, -1).reduce((s, n) => s + n, 0) / Math.max(1, recentHistory.length - 1)
+      : 0;
+    const newsSpike = articleCount >= 20 && avgRecent > 0 && articleCount >= avgRecent * 2;
+    const intensitySpike = prev && (newIntensity - (prev.intensity || 0)) >= 1.0;
+
     let topArticle = null;
     if (articleCount > 0) {
       topArticle = { conflict: base.name, articles: articleCount, link: topLink };
     }
 
     return {
-      conflict: { ...base, intensity: newIntensity, desc: topHeadline },
+      conflict: {
+        ...base,
+        intensity: newIntensity,
+        desc: topHeadline,
+        firstSeen,
+        articleCount,
+        articleHistory: recentHistory,
+        newsSpike,
+        intensitySpike,
+        spikeAt: (newsSpike || intensitySpike) ? nowIso : (prev?.spikeAt || null)
+      },
       topArticle
     };
   }
@@ -201,12 +229,26 @@ export default async () => {
   for (const r of allResults) {
     if (r.status === 'fulfilled') results.push(r.value);
   }
-  // Add skipped/failed conflicts with base data
+  // Add skipped/failed conflicts with base data, preserving firstSeen + spike state
   const gotNames = new Set(results.map(r => r.conflict.name));
+  const nowIso = new Date().toISOString();
+  const skippedFirstSeen = (prev) => {
+    if (prev?.firstSeen) return prev.firstSeen;
+    if (prev) return new Date(Date.now() - 30 * 86400 * 1000).toISOString(); // existing untimestamped → backdate
+    return nowIso; // truly new conflict
+  };
   for (const base of BASE_CONFLICTS) {
     if (!gotNames.has(base.name)) {
       const prev = prevMap[base.name];
-      results.push({ conflict: prev || base, topArticle: null });
+      const merged = {
+        ...base,
+        ...(prev || {}),
+        firstSeen: skippedFirstSeen(prev),
+        // Decay spike flags after 7 days
+        newsSpike: prev?.spikeAt && (Date.now() - new Date(prev.spikeAt).getTime() < 7 * 86400 * 1000) ? !!prev.newsSpike : false,
+        intensitySpike: prev?.spikeAt && (Date.now() - new Date(prev.spikeAt).getTime() < 7 * 86400 * 1000) ? !!prev.intensitySpike : false
+      };
+      results.push({ conflict: merged, topArticle: null });
     }
   }
 
