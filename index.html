@@ -209,6 +209,15 @@ select{cursor:pointer}
 .news-panel .np-close{background:none;border:none;color:#888;font-size:16px;cursor:pointer;padding:2px 6px;border-radius:4px}
 .news-panel .np-close:hover{color:#fff;background:rgba(255,255,255,0.1)}
 @keyframes newsPulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.news-panel .np-hero{position:relative;padding:14px 14px 12px;margin:-2px -4px 8px;border-radius:10px;background:linear-gradient(135deg,rgba(239,68,68,0.10),rgba(239,68,68,0.02) 60%,rgba(255,255,255,0.02));border:1px solid rgba(239,68,68,0.25)}
+.news-panel .np-hero-tag{position:absolute;top:-7px;left:14px;font-size:9px;font-weight:800;letter-spacing:1px;color:#fff;padding:3px 8px;border-radius:4px;background:#ef4444;animation:newsPulse 2s infinite}
+.news-panel .np-hero-label{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1.4px;margin:6px 0 6px;font-weight:600}
+.news-panel .np-hero-conflict{font-size:11px;color:#fbbf24;font-weight:700;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.6px}
+.news-panel .np-hero-headline{color:#fff;font-size:14px;font-weight:600;line-height:1.45;margin-bottom:6px}
+.news-panel .np-hero-headline a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.2);transition:border-color .2s}
+.news-panel .np-hero-headline a:hover{border-bottom-color:#60a5fa;color:#dbeafe}
+.news-panel .np-hero-meta{font-size:10px;color:#aaa}
+.news-panel .np-rest-label{font-size:9px;color:#666;text-transform:uppercase;letter-spacing:1.2px;margin:12px 0 4px;font-weight:600}
 .news-panel .np-item{padding:8px 0;border-top:1px solid rgba(255,255,255,0.08)}
 .news-panel .np-item:first-child{border-top:none}
 .news-panel .np-conflict{font-size:10px;color:#fbbf24;font-weight:600;margin-bottom:3px}
@@ -393,6 +402,11 @@ const T = {
     vpTitle:"Visitors",
     npTitle:"Today's Key Developments",
     npArticles:"articles in 48h",
+    npTopStory:"Today's Top Story",
+    npBreaking:"BREAKING",
+    npEscalating:"ESCALATING",
+    npHighAttention:"HIGH ATTENTION",
+    npAlsoTracking:"Also tracking today",
     riskExtreme:"Extreme Risk Zone — Strongly recommend preparing 6+ months supply",
     riskHigh:"High Risk — Recommend 3-6 months supply, prioritize water and staple grains",
     riskMedium:"Medium Risk — Recommend 1-3 months basic supply as safety buffer",
@@ -490,6 +504,11 @@ const T = {
     vpTitle:"访客",
     npTitle:"今日重要动态",
     npArticles:"篇报道（48h内）",
+    npTopStory:"今日全球头条",
+    npBreaking:"突发",
+    npEscalating:"局势升级",
+    npHighAttention:"高度关注",
+    npAlsoTracking:"今日其他动态",
     riskExtreme:"极高风险区域 — 强烈建议立即准备至少6个月应急储备",
     riskHigh:"高风险 — 建议准备3-6个月应急储备，优先确保水和主粮",
     riskMedium:"中等风险 — 建议准备1-3个月基础储备作为安全缓冲",
@@ -875,15 +894,51 @@ function renderNewsPanel(news){
   const panel=document.getElementById("newsPanel");
   const container=document.getElementById("npItems");
   if(!panel||!container) return;
+  if(!news||news.length===0){panel.classList.remove("loaded");return;}
   document.getElementById("npTitle").textContent=t("npTitle");
-  container.innerHTML=news.map(n=>{
-    const title = lang==='zh' ? (n.headlineZh || tConflict('descs', n.headline)) : n.headline;
-    const conflictName = tConflict('names', n.conflict);
-    const headline=n.url
-      ? `<a href="${n.url}" target="_blank" rel="noopener">${title}</a>`
-      : title;
-    return `<div class="np-item"><div class="np-conflict">${conflictName}</div><div class="np-headline">${headline}</div><div class="np-meta">${n.articles} ${t("npArticles")}</div></div>`;
-  }).join("");
+
+  // Find the #1 top story by article volume; rest are "also tracking"
+  const top = news[0];
+  const rest = news.slice(1, 5);
+
+  // Determine the badge for the top story by intensity / spike state
+  const topConflictData=(CONFLICTS||[]).find(c=>c.name===top.conflict)||{};
+  let badgeText=t("npHighAttention");
+  let badgeColor="#f59e0b";
+  if(topConflictData.intensitySpike||topConflictData.newsSpike){
+    badgeText=t("npEscalating");badgeColor="#ef4444";
+  } else if(top.articles>=40){
+    badgeText=t("npBreaking");badgeColor="#dc2626";
+  }
+
+  const topTitle=lang==='zh'?(top.headlineZh||tConflict('descs',top.headline)):top.headline;
+  const topConflictName=tConflict('names',top.conflict);
+  const topHeadline=top.url
+    ?`<a href="${top.url}" target="_blank" rel="noopener">${topTitle}</a>`
+    :topTitle;
+
+  let html=`
+    <div class="np-hero">
+      <div class="np-hero-tag" style="background:${badgeColor}">${badgeText}</div>
+      <div class="np-hero-label">${t("npTopStory")}</div>
+      <div class="np-hero-conflict">${topConflictName}</div>
+      <div class="np-hero-headline">${topHeadline}</div>
+      <div class="np-hero-meta">${top.articles} ${t("npArticles")}</div>
+    </div>`;
+
+  if(rest.length>0){
+    html+=`<div class="np-rest-label">${t("npAlsoTracking")}</div>`;
+    html+=rest.map(n=>{
+      const title=lang==='zh'?(n.headlineZh||tConflict('descs',n.headline)):n.headline;
+      const conflictName=tConflict('names',n.conflict);
+      const headline=n.url
+        ?`<a href="${n.url}" target="_blank" rel="noopener">${title}</a>`
+        :title;
+      return `<div class="np-item"><div class="np-conflict">${conflictName}</div><div class="np-headline">${headline}</div><div class="np-meta">${n.articles} ${t("npArticles")}</div></div>`;
+    }).join("");
+  }
+
+  container.innerHTML=html;
   panel.classList.add("loaded");
 }
 function formatUpdateDate(l){
