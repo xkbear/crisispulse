@@ -64,6 +64,12 @@
   to = "/index.html"
   status = 200
 
+# Privacy policy (required by App Store)
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy.html"
+  status = 200
+
 # HSTS header for all pages
 [[headers]]
   for = "/*"
