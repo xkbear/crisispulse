@@ -21,7 +21,7 @@ struct MapTabView: View {
     )
 
     @State private var selectedConflict: Conflict?
-    @State private var showNewsSheet: Bool = true
+    @State private var newsExpanded: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -31,23 +31,30 @@ struct MapTabView: View {
                 topBar
                     .padding(.horizontal)
                     .padding(.top, 8)
+
+                // Inline news card pinned to the bottom — does NOT cover the
+                // tab bar (we used to use .sheet here which hid the tab bar).
+                VStack {
+                    Spacer()
+                    NewsPanelCard(expanded: $newsExpanded)
+                        .padding(.horizontal, 12)
+                        .padding(.bottom, 6)
+                }
+                .ignoresSafeArea(.keyboard)
             }
             .navigationBarHidden(true)
             .background(Color.cpBackgroundTop.ignoresSafeArea())
             .onAppear {
+                // Skip the location permission prompt on the iOS Simulator —
+                // on real devices, request normally.
+                #if !targetEnvironment(simulator)
                 locationManager.requestPermission()
+                #endif
             }
             .sheet(item: $selectedConflict) { conflict in
                 ConflictDetailView(conflict: conflict)
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
-            }
-            .sheet(isPresented: $showNewsSheet) {
-                NewsPanelView()
-                    .presentationDetents([.height(180), .medium])
-                    .presentationBackgroundInteraction(.enabled)
-                    .presentationDragIndicator(.visible)
-                    .interactiveDismissDisabled()
             }
             .refreshable {
                 await app.refreshConflicts()

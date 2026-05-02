@@ -31,12 +31,8 @@ targets:
     sources:
       - path: CrisisPulse
         excludes:
-          - "Resources/**/*.json"
-      - path: CrisisPulse/Resources
-        type: folder
-
-    resources:
-      - CrisisPulse/Resources/Assets.xcassets
+          - "Info.plist"
+          - "Resources/Assets.xcassets/AppIcon.appiconset/icon-source.svg"
 
     info:
       path: CrisisPulse/Info.plist
@@ -77,14 +73,31 @@ targets:
       - sdk: CoreLocation.framework
       - sdk: UserNotifications.framework
 
+  CrisisPulseUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: CrisisPulseUITests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.crisispulse.app.uitests
+        TEST_TARGET_NAME: CrisisPulse
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: CrisisPulse
+
 schemes:
   CrisisPulse:
     build:
       targets:
         CrisisPulse: all
+        CrisisPulseUITests: [test]
     run:
       config: Debug
     archive:
       config: Release
     test:
       config: Debug
+      targets:
+        - CrisisPulseUITests

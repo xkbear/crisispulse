@@ -50,11 +50,31 @@ final class AppState: ObservableObject {
         do {
             let response = try await api.fetchConflicts()
             self.conflicts = response.conflicts
-            self.topNews = response.topNews
+            self.topNews = response.topNews.isEmpty
+                ? Self.fallbackTopNews(from: response.conflicts)
+                : response.topNews
             self.lastUpdated = ISO8601DateFormatter().date(from: response.lastUpdated)
             self.loadError = nil
         } catch {
             self.loadError = error.localizedDescription
         }
+    }
+
+    /// When the backend fails to populate topNews (e.g. RSS scraper down),
+    /// derive a sensible fallback from the top-intensity conflicts so the
+    /// news card on the map page is never empty in front of users.
+    private static func fallbackTopNews(from conflicts: [Conflict]) -> [NewsItem] {
+        conflicts
+            .sorted { $0.intensity > $1.intensity }
+            .prefix(5)
+            .map { conflict in
+                NewsItem(
+                    conflict: conflict.name,
+                    headline: conflict.desc,
+                    headlineZh: conflict.descZh,
+                    articles: max(20, Int((conflict.articleCount ?? 0))),
+                    url: conflict.sources?.first?.url
+                )
+            }
     }
 }
