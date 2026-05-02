@@ -1,0 +1,20 @@
+# XcodeGen output (regenerated locally)
+CrisisPulse.xcodeproj/
+
+# Xcode build artifacts
+build/
+DerivedData/
+*.xcuserdatad
+xcuserdata/
+*.xcuserstate
+
+# CocoaPods / SPM caches
+Pods/
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
+
+# Local secrets
+*.xcconfig.local
