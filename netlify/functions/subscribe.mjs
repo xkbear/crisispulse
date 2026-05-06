@@ -2,8 +2,22 @@ import { getStore } from "@netlify/blobs";
 
 const RESEND_API_KEY = "re_FkyNsECz_GHxJJs1ZVZsoKUu1paaFZf1a";
 const FROM_EMAIL = "alerts@crisispulse.org";
+const SITE = "https://crisispulse.org";
+
+function trackedURL(path, content = null) {
+  const u = new URL(path, SITE);
+  u.searchParams.set("utm_source", "email");
+  u.searchParams.set("utm_medium", "newsletter");
+  u.searchParams.set("utm_campaign", "welcome");
+  if (content) u.searchParams.set("utm_content", content);
+  return u.toString();
+}
 
 async function sendWelcomeEmail(to) {
+  const ctaURL  = trackedURL("/", "cta_button");
+  const footURL = trackedURL("/", "footer_link");
+  const unsubURL = `${SITE}/unsubscribe?email=${encodeURIComponent(to)}&utm_source=email&utm_medium=newsletter&utm_campaign=welcome&utm_content=unsub_footer`;
+
   const html = `
 <!DOCTYPE html>
 <html>
@@ -23,7 +37,7 @@ async function sendWelcomeEmail(to) {
   </ul>
 
   <div style="text-align:center;margin:24px 0">
-    <a href="https://crisispulse.org" style="display:inline-block;padding:12px 28px;background:#e67e22;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px">
+    <a href="${ctaURL}" style="display:inline-block;padding:12px 28px;background:#e67e22;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px">
       View Live Crisis Map →
     </a>
   </div>
@@ -31,7 +45,7 @@ async function sendWelcomeEmail(to) {
   <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
   <p style="font-size:11px;color:#999;text-align:center;line-height:1.5">
     Crisis Pulse · Free · Open source · No data collected<br>
-    <a href="https://crisispulse.org" style="color:#999">crisispulse.org</a>
+    <a href="${footURL}" style="color:#999">crisispulse.org</a> · <a href="${unsubURL}" style="color:#999">unsubscribe</a>
   </p>
 </body>
 </html>`;
@@ -47,7 +61,15 @@ async function sendWelcomeEmail(to) {
         from: FROM_EMAIL,
         to: [to],
         subject: "🌍 Welcome to Crisis Pulse — You're subscribed!",
-        html
+        html,
+        tags: [
+          { name: "campaign", value: "welcome" },
+          { name: "kind",     value: "welcome" }
+        ],
+        headers: {
+          "List-Unsubscribe": `<mailto:hello@crisispulse.org?subject=unsubscribe>, <${unsubURL}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"
+        }
       })
     });
     const data = await res.json();

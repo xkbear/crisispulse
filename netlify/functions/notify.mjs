@@ -3,20 +3,65 @@ import { getStore } from "@netlify/blobs";
 // Send conflict alerts to subscribers via Resend
 const RESEND_API_KEY = "re_FkyNsECz_GHxJJs1ZVZsoKUu1paaFZf1a";
 const FROM_EMAIL = "alerts@crisispulse.org";
+const SITE = "https://crisispulse.org";
 
-async function sendEmail(to, subject, html) {
+/**
+ * Build a tracked URL with UTM parameters so we can see referral traffic
+ * from the email brief in Google Search Console / any analytics layer.
+ *
+ * @param path  Path relative to site root, e.g. "/" or "/conflicts/gaza"
+ * @param campaign  e.g. "daily_brief" or "escalation_alert"
+ * @param content   Optional element identifier (e.g. "cta_button", "footer_link")
+ */
+function trackedURL(path, campaign, content = null) {
+  const url = new URL(path, SITE);
+  url.searchParams.set("utm_source", "email");
+  url.searchParams.set("utm_medium", "newsletter");
+  url.searchParams.set("utm_campaign", campaign);
+  if (content) url.searchParams.set("utm_content", content);
+  return url.toString();
+}
+
+/**
+ * Send via Resend with `tags` for per-campaign open/click stats and
+ * a List-Unsubscribe header so Gmail/Apple Mail render a one-click unsubscribe.
+ */
+async function sendEmail(to, subject, html, { campaign, kind }) {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${RESEND_API_KEY}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ from: FROM_EMAIL, to: [to], subject, html })
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to: [to],
+      subject,
+      html,
+      // Tags surface as filters in Resend's dashboard so we can see open/click
+      // rates per-campaign at a glance.
+      tags: [
+        { name: "campaign", value: campaign },
+        { name: "kind",     value: kind }
+      ],
+      // Renders a one-click unsubscribe button in Gmail/Apple Mail headers.
+      // mailto: gives the legacy fallback; https: gives the modern UX.
+      headers: {
+        "List-Unsubscribe": `<mailto:hello@crisispulse.org?subject=unsubscribe>, <${SITE}/unsubscribe?email=${encodeURIComponent(to)}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"
+      }
+    })
   });
   return res.ok;
 }
 
-function buildAlertEmail(escalations) {
+function unsubscribeFooter(to, campaign) {
+  const url = `${SITE}/unsubscribe?email=${encodeURIComponent(to)}&utm_source=email&utm_medium=newsletter&utm_campaign=${campaign}&utm_content=unsub_footer`;
+  return `<a href="${url}" style="color:#999">unsubscribe</a>`;
+}
+
+function buildAlertEmail(escalations, to) {
+  const campaign = "escalation_alert";
   const rows = escalations.map(e => `
     <tr>
       <td style="padding:10px 12px;border-bottom:1px solid #eee;font-weight:600">${e.name}</td>
@@ -51,7 +96,7 @@ function buildAlertEmail(escalations) {
   </table>
 
   <div style="text-align:center;margin:24px 0">
-    <a href="https://crisispulse.org" style="display:inline-block;padding:12px 28px;background:#e67e22;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px">
+    <a href="${trackedURL("/", campaign, "cta_button")}" style="display:inline-block;padding:12px 28px;background:#e67e22;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px">
       View Live Crisis Map →
     </a>
   </div>
@@ -59,13 +104,14 @@ function buildAlertEmail(escalations) {
   <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
   <p style="font-size:11px;color:#999;text-align:center;line-height:1.5">
     You received this because you subscribed to Crisis Pulse alerts.<br>
-    <a href="https://crisispulse.org" style="color:#999">crisispulse.org</a> · Open source · No data collected
+    <a href="${trackedURL("/", campaign, "footer_link")}" style="color:#999">crisispulse.org</a> · Open source · No data collected · ${unsubscribeFooter(to, campaign)}
   </p>
 </body>
 </html>`;
 }
 
-function buildDailyBriefEmail(topConflicts) {
+function buildDailyBriefEmail(topConflicts, to) {
+  const campaign = "daily_brief";
   const date = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
   const rows = topConflicts.map((c, i) => {
     const color = c.intensity >= 8 ? "#dc2626" : c.intensity >= 6 ? "#ea580c" : "#ca8a04";
@@ -105,7 +151,7 @@ function buildDailyBriefEmail(topConflicts) {
   </table>
 
   <div style="text-align:center;margin:24px 0">
-    <a href="https://crisispulse.org" style="display:inline-block;padding:12px 28px;background:#1d4ed8;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px">
+    <a href="${trackedURL("/", campaign, "cta_button")}" style="display:inline-block;padding:12px 28px;background:#1d4ed8;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px">
       View Full Crisis Map →
     </a>
   </div>
@@ -113,7 +159,7 @@ function buildDailyBriefEmail(topConflicts) {
   <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
   <p style="font-size:11px;color:#999;text-align:center;line-height:1.5">
     You received this daily brief because you subscribed to Crisis Pulse.<br>
-    <a href="https://crisispulse.org" style="color:#999">crisispulse.org</a> · Free · Open source · No data collected
+    <a href="${trackedURL("/", campaign, "footer_link")}" style="color:#999">crisispulse.org</a> · Free · Open source · No data collected · ${unsubscribeFooter(to, campaign)}
   </p>
 </body>
 </html>`;
@@ -121,7 +167,6 @@ function buildDailyBriefEmail(topConflicts) {
 
 async function getSubscribers() {
   const subStore = getStore("subscribers");
-  // Try both keys for backward compatibility
   let data = await subStore.get("emails", { type: "json" });
   if (!data) {
     data = await subStore.get("list", { type: "json" });
@@ -146,16 +191,19 @@ export default async (req, context) => {
       return Response.json({ ok: true, sent: 0, reason: "no subscribers" }, { headers });
     }
 
-    let subject, html;
+    // Determine kind/subject; the html body is per-recipient because we
+    // include personal unsubscribe links and tracked footer URLs.
+    const kind = dailyBrief ? "dailyBrief" : "escalation";
+    let subject, htmlFor, campaign;
 
     if (dailyBrief && topConflicts && topConflicts.length > 0) {
-      // Daily brief mode
       subject = `🔴 Crisis Pulse Daily Brief — Top ${topConflicts.length} Conflicts Today`;
-      html = buildDailyBriefEmail(topConflicts);
+      campaign = "daily_brief";
+      htmlFor = (sub) => buildDailyBriefEmail(topConflicts, sub.email);
     } else if (escalations && escalations.length > 0) {
-      // Escalation alert mode
       subject = `⚠️ ${escalations.length} conflict${escalations.length > 1 ? 's' : ''} escalated — Crisis Pulse`;
-      html = buildAlertEmail(escalations);
+      campaign = "escalation_alert";
+      htmlFor = (sub) => buildAlertEmail(escalations, sub.email);
     } else {
       return Response.json({ ok: true, sent: 0, reason: "nothing to notify" }, { headers });
     }
@@ -163,10 +211,9 @@ export default async (req, context) => {
     let sent = 0;
     let failed = 0;
 
-    // Send to each subscriber (Resend free tier: 100/day)
     for (const sub of subscribers.slice(0, 90)) {
       try {
-        const ok = await sendEmail(sub.email, subject, html);
+        const ok = await sendEmail(sub.email, subject, htmlFor(sub), { campaign, kind });
         if (ok) sent++; else failed++;
       } catch (_) {
         failed++;
