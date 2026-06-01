@@ -19,9 +19,17 @@ export default async (req) => {
     }
     return Response.json({ conflicts: null, lastUpdated: null }, { headers });
   } catch (err) {
+    // Surface the actual error message + name so we can debug without
+    // having to tail Netlify function logs.
     console.error("Conflicts API error:", err);
     return Response.json(
-      { error: "Internal error", conflicts: null, lastUpdated: null },
+      {
+        error: "Internal error",
+        message: err?.message || String(err),
+        name: err?.name || null,
+        conflicts: null,
+        lastUpdated: null
+      },
       { status: 500, headers }
     );
   }
