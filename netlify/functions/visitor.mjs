@@ -12,11 +12,28 @@ export default async (req, context) => {
     return new Response(null, { status: 204, headers });
   }
 
-  const store = getStore("visitor-stats");
+  // Hard upper bound for Blob operations — never let one hang request
+  // long enough to trigger Netlify's 10s function timeout (which returns
+  // 502 with "unexpected end of JSON input").
+  const blobTimeout = (promise, ms = 4000) => Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error("blob timeout")), ms))
+  ]);
+
+  let store;
+  try {
+    store = getStore("visitor-stats");
+  } catch (err) {
+    console.error("visitor getStore failed:", err);
+    return Response.json(
+      { error: "store unavailable", message: String(err?.message || err), total: 0, countries: {} },
+      { status: 503, headers }
+    );
+  }
 
   try {
     if (req.method === "GET") {
-      const data = await store.get("counts", { type: "json" });
+      const data = await blobTimeout(store.get("counts", { type: "json" }));
       return Response.json(data || { total: 0, countries: {} }, { headers });
     }
 
@@ -45,13 +62,13 @@ export default async (req, context) => {
         if (!country) country = "Unknown";
       }
 
-      let data = await store.get("counts", { type: "json" });
+      let data = await blobTimeout(store.get("counts", { type: "json" }));
       if (!data) data = { total: 0, countries: {} };
 
       data.total += 1;
       data.countries[country] = (data.countries[country] || 0) + 1;
 
-      await store.setJSON("counts", data);
+      await blobTimeout(store.setJSON("counts", data));
       // Return detected country so frontend knows what was recorded
       return Response.json({ ...data, detectedCountry: country }, { headers });
     }
@@ -60,7 +77,13 @@ export default async (req, context) => {
   } catch (err) {
     console.error("Visitor function error:", err);
     return Response.json(
-      { error: "Internal error", total: 0, countries: {} },
+      {
+        error: "Internal error",
+        message: err?.message || String(err),
+        name: err?.name || null,
+        total: 0,
+        countries: {}
+      },
       { status: 500, headers }
     );
   }
