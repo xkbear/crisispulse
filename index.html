@@ -924,16 +924,14 @@ function renderTrendPanel(conflicts){
   if(!panel || !conflicts) return;
   document.getElementById("tpTitle").textContent = t("tpTitle");
 
-  // Use ONLY the actual amount of history we have, not 30 days padded.
-  // Adapt _trend.days from the longest non-empty history we find — that's
-  // the honest window users should see.
+  // Always show a 30-day window. After today's backfill every conflict
+  // has 30 intensityHistory points; missing slots are still drawn as null.
   const histLen = (c) => {
     if(Array.isArray(c.intensityHistory) && c.intensityHistory.length) return c.intensityHistory.length;
     if(Array.isArray(c.articleHistory) && c.articleHistory.length) return c.articleHistory.length;
     return 0;
   };
-  const maxHist = conflicts.reduce((m, c) => Math.max(m, histLen(c)), 0);
-  _trend.days = Math.max(2, Math.min(30, maxHist || 7));
+  _trend.days = 30;
 
   // Pick conflicts that HAVE history data (so the chart shows real
   // variation, not flat lines). Sort by current intensity within that pool.
@@ -959,16 +957,9 @@ function renderTrendPanel(conflicts){
     hasRealHistory: histLen(c) >= 2
   })).filter(s => s.values.length > 0);
 
-  // Update subtitle to reflect the actual data window
-  const sub = document.getElementById("tpSub");
-  if(series.length && series.some(s => s.hasRealHistory)){
-    const dayWord = lang === 'zh' ? `近 ${_trend.days} 天` : `last ${_trend.days} days`;
-    sub.textContent = lang === 'zh'
-      ? `Top 5 冲突 · ${dayWord}`
-      : `Top 5 conflicts · ${dayWord}`;
-  } else {
-    sub.textContent = t("tpSub");
-  }
+  // Subtitle always shows "30 days" now that the backfill ensures every
+  // conflict has 30 data points.
+  document.getElementById("tpSub").textContent = t("tpSub");
 
   if(series.length === 0){
     panel.classList.add("tp-empty");
