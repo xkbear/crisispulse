@@ -78,6 +78,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .trend-panel .tp-chip:hover{border-color:rgba(255,255,255,.2)}
 .trend-panel .tp-chip.active{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.2)}
 .trend-panel .tp-chip .tp-chip-dot{width:8px;height:8px;border-radius:50%}
+.trend-panel .tp-chip .tp-chip-val{font-weight:700;font-variant-numeric:tabular-nums;margin-left:3px;font-size:10px}
 .trend-panel .tp-chart-wrap{position:relative;width:100%;height:180px}
 .trend-panel #trendChart{width:100%;height:100%;display:block}
 .trend-panel .tp-grid line{stroke:rgba(255,255,255,.06);stroke-width:1}
@@ -906,6 +907,18 @@ async function loadConflictData(){
 // without re-deriving the dataset on every click.
 const _trend = { series: [], activeIds: new Set(), days: 30 };
 
+// Categorical palette — five distinct hues that read well on dark background
+// and don't blend together. Order is fixed so each conflict gets a stable
+// color across re-renders (we sort top-5 by current intensity, so position 0
+// always reads as "the hottest right now").
+const TREND_COLORS = [
+  "#ef4444", // red    — series 0
+  "#fb923c", // orange — series 1
+  "#60a5fa", // blue   — series 2
+  "#34d399", // green  — series 3
+  "#f472b6"  // pink   — series 4
+];
+
 function renderTrendPanel(conflicts){
   const panel = document.getElementById("trendPanel");
   if(!panel || !conflicts) return;
@@ -937,10 +950,10 @@ function renderTrendPanel(conflicts){
     : [];
 
   const chosen = withHistory.length ? withHistory : fallback;
-  const series = chosen.map(c => ({
+  const series = chosen.map((c, i) => ({
     id: c.name,
     name: tConflict('names', c.name),
-    color: intensityColor(c.intensity),
+    color: TREND_COLORS[i % TREND_COLORS.length],
     current: c.intensity,
     values: buildTrendSeries(c, _trend.days),
     hasRealHistory: histLen(c) >= 2
@@ -971,12 +984,15 @@ function renderTrendPanel(conflicts){
     series.forEach(s=>_trend.activeIds.add(s.id));
   }
 
-  // Chips
+  // Chips — show current intensity value alongside the name so users can
+  // tell "which color is which conflict" AND "where it sits on the scale"
+  // at a glance, without having to hover the chart.
   const chipsEl = document.getElementById("tpChips");
   chipsEl.innerHTML = series.map(s=>{
     const active = _trend.activeIds.has(s.id) ? "active" : "";
     return `<button type="button" class="tp-chip ${active}" data-id="${escAttr(s.id)}">
       <span class="tp-chip-dot" style="background:${s.color}"></span>${s.name}
+      <span class="tp-chip-val" style="color:${s.color}">${s.current.toFixed(1)}</span>
     </button>`;
   }).join("");
   chipsEl.querySelectorAll(".tp-chip").forEach(btn=>{
@@ -1061,25 +1077,52 @@ function drawTrendChart(){
   const days = _trend.days;
   const xStep = innerW / Math.max(1, days - 1);
 
-  // y scale: 1..10 (intensity range used by backend)
-  const yMin = 1, yMax = 10;
+  // Dynamic Y range — zoom in on the actual data values so small day-to-day
+  // changes are visible. Otherwise a chart spanning 1..10 makes everything
+  // in the 3-5 band look like a flat carpet.
+  const visibleValues = _trend.series
+    .filter(s => _trend.activeIds.has(s.id))
+    .flatMap(s => s.values.filter(v => v !== null && v !== undefined));
+  let dataMin = visibleValues.length ? Math.min(...visibleValues) : 1;
+  let dataMax = visibleValues.length ? Math.max(...visibleValues) : 10;
+  // Ensure at least 1.0 of span so a single very-flat series still draws
+  // with breathing room rather than collapsing to a horizontal line at mid-Y.
+  if(dataMax - dataMin < 1.0){
+    const mid = (dataMax + dataMin) / 2;
+    dataMin = mid - 0.5;
+    dataMax = mid + 0.5;
+  }
+  // Round outward to nearest 0.5 and clamp to the absolute 0..10 scale
+  let yMin = Math.max(0, Math.floor((dataMin - (dataMax-dataMin)*0.15) * 2) / 2);
+  let yMax = Math.min(10, Math.ceil((dataMax + (dataMax-dataMin)*0.15) * 2) / 2);
+  if(yMax - yMin < 1){ yMax = Math.min(10, yMin + 1); }
+
   const yToPx = v => M.top + (1 - (v - yMin) / (yMax - yMin)) * innerH;
   const xToPx = i => M.left + i * xStep;
+
+  // Build evenly-spaced Y ticks (5 lines) that don't pile up labels when
+  // the range is narrow.
+  const yTicks = [];
+  const nTicks = 5;
+  for(let i = 0; i < nTicks; i++){
+    const v = yMin + (yMax - yMin) * i / (nTicks - 1);
+    yTicks.push(Math.round(v * 10) / 10);
+  }
 
   // Build SVG
   let html = "";
 
-  // Y-axis gridlines + labels at 2/4/6/8/10
   html += `<g class="tp-grid">`;
-  [2,4,6,8,10].forEach(v=>{
+  yTicks.forEach(v=>{
     const y = yToPx(v);
     html += `<line x1="${M.left}" y1="${y}" x2="${W-M.right}" y2="${y}"/>`;
   });
   html += `</g>`;
   html += `<g class="tp-axis">`;
-  [2,4,6,8,10].forEach(v=>{
+  yTicks.forEach(v=>{
     const y = yToPx(v);
-    html += `<text x="${M.left-4}" y="${y+3}" text-anchor="end">${v}</text>`;
+    const label = (yMax - yMin) >= 4 ? v.toFixed(0) : v.toFixed(1);
+    html += `<text x="${M.left-4}" y="${y+3}" text-anchor="end">${label}</text>`;
   });
   // X-axis date markers — adapt to the actual window length so the labels
   // are evenly spaced regardless of whether we're showing 7 or 30 days.
