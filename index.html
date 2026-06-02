@@ -910,18 +910,52 @@ function renderTrendPanel(conflicts){
   const panel = document.getElementById("trendPanel");
   if(!panel || !conflicts) return;
   document.getElementById("tpTitle").textContent = t("tpTitle");
-  document.getElementById("tpSub").textContent = t("tpSub");
 
-  // Build the series: top 5 by current intensity, each with a 30-point
-  // history padded from intensityHistory or estimated from articleHistory.
-  const top = [...conflicts].sort((a,b)=>b.intensity-a.intensity).slice(0,5);
-  const series = top.map((c,i)=>({
+  // Use ONLY the actual amount of history we have, not 30 days padded.
+  // Adapt _trend.days from the longest non-empty history we find — that's
+  // the honest window users should see.
+  const histLen = (c) => {
+    if(Array.isArray(c.intensityHistory) && c.intensityHistory.length) return c.intensityHistory.length;
+    if(Array.isArray(c.articleHistory) && c.articleHistory.length) return c.articleHistory.length;
+    return 0;
+  };
+  const maxHist = conflicts.reduce((m, c) => Math.max(m, histLen(c)), 0);
+  _trend.days = Math.max(2, Math.min(30, maxHist || 7));
+
+  // Pick conflicts that HAVE history data (so the chart shows real
+  // variation, not flat lines). Sort by current intensity within that pool.
+  // This matters because the "top 5 by intensity right now" can be the
+  // mid-tier conflicts (Afghanistan, Haiti, ...) that are NOT queried by
+  // the cron and therefore have empty history.
+  const withHistory = conflicts
+    .filter(c => histLen(c) >= 2)
+    .sort((a,b) => b.intensity - a.intensity)
+    .slice(0, 5);
+
+  const fallback = (withHistory.length === 0)
+    ? [...conflicts].sort((a,b)=>b.intensity-a.intensity).slice(0,5)
+    : [];
+
+  const chosen = withHistory.length ? withHistory : fallback;
+  const series = chosen.map(c => ({
     id: c.name,
     name: tConflict('names', c.name),
     color: intensityColor(c.intensity),
     current: c.intensity,
-    values: buildTrendSeries(c, _trend.days)
-  })).filter(s=>s.values.length>0);
+    values: buildTrendSeries(c, _trend.days),
+    hasRealHistory: histLen(c) >= 2
+  })).filter(s => s.values.length > 0);
+
+  // Update subtitle to reflect the actual data window
+  const sub = document.getElementById("tpSub");
+  if(series.length && series.some(s => s.hasRealHistory)){
+    const dayWord = lang === 'zh' ? `近 ${_trend.days} 天` : `last ${_trend.days} days`;
+    sub.textContent = lang === 'zh'
+      ? `Top 5 冲突 · ${dayWord}`
+      : `Top 5 conflicts · ${dayWord}`;
+  } else {
+    sub.textContent = t("tpSub");
+  }
 
   if(series.length === 0){
     panel.classList.add("tp-empty");
@@ -962,42 +996,54 @@ function renderTrendPanel(conflicts){
 }
 
 // Given a conflict, return a numeric array of length `days` representing
-// intensity per day (oldest first, today last). Uses intensityHistory if
-// present, falls back to articleHistory-derived estimate, falls back to
-// flat line at current intensity.
+// intensity per day (oldest first, today last).
 function buildTrendSeries(conflict, days){
   const current = conflict.intensity ?? 5;
 
-  // 1. If backend already tracks intensity per day, use it.
+  // 1. Real historical intensity snapshots (preferred — once cron fills it).
   if(Array.isArray(conflict.intensityHistory) && conflict.intensityHistory.length > 0){
-    const hist = conflict.intensityHistory.slice(-days);
-    // Pad with the oldest value so we always show a fixed window
-    while(hist.length < days) hist.unshift(hist[0] ?? current);
+    const hist = conflict.intensityHistory.slice(-days).map(v => Number(v));
+    // Don't pad with old values — pad with null so the chart starts from
+    // where real data begins. The xToPx code skips null segments naturally
+    // because we render only the values we have.
+    while(hist.length < days) hist.unshift(null);
     return hist;
   }
 
-  // 2. Try to estimate from articleHistory (article counts per day).
+  // 2. Reconstruct from articleHistory by re-running the same delta formula
+  //    forward (starting from base intensity), not backwards. This is more
+  //    honest than backwards-derivation because the *current* intensity is
+  //    the result of compounding deltas from articleHistory anyway.
   if(Array.isArray(conflict.articleHistory) && conflict.articleHistory.length > 0){
     const articles = conflict.articleHistory;
-    // Reproduce the same delta rule used by update-conflicts to back out an
-    // approximate intensity for each historical day.
-    const result = [];
-    let prev = current;
-    // Work backwards: start from current, undo the delta each day.
-    for(let i = articles.length - 1; i >= 0; i--){
-      result.unshift(prev);
-      const count = articles[i];
-      const delta = count >= 30 ? 1.0 : count >= 15 ? 0.5 : count >= 5 ? 0 : -0.5;
-      // Reverse formula: prev = newI = clamp(prev + delta*0.3, 1, 10)
-      // → previousDay = clamp(prev - delta*0.3, 1, 10)
-      prev = Math.round(Math.min(10, Math.max(1, prev - delta * 0.3)) * 10) / 10;
+    // Starting intensity: estimate where we were N days ago by reversing
+    // the cumulative delta. If today=current and 7 days of deltas
+    // produced ΔTotal, then 7 days ago intensity ≈ current - ΔTotal.
+    let cumulativeDelta = 0;
+    for(const count of articles){
+      const d = count >= 30 ? 1.0 : count >= 15 ? 0.5 : count >= 5 ? 0 : -0.5;
+      cumulativeDelta += d * 0.3;
     }
-    while(result.length < days) result.unshift(result[0] ?? current);
+    let start = Math.round(Math.min(10, Math.max(1, current - cumulativeDelta)) * 10) / 10;
+    // Now walk forward day by day applying each article count's delta
+    const result = [];
+    let v = start;
+    for(const count of articles){
+      result.push(v);
+      const d = count >= 30 ? 1.0 : count >= 15 ? 0.5 : count >= 5 ? 0 : -0.5;
+      v = Math.round(Math.min(10, Math.max(1, v + d * 0.3)) * 10) / 10;
+    }
+    // The last value computed above represents "tomorrow" — replace the last
+    // entry with the actual current intensity so the line ends at the dot.
+    if(result.length){ result[result.length - 1] = current; }
+    while(result.length < days) result.unshift(null);
     return result.slice(-days);
   }
 
-  // 3. Fall back to flat line.
-  return Array(days).fill(current);
+  // 3. No history at all: return a single-point series (today only).
+  const out = Array(days).fill(null);
+  out[days - 1] = current;
+  return out;
 }
 
 function drawTrendChart(){
@@ -1035,20 +1081,46 @@ function drawTrendChart(){
     const y = yToPx(v);
     html += `<text x="${M.left-4}" y="${y+3}" text-anchor="end">${v}</text>`;
   });
-  // X-axis date markers: 30d / 20d / 10d / today
-  [0, 10, 20, days-1].forEach(idx=>{
+  // X-axis date markers — adapt to the actual window length so the labels
+  // are evenly spaced regardless of whether we're showing 7 or 30 days.
+  const labelIndices = days <= 8
+    ? [0, Math.floor(days/2), days-1]
+    : [0, Math.floor(days/3), Math.floor(2*days/3), days-1];
+  for(const idx of labelIndices){
     const x = xToPx(idx);
-    const label = idx === days-1 ? t("tpToday") : t("tpDateAgo").replace("%d", (days-1-idx).toString());
-    html += `<text x="${x}" y="${H-4}" text-anchor="${idx===0?'start':idx===days-1?'end':'middle'}">${label}</text>`;
-  });
+    const label = idx === days-1
+      ? t("tpToday")
+      : t("tpDateAgo").replace("%d", (days-1-idx).toString());
+    const anchor = idx===0 ? 'start' : idx===days-1 ? 'end' : 'middle';
+    html += `<text x="${x}" y="${H-4}" text-anchor="${anchor}">${label}</text>`;
+  }
   html += `</g>`;
 
-  // Lines for active series
+  // Lines for active series — emit a separate M..L..L segment for every
+  // run of real (non-null) values, so the chart only draws where we have
+  // actual data. Null gaps are invisible instead of zero-jumps.
   for(const s of _trend.series){
     const visible = _trend.activeIds.has(s.id);
     const opacity = visible ? 1 : 0;
-    const d = s.values.map((v, i) => `${i===0?'M':'L'}${xToPx(i).toFixed(1)},${yToPx(v).toFixed(1)}`).join(" ");
-    html += `<path class="tp-line" d="${d}" stroke="${s.color}" data-id="${escAttr(s.id)}" style="opacity:${opacity}"/>`;
+    let d = "";
+    let pendingMove = true;
+    for(let i = 0; i < s.values.length; i++){
+      const v = s.values[i];
+      if(v === null || v === undefined){ pendingMove = true; continue; }
+      d += `${pendingMove ? 'M' : 'L'}${xToPx(i).toFixed(1)},${yToPx(v).toFixed(1)} `;
+      pendingMove = false;
+    }
+    if(d){
+      html += `<path class="tp-line" d="${d.trim()}" stroke="${s.color}" data-id="${escAttr(s.id)}" style="opacity:${opacity}"/>`;
+    }
+    // Also draw a dot at the last real value so single-point series are visible
+    let lastIdx = -1;
+    for(let j = s.values.length - 1; j >= 0; j--){
+      if(s.values[j] !== null && s.values[j] !== undefined){ lastIdx = j; break; }
+    }
+    if(lastIdx >= 0 && visible){
+      html += `<circle cx="${xToPx(lastIdx).toFixed(1)}" cy="${yToPx(s.values[lastIdx]).toFixed(1)}" r="3" fill="${s.color}" stroke="#0a0a0f" stroke-width="1.5" style="opacity:${opacity}"/>`;
+    }
   }
 
   // Hover line + dots (hidden by default)
@@ -1081,6 +1153,7 @@ function drawTrendChart(){
     for(const s of _trend.series){
       if(!_trend.activeIds.has(s.id)) continue;
       const v = s.values[idx];
+      if(v === null || v === undefined) continue;
       dotsHTML += `<circle class="tp-dot" cx="${xAt}" cy="${yToPx(v)}" r="3.5" fill="${s.color}" stroke="#0a0a0f" stroke-width="1.5"/>`;
       rows.push({ name: s.name, value: v, color: s.color });
     }
