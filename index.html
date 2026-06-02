@@ -69,6 +69,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .map-legend{display:flex;justify-content:center;gap:16px;padding:8px 16px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#888}
 .legend-dot{width:10px;height:10px;border-radius:50%}
+.trend-panel{max-width:600px;margin:16px auto 0;padding:14px 18px 18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;position:relative}
+.trend-panel .tp-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.trend-panel .tp-title{font-size:13px;font-weight:700;color:#e6e6e6;letter-spacing:.3px}
+.trend-panel .tp-sub{font-size:10px;color:#666}
+.trend-panel .tp-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.trend-panel .tp-chip{font-size:10px;padding:4px 9px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#aaa;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;user-select:none}
+.trend-panel .tp-chip:hover{border-color:rgba(255,255,255,.2)}
+.trend-panel .tp-chip.active{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.2)}
+.trend-panel .tp-chip .tp-chip-dot{width:8px;height:8px;border-radius:50%}
+.trend-panel .tp-chart-wrap{position:relative;width:100%;height:180px}
+.trend-panel #trendChart{width:100%;height:100%;display:block}
+.trend-panel .tp-grid line{stroke:rgba(255,255,255,.06);stroke-width:1}
+.trend-panel .tp-axis text{fill:#666;font-size:10px;font-family:inherit}
+.trend-panel .tp-line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:opacity .15s}
+.trend-panel .tp-dot{transition:r .12s ease}
+.trend-panel .tp-hover-line{stroke:rgba(255,255,255,.18);stroke-width:1;pointer-events:none}
+.trend-panel .tp-tooltip{position:absolute;pointer-events:none;background:rgba(15,15,20,.95);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:7px 10px;font-size:11px;color:#ddd;min-width:140px;opacity:0;transition:opacity .12s;z-index:50}
+.trend-panel .tp-tooltip .tp-tt-date{color:#666;font-size:9px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.6px}
+.trend-panel .tp-tooltip .tp-tt-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:2px 0;font-size:11px}
+.trend-panel .tp-tooltip .tp-tt-name{display:flex;align-items:center;gap:5px}
+.trend-panel .tp-tooltip .tp-tt-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.trend-panel .tp-tooltip .tp-tt-val{font-weight:700;font-variant-numeric:tabular-nums}
+.trend-panel.tp-empty .tp-chart-wrap{display:flex;align-items:center;justify-content:center;color:#555;font-size:11px;font-style:italic}
+@media(max-width:500px){.trend-panel{max-width:none;margin:12px 12px 0;padding:12px 14px 14px}.trend-panel .tp-chart-wrap{height:150px}}
 .risk-panel{max-width:600px;margin:0 auto;padding:16px}
 .risk-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;text-align:center}
 .risk-label{font-size:12px;color:#bbb;margin-bottom:4px}
@@ -366,6 +390,15 @@ select{cursor:pointer}
     <button class="sp-close" onclick="closeSourcePanel()">×</button>
     <div id="sourcePanelContent"></div>
   </div>
+  <div class="trend-panel" id="trendPanel">
+    <div class="tp-header">
+      <div class="tp-title" id="tpTitle"></div>
+      <div class="tp-sub" id="tpSub"></div>
+    </div>
+    <div class="tp-chips" id="tpChips"></div>
+    <div class="tp-chart-wrap"><svg id="trendChart" preserveAspectRatio="none"></svg></div>
+    <div class="tp-tooltip" id="trendTooltip"></div>
+  </div>
   <div class="risk-panel">
     <div class="risk-card">
       <div class="humanistic-message" id="humanisticMsg"></div>
@@ -403,6 +436,11 @@ const T = {
     npTitle:"Today's Key Developments",
     npArticles:"articles in 48h",
     npTopStory:"Today's Top Story",
+    tpTitle:"Intensity Trend",
+    tpSub:"Top 5 conflicts · last 30 days",
+    tpEmpty:"Trend data is being collected — check back tomorrow",
+    tpDateAgo:"%d days ago",
+    tpToday:"today",
     npBreaking:"BREAKING",
     npEscalating:"ESCALATING",
     npHighAttention:"HIGH ATTENTION",
@@ -505,6 +543,11 @@ const T = {
     npTitle:"今日重要动态",
     npArticles:"篇报道（48h内）",
     npTopStory:"今日全球头条",
+    tpTitle:"强度趋势",
+    tpSub:"Top 5 冲突 · 近 30 天",
+    tpEmpty:"趋势数据收集中 — 明天再来看看",
+    tpDateAgo:"%d 天前",
+    tpToday:"今天",
     npBreaking:"突发",
     npEscalating:"局势升级",
     npHighAttention:"高度关注",
@@ -646,6 +689,7 @@ function updateMapPageText() {
   const npt=document.getElementById("npTitle");if(npt)npt.textContent=t("npTitle");
   if(_newsData)renderNewsPanel(_newsData);
   initMapSubscribe();
+  if(CONFLICTS && CONFLICTS.length) renderTrendPanel(CONFLICTS);
   renderLegend();
   let ds = t('dataSource');
   if(lastUpdatedDate){
@@ -853,8 +897,235 @@ async function loadConflictData(){
     }
     if(data.lastUpdated) lastUpdatedDate = new Date(data.lastUpdated);
     if(data.topNews && data.topNews.length > 0) renderNewsPanel(data.topNews);
+    renderTrendPanel(CONFLICTS);
   }catch(_){}
 }
+
+// ====== INTENSITY TREND CHART ======
+// State held outside renderTrendPanel so chip toggling can re-draw the lines
+// without re-deriving the dataset on every click.
+const _trend = { series: [], activeIds: new Set(), days: 30 };
+
+function renderTrendPanel(conflicts){
+  const panel = document.getElementById("trendPanel");
+  if(!panel || !conflicts) return;
+  document.getElementById("tpTitle").textContent = t("tpTitle");
+  document.getElementById("tpSub").textContent = t("tpSub");
+
+  // Build the series: top 5 by current intensity, each with a 30-point
+  // history padded from intensityHistory or estimated from articleHistory.
+  const top = [...conflicts].sort((a,b)=>b.intensity-a.intensity).slice(0,5);
+  const series = top.map((c,i)=>({
+    id: c.name,
+    name: tConflict('names', c.name),
+    color: intensityColor(c.intensity),
+    current: c.intensity,
+    values: buildTrendSeries(c, _trend.days)
+  })).filter(s=>s.values.length>0);
+
+  if(series.length === 0){
+    panel.classList.add("tp-empty");
+    document.getElementById("tpChips").innerHTML="";
+    document.getElementById("trendChart").innerHTML="";
+    document.querySelector(".tp-chart-wrap").innerHTML = `<div style="color:#555;font-size:11px;font-style:italic;display:flex;align-items:center;justify-content:center;height:100%">${t("tpEmpty")}</div>`;
+    return;
+  }
+  panel.classList.remove("tp-empty");
+
+  _trend.series = series;
+  if(_trend.activeIds.size === 0){
+    series.forEach(s=>_trend.activeIds.add(s.id));
+  }
+
+  // Chips
+  const chipsEl = document.getElementById("tpChips");
+  chipsEl.innerHTML = series.map(s=>{
+    const active = _trend.activeIds.has(s.id) ? "active" : "";
+    return `<button type="button" class="tp-chip ${active}" data-id="${escAttr(s.id)}">
+      <span class="tp-chip-dot" style="background:${s.color}"></span>${s.name}
+    </button>`;
+  }).join("");
+  chipsEl.querySelectorAll(".tp-chip").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-id");
+      if(_trend.activeIds.has(id)){
+        if(_trend.activeIds.size > 1) _trend.activeIds.delete(id);
+      } else {
+        _trend.activeIds.add(id);
+      }
+      btn.classList.toggle("active");
+      drawTrendChart();
+    });
+  });
+
+  drawTrendChart();
+}
+
+// Given a conflict, return a numeric array of length `days` representing
+// intensity per day (oldest first, today last). Uses intensityHistory if
+// present, falls back to articleHistory-derived estimate, falls back to
+// flat line at current intensity.
+function buildTrendSeries(conflict, days){
+  const current = conflict.intensity ?? 5;
+
+  // 1. If backend already tracks intensity per day, use it.
+  if(Array.isArray(conflict.intensityHistory) && conflict.intensityHistory.length > 0){
+    const hist = conflict.intensityHistory.slice(-days);
+    // Pad with the oldest value so we always show a fixed window
+    while(hist.length < days) hist.unshift(hist[0] ?? current);
+    return hist;
+  }
+
+  // 2. Try to estimate from articleHistory (article counts per day).
+  if(Array.isArray(conflict.articleHistory) && conflict.articleHistory.length > 0){
+    const articles = conflict.articleHistory;
+    // Reproduce the same delta rule used by update-conflicts to back out an
+    // approximate intensity for each historical day.
+    const result = [];
+    let prev = current;
+    // Work backwards: start from current, undo the delta each day.
+    for(let i = articles.length - 1; i >= 0; i--){
+      result.unshift(prev);
+      const count = articles[i];
+      const delta = count >= 30 ? 1.0 : count >= 15 ? 0.5 : count >= 5 ? 0 : -0.5;
+      // Reverse formula: prev = newI = clamp(prev + delta*0.3, 1, 10)
+      // → previousDay = clamp(prev - delta*0.3, 1, 10)
+      prev = Math.round(Math.min(10, Math.max(1, prev - delta * 0.3)) * 10) / 10;
+    }
+    while(result.length < days) result.unshift(result[0] ?? current);
+    return result.slice(-days);
+  }
+
+  // 3. Fall back to flat line.
+  return Array(days).fill(current);
+}
+
+function drawTrendChart(){
+  const svg = document.getElementById("trendChart");
+  const wrap = svg.parentElement;
+  if(!svg || !wrap) return;
+  const W = wrap.clientWidth;
+  const H = wrap.clientHeight;
+  if(W === 0 || H === 0){ requestAnimationFrame(drawTrendChart); return; }
+
+  const M = { top: 8, right: 8, bottom: 18, left: 26 };
+  const innerW = W - M.left - M.right;
+  const innerH = H - M.top - M.bottom;
+
+  const days = _trend.days;
+  const xStep = innerW / Math.max(1, days - 1);
+
+  // y scale: 1..10 (intensity range used by backend)
+  const yMin = 1, yMax = 10;
+  const yToPx = v => M.top + (1 - (v - yMin) / (yMax - yMin)) * innerH;
+  const xToPx = i => M.left + i * xStep;
+
+  // Build SVG
+  let html = "";
+
+  // Y-axis gridlines + labels at 2/4/6/8/10
+  html += `<g class="tp-grid">`;
+  [2,4,6,8,10].forEach(v=>{
+    const y = yToPx(v);
+    html += `<line x1="${M.left}" y1="${y}" x2="${W-M.right}" y2="${y}"/>`;
+  });
+  html += `</g>`;
+  html += `<g class="tp-axis">`;
+  [2,4,6,8,10].forEach(v=>{
+    const y = yToPx(v);
+    html += `<text x="${M.left-4}" y="${y+3}" text-anchor="end">${v}</text>`;
+  });
+  // X-axis date markers: 30d / 20d / 10d / today
+  [0, 10, 20, days-1].forEach(idx=>{
+    const x = xToPx(idx);
+    const label = idx === days-1 ? t("tpToday") : t("tpDateAgo").replace("%d", (days-1-idx).toString());
+    html += `<text x="${x}" y="${H-4}" text-anchor="${idx===0?'start':idx===days-1?'end':'middle'}">${label}</text>`;
+  });
+  html += `</g>`;
+
+  // Lines for active series
+  for(const s of _trend.series){
+    const visible = _trend.activeIds.has(s.id);
+    const opacity = visible ? 1 : 0;
+    const d = s.values.map((v, i) => `${i===0?'M':'L'}${xToPx(i).toFixed(1)},${yToPx(v).toFixed(1)}`).join(" ");
+    html += `<path class="tp-line" d="${d}" stroke="${s.color}" data-id="${escAttr(s.id)}" style="opacity:${opacity}"/>`;
+  }
+
+  // Hover line + dots (hidden by default)
+  html += `<line class="tp-hover-line" id="tpHoverLine" x1="0" y1="${M.top}" x2="0" y2="${M.top+innerH}" style="opacity:0"/>`;
+  html += `<g id="tpHoverDots"></g>`;
+
+  // Set viewBox so SVG scales correctly via CSS
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = html;
+
+  // Hover interaction
+  const tt = document.getElementById("trendTooltip");
+  const hoverLine = document.getElementById("tpHoverLine");
+  const hoverDots = document.getElementById("tpHoverDots");
+
+  svg.onmousemove = (e) => {
+    const rect = svg.getBoundingClientRect();
+    const xPx = e.clientX - rect.left;
+    // Map screen X to data index (account for SVG scaling)
+    const dataX = (xPx / rect.width) * W;
+    const idx = Math.max(0, Math.min(days-1, Math.round((dataX - M.left) / xStep)));
+    const xAt = xToPx(idx);
+
+    hoverLine.setAttribute("x1", xAt);
+    hoverLine.setAttribute("x2", xAt);
+    hoverLine.style.opacity = 1;
+
+    let dotsHTML = "";
+    const rows = [];
+    for(const s of _trend.series){
+      if(!_trend.activeIds.has(s.id)) continue;
+      const v = s.values[idx];
+      dotsHTML += `<circle class="tp-dot" cx="${xAt}" cy="${yToPx(v)}" r="3.5" fill="${s.color}" stroke="#0a0a0f" stroke-width="1.5"/>`;
+      rows.push({ name: s.name, value: v, color: s.color });
+    }
+    hoverDots.innerHTML = dotsHTML;
+
+    if(rows.length){
+      const dateLabel = idx === days-1 ? t("tpToday") : t("tpDateAgo").replace("%d", (days-1-idx).toString());
+      // Sort rows by value desc for tooltip readability
+      rows.sort((a,b)=>b.value-a.value);
+      tt.innerHTML = `
+        <div class="tp-tt-date">${dateLabel}</div>
+        ${rows.map(r=>`
+          <div class="tp-tt-row">
+            <span class="tp-tt-name"><span class="tp-tt-dot" style="background:${r.color}"></span>${r.name}</span>
+            <span class="tp-tt-val" style="color:${r.color}">${r.value.toFixed(1)}</span>
+          </div>
+        `).join("")}
+      `;
+      // Position tooltip: try right of cursor, flip left if near edge
+      const wrapRect = wrap.getBoundingClientRect();
+      const ttW = 180; // estimated
+      let left = e.clientX - wrapRect.left + 12;
+      if(left + ttW > wrapRect.width) left = e.clientX - wrapRect.left - ttW - 12;
+      let top = e.clientY - wrapRect.top - 10;
+      if(top < 0) top = 0;
+      tt.style.left = left + "px";
+      tt.style.top = top + "px";
+      tt.style.opacity = 1;
+    }
+  };
+  svg.onmouseleave = () => {
+    hoverLine.style.opacity = 0;
+    hoverDots.innerHTML = "";
+    tt.style.opacity = 0;
+  };
+}
+
+function escAttr(s){return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+
+// Redraw on window resize (debounced)
+let _trendResizeTimer = null;
+window.addEventListener("resize", ()=>{
+  clearTimeout(_trendResizeTimer);
+  _trendResizeTimer = setTimeout(()=>{ if(_trend.series.length) drawTrendChart(); }, 150);
+});
 let _newsData = null;
 // ====== EMAIL SUBSCRIBE ======
 async function handleSubscribe(e){

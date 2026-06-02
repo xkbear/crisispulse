@@ -202,6 +202,10 @@ export default async () => {
       topArticle = { conflict: base.name, articles: articleCount, link: topLink };
     }
 
+    // Track 30 days of intensity so the trend chart can be drawn directly
+    // from server data instead of estimated client-side.
+    const intensityHistory = [...(prev?.intensityHistory || []), newIntensity].slice(-30);
+
     return {
       conflict: {
         ...base,
@@ -210,6 +214,7 @@ export default async () => {
         firstSeen,
         articleCount,
         articleHistory: recentHistory,
+        intensityHistory,
         newsSpike,
         intensitySpike,
         spikeAt: (newsSpike || intensitySpike) ? nowIso : (prev?.spikeAt || null)
@@ -240,10 +245,15 @@ export default async () => {
   for (const base of BASE_CONFLICTS) {
     if (!gotNames.has(base.name)) {
       const prev = prevMap[base.name];
+      const carriedIntensity = prev?.intensity ?? base.intensity;
+      // Skipped conflicts: append today's (unchanged) intensity so the
+      // history stays time-aligned with the queried conflicts.
+      const skippedIntensityHistory = [...(prev?.intensityHistory || []), carriedIntensity].slice(-30);
       const merged = {
         ...base,
         ...(prev || {}),
         firstSeen: skippedFirstSeen(prev),
+        intensityHistory: skippedIntensityHistory,
         // Decay spike flags after 7 days
         newsSpike: prev?.spikeAt && (Date.now() - new Date(prev.spikeAt).getTime() < 7 * 86400 * 1000) ? !!prev.newsSpike : false,
         intensitySpike: prev?.spikeAt && (Date.now() - new Date(prev.spikeAt).getTime() < 7 * 86400 * 1000) ? !!prev.intensitySpike : false
