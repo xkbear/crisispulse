@@ -34,6 +34,11 @@
   to = "/.netlify/functions/notify"
   status = 200
 
+[[redirects]]
+  from = "/api/admin-daily-report"
+  to = "/.netlify/functions/admin-daily-report"
+  status = 200
+
 # SEO keyword-rich alias URLs. 200 (rewrite) serves index.html directly so the
 # URL stays in the address bar and is independently crawlable. The canonical
 # tag in <head> points to https://crisispulse.org/ which consolidates ranking

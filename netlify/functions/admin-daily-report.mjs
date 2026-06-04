@@ -234,8 +234,11 @@ export default async () => {
   }
 };
 
+// Scheduled handler — runs daily at midnight UTC.
+// Netlify v2 Functions config: schedule and path are mutually exclusive in
+// a single config object. To allow ad-hoc manual triggers (curl during dev),
+// the redirect rule `/api/admin-daily-report` → this function lives in
+// netlify.toml instead of inline here.
 export const config = {
-  // Daily at midnight UTC — same window as update-conflicts
-  schedule: "@daily",
-  path: "/api/admin-daily-report"
+  schedule: "@daily"
 };
